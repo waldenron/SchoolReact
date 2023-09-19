@@ -4,8 +4,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { ItemsList, Logo, Header } from "./Common"
 
-const url = "https://art-yeshiva.org.il/";
-const logo = url + "images/LogoArtYeshiva.gif";
 
 const instContactInfo = [
     {
@@ -139,7 +137,7 @@ const toHtmlElements = (contacts) => {
 const ContactPage = () => {
     return (
         <div className="py-3 w-md-75 mx-auto">
-            <Logo url={url} src={logo} />
+            <Logo />
             <Header
                 header="יצירת קשר"
                 msg={toHtmlInstContactInfo()}

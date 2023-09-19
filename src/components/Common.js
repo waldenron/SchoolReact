@@ -3,6 +3,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
+const url = "https://art-yeshiva.org.il/";
+const logo = url + "images/LogoArtYeshiva.gif";
 
 const cleanText = (text) => {
     if (text != null) {
@@ -72,10 +74,10 @@ export const ItemsList = ({ items, toHtml }) => {
 };
 
 
-export const Logo = ({ url, src }) => {
+export const Logo = () => {
     return (
         <a href={url} className="text-decoration-none">
-            <img src={src} className="img-fluid d-block mx-auto pt-1" alt="Logo" />
+            <img src={logo} className="img-fluid d-block mx-auto pt-1" alt="Logo" />
         </a>
     );
 };

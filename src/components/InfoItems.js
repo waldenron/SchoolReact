@@ -1,11 +1,56 @@
 import React from 'react';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
+import { ItemsList, Logo, Header } from "./Common"
 import '../css/StyleSheet.css';
 import '../css/StyleSheet_AY.css';
 
+const url = "https://art-yeshiva.org.il/";
 
-const data = [
+const infoLinks = [
+    {
+        icon: 'fas fa-calendar-alt',
+        text: 'יומנים',
+        href: '/Calendars.aspx',
+        tooltip: 'יומני גוגל לשכבות',
+    },
+    {
+        icon: 'fas fa-school',
+        text: 'מערכת',
+        href: 'Schedule.aspx',
+        tooltip: 'מערכת השעות',
+    },
+    {
+        icon: 'image',
+        imgSrc: '/images/mashuv.jpg',
+        text: 'משוב',
+        href: 'https://web.mashov.info/students/login',
+        tooltip: 'מערכת משוב לתלמידים ולהורים',
+    },
+];
+
+const infoItemsToJSX = infoLinks.map((link, index) => (
+    <a key={index}
+        className="text-decoration-none px-md-3 px-2 text-dark text-decoration-none text-center"
+        href={link.href}
+        data-bs-toggle="tooltip"
+        title={link.tooltip}
+        target={link.href.startsWith('http') ? "_blank" : "_self"}
+        rel="noopener noreferrer"
+    >
+        <h5 className="d-inline">
+            {link.icon === 'image'
+                ? <img src={url + link.imgSrc} alt={link.text} />
+                : <FontAwesomeIcon icon={link.icon} />
+
+            }
+            &nbsp;<span className="text-decoration-underline">{link.text}</span>
+        </h5>
+    </a>
+));
+
+const infoItems = [
     {
         id: 270,
         name: "מידעון תשפ\"ד",
@@ -83,36 +128,32 @@ const data = [
     },
 ];
 
+const toHtmlElements = (data) => {
+    return data.map((item) => (
+        <>
+            <a href={item.fullLink} target="_blank">
+                {item.name}
+            </a>
+        </>
+    ));
+};
 
-export default function InfoItems() {
+const InfoItemsPage = () => {
+    const msg = (
+        <div className="d-flex flex-wrap btn-group">
+            {infoItemsToJSX}
+        </div>
+    );
     return (
-        <div id="ListDiv" className="">
-            <ul className="list-group rounded-0 border-secondary">
-                {data.map((item, index) => (
-                    <li
-                        key={index}
-                        className="list-group-item d-flex flex-wrap justify-content-between align-items-center"
-                        
-                        data-id={item.id}
-                        data-name={item.name}
-                        data-note={item.note}
-                        data-lastupdate={item.lastUpdate}
-                        data-textshort={item.textShort}
-                        data-infoitemcategory={item.infoItemCategory}
-                        data-classes={item.classes.join(",")}
-                        data-classesdescription={item.classesDescription}
-                        data-lastupdatetext={item.lastUpdateText}
-                        data-linktext={item.linkText}
-                        data-link={item.link}
-                        data-fulllink={item.fullLink}
-                        data-textsearch={item.textSearch}
-                    >
-                        <a href={item.fullLink} target="_blank">
-                            {item.name}
-                        </a>
-                    </li>
-                ))}
-            </ul>
+        <div className="py-3 w-md-75 mx-auto">
+            <Logo />
+            <Header
+                header="מידע לתלמידים"
+                msg={msg}
+            />
+            <ItemsList items={infoItems} toHtml={toHtmlElements} />
         </div>
     )
-}
+};
+
+export default InfoItemsPage;
