@@ -1,23 +1,31 @@
-import logo from './logo.svg';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import { Route, Routes } from "react-router-dom";
+
+import Nav from "./components/Nav";
+import Row from "./components/Row";
+import InfoItems from './components/InfoItems';
+import ContactPage from './components/Contact';
+import NotFound from "./components/NotFound";
+
+
+import { fas } from '@fortawesome/free-solid-svg-icons'
+import { library } from '@fortawesome/fontawesome-svg-core'
+library.add(fas)
+
+
 
 function App() {
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container rounded mt-3 mx-auto">
+      <Nav />
+      <Routes>
+        <Route path="/" element={<Row />} />
+        <Route path="/InfoItems" element={<InfoItems />} />
+        <Route path="/Contacts" element={<ContactPage />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </div>
   );
 }

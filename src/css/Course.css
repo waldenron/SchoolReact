@@ -1,0 +1,32 @@
+﻿* {
+    font-size: 14pt;
+}
+
+h3 {
+    margin-top: 2%;
+}
+
+.ListDiv > i {
+    font-size: 24px;
+    color: #333;
+}
+
+table {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+th,
+td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+h6 span a {
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14pt;
+}

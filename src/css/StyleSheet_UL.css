@@ -1,0 +1,42 @@
+﻿body {
+    background-color: #FAF3F0;
+}
+
+.bgLight {
+    background-color: #EEEBFB;
+}
+
+.indexMainBg {
+    background-color: #F4EEFF;
+}
+
+.eventDateBG {
+    background-color: #DDDDDD;
+}
+
+.eventDateBGSunday {
+    background-color: #93B5C6;
+}
+
+.bodyIndex {
+    background-color: #FAF3F0;
+    color: #19385e !important;
+}
+
+.navbar {
+    background-color: #0e2954;
+}
+
+.navbar-nav .nav-link {
+    color: white !important;
+}
+
+.hrIndex {
+    background-color: #343a40;
+}
+
+.hrFooter {
+    background-color: #343a40;
+    width: 75% !important;
+    margin: auto;
+}

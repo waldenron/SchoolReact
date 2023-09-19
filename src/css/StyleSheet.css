@@ -1,0 +1,184 @@
+﻿* {
+    font-size: inherit;
+}
+
+.requiredField::after {
+    content: "🟥";
+    font-size: 7pt;
+    margin-right: 0.3rem;
+}
+
+.btn-group-vertical > button {
+    margin-bottom: 10px;
+    text-align: right;
+}
+
+.btn-info, .bg-info {
+    background-color: #17a2b8 !important;
+}
+
+    .btn-info.active {
+        background-color: #117a8b !important;
+    }
+
+.bgLight {
+    background-color: #EEF2FF !important;
+}
+
+.text-primary {
+    color: #3E6D9C !important;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #3E6D9C;
+    border-color: #3E6D9C;
+}
+
+.border-primary {
+    border-color: #3E6D9C !important;
+}
+
+.primarySelected {
+    border: 0 !important;
+    border-bottom: 1px solid #dee2e6 !important;
+    border-color: #3E6D9C !important;
+    border-width: 3px !important;
+}
+
+.bgLightGray {
+    background-color: #AEBDCA !important;
+}
+
+.bgToday {
+    background-color: #C36839;
+}
+
+ul.list-group li:nth-of-type(odd) {
+    background-color: #d6d8db !important;
+}
+
+ul.list-group li:hover {
+    background-color: #748DA6 !important;
+}
+
+.album-color {
+    color: #e47792
+}
+
+.image-container {
+    position: relative;
+    padding-top: 100%; /* 1:1 aspect ratio; for a landscape orientation you might use padding-top: 66.66%; for a 3:2 ratio */
+    overflow: hidden; /* Ensures image does not escape container */
+}
+
+    .image-container img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+@media screen and (min-width: 900px) {
+    .w-lg-25 {
+        width: 25% !important;
+    }
+
+    .w-lg-50 {
+        width: 50% !important;
+    }
+
+    .w-lg-75 {
+        width: 75% !important;
+    }
+
+    .w-lg-90 {
+        width: 90% !important;
+    }
+
+    .width-third {
+        flex: 0 0 calc(33.333% - 1rem);
+    }
+}
+
+@media screen and (min-width: 576px) {
+    .before {
+        flex: 0 0 15%;
+    }
+
+    .w-md-20 {
+        width: 20% !important;
+    }
+
+    .w-md-25 {
+        width: 25% !important;
+    }
+
+    .w-md-40 {
+        width: 39% !important;
+    }
+
+    .w-md-50 {
+        width: 50% !important;
+    }
+
+    .w-45 {
+        width: 45% !important;
+    }
+
+    .h-md-60 {
+        height: 60% !important;
+    }
+
+    .h-md-70 {
+        height: 70% !important;
+    }
+
+    .w-md-75 {
+        width: 75% !important;
+    }
+
+    .w-md-90 {
+        width: 90% !important;
+    }
+
+    .width-third {
+        flex: 0 0 calc(33.333% - 1rem);
+    }
+
+    .width-quater {
+        flex: 0 0 calc(25.0% - 1rem);
+    }
+
+    .hideOnLargeScreen {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    .hideOnSmallScreen {
+        display: none;
+    }
+
+    h5 {
+        font-size: 10pt;
+    }
+
+    h4 {
+        font-size: 10pt;
+    }
+
+    .btn-group-vertical {
+        width: 100% !important;
+    }
+
+    .before {
+        flex: 0 0 15%;
+    }
+
+    .mt-sm-5pc {
+        margin-top: 5% !important;
+    }
+}
