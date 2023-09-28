@@ -1,82 +1,78 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Nav.css';
 
+const instCode = "1";
+
+const fetchNavItems = async () => {
+  const API_URL = '/api/NavItems';
+  const response = await fetch(API_URL, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'InstCode': instCode
+    }
+  });
+
+  const data = await response.json();
+  return data.sort((a, b) => a.priority - b.priority);
+}
+
+const parseStyle = (styleString) => {
+  const styleObj = {};
+  styleString.split(';').forEach(part => {
+    const [key, value] = part.split(':').map(str => str.trim());
+    if (key && value) {
+      styleObj[key] = value;
+    }
+  });
+  return styleObj;
+};
+
+const getDisplayElement = (pic) => {
+  if (pic.includes('<i ')) {
+    const classMatch = pic.match(/class="([^"]+)"/);
+    const classes = classMatch[1].split(' ');
+    const iconClass = classes.find(c => c.startsWith('fa-'));
+    const style = pic.match(/style="([^"]+)"/) ? parseStyle(pic.match(/style="([^"]+)"/)[1]) : {};
+
+    return <FontAwesomeIcon icon={iconClass} style={style} />;
+  } else {
+    //**** temp - the inages are on the server */
+    const url = "https://art-yeshiva.org.il/";
+
+    const srcMatch = pic.match(/src="([^"]+)"/);
+    return <img src={`${url}/${srcMatch[1]}`} />;
+  }
+};
 
 export default function Nav() {
-  const url = "https://art-yeshiva.org.il/";
+  const [navItems, setNavItems] = useState([]);
 
-  const links = [
-    {
-      title: "מידע שוטף לתלמידי בית הספר",
-      href: "/InfoItems",
-      icon: { class: "fas fa-user-graduate" },
-      text: "מידע לתלמידים"
-    },
-    {
-      title: "מידע ורישום למועמדים",
-      href: "RegAY.html",
-      icon: { class: "fas fa-user-edit" },
-      text: "מידע למועמדים"
-    },
-    {
-      title: "יצירת קשר עם בית הספר והצוות",
-      href: "/Contacts",
-      icon: { class: "fas fa-at" },
-      text: "צור קשר"
-    },
-    {
-      title: "מידע לבוגרים",
-      href: "/InfoItems.aspx?iic=11",
-      icon: { class: "fas fa-male" },
-      text: "מידע לבוגרים"
-    },
-    {
-      title: "מידע המיועד רק למורים (דרושה סיסמה)",
-      href: "/Login.aspx",
-      icon: { class: "fas fa-chalkboard-teacher" },
-      text: "אזור מורים"
-    },
-    {
-      title: "גלריית תמונות",
-      href: "/PicGallery.aspx",
-      icon: { class: "fas fa-solid fa-images", style: { color: "#e47792" } },
-      text: "גלרייה"
-    },
-    {
-      title: "עמוד הפייסבוק של הישיבה",
-      href: "https://facebook.com/artyeshiva/",
-      icon: { src: `${url}/Images/facebook.png` },
-      text: ""
-    },
-    {
-      title: "ערוץ היוטיוב של הישיבה",
-      href: "https://www.youtube.com/channel/UChR-RJQKzEVuzJ2ApEKhGEA/videos/",
-      icon: { src: `${url}/Images/youtube.png` },
-      text: ""
-    }
-  ];
+  useEffect(() => {
+    (async () => {
+      const fetchedData = await fetchNavItems();
+      setNavItems(fetchedData);
+    })();
+  }, []);
 
   return (
     <div className="navMenu">
-      {links.map((link, index) => (
+      {navItems.map((navItem, index) => (
         <Link
           key={index}
           className="px-md-3 px-2 text-dark text-decoration-none text-center"
           data-bs-toggle="tooltip"
-          title={link.title}
-          to={link.href}
-          target={link.href.startsWith('http') ? '_blank' : '_self'}
+          title={navItem.text}
+          to={navItem.link.replace(".aspx", "")}//***temp*** remove .aspx
+          target={navItem.isLinkNewTab ? '_blank' : '_self'}
         >
           <h5 className="d-inline">
-            {link.icon.class ?
-              (<FontAwesomeIcon icon={link.icon.class} style={link.icon.style} />)
-              : (<img src={link.icon.src} />)}
-            &nbsp;
-            <span className="text-decoration-underline">{link.text}</span>
+            {getDisplayElement(navItem.pic)}
+            {navItem.name && (<span className="ms-1 me-0text-decoration-underline">{navItem.name}</span>)}
           </h5>
         </Link>
       ))}
