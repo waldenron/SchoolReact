@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { ItemsList, Logo, Header } from "./Common"
 import '../css/StyleSheet.css';
 import '../css/StyleSheet_AY.css';
+import { NavItem } from './Nav';
+
+const instCode = "1";
 
 const url = "https://art-yeshiva.org.il/";
 
@@ -30,26 +33,39 @@ const infoLinks = [
     },
 ];
 
-const infoItemsToJSX = infoLinks.map((link, index) => (
-    <a key={index}
-        className="text-decoration-none px-md-3 px-2 text-dark text-decoration-none text-center"
-        href={link.href}
-        data-bs-toggle="tooltip"
-        title={link.tooltip}
-        target={link.href.startsWith('http') ? "_blank" : "_self"}
-        rel="noopener noreferrer"
-    >
-        <h5 className="d-inline">
-            {link.icon === 'image'
-                ? <img src={url + link.imgSrc} alt={link.text} />
-                : <FontAwesomeIcon icon={link.icon} />
 
-            }
-            &nbsp;<span className="text-decoration-underline">{link.text}</span>
-        </h5>
-    </a>
-));
+const fetchInfoLinksItems = async () => {
+    const API_URL = '/api/InfoLinksItems';
+    const response = await fetch(API_URL, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'InstCode': instCode
+        }
+    });
 
+    const data = await response.json();
+    return data.sort((a, b) => a.priority - b.priority);
+}
+
+function InfoNav() {
+    const [navItems, setNavItems] = useState([]);
+
+    useEffect(() => {
+        (async () => {
+            const fetchedData = await fetchInfoLinksItems();
+            setNavItems(fetchedData);
+        })();
+    }, []);
+
+    return (
+        <div className="d-flex flex-wrap btn-group justify-content-center">
+            {navItems.map((navItem, index) => (
+                <NavItem navItem={navItem} index={index} />
+            ))}
+        </div>
+    );
+}
 const infoItems = [
     {
         id: 270,
@@ -140,8 +156,8 @@ const toHtmlElements = (data) => {
 
 const InfoItemsPage = () => {
     const msg = (
-        <div className="d-flex flex-wrap btn-group">
-            {infoItemsToJSX}
+        <div className="d-flex flex-wrap btn-group justify-content-end">
+            <InfoNav />
         </div>
     );
     return (

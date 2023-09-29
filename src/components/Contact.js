@@ -7,8 +7,9 @@ import { ItemsList, Logo, Header } from "./Common"
 
 const instCode = "1";
 
+//InstContactInfo
 const fetchInstContactInfo = async () => {
-    const API_URL = '/api/Inst';
+    const API_URL = '/api/InstContactInfo';
     const response = await fetch(API_URL, {
         method: 'GET',
         headers: {
@@ -21,8 +22,7 @@ const fetchInstContactInfo = async () => {
 };
 const InstContactInfo = () => {
     const [instContactInfo, setInstContactInfo] = useState();
-
-   
+ 
     useEffect(() => {
         (async () => {
             const fetchedData = await fetchInstContactInfo();
@@ -62,15 +62,8 @@ const InstContactInfo = () => {
     )
 };
 
-const toHtmlElements = (contacts) => {
-    return contacts.map((contact) => (
-        <>
-            <span>{contact.jobTitle} - {contact.fullName}</span>
-            <a href={`mailto:${contact.email}`} target="_blank" rel="noopener noreferrer">{contact.email}</a>
-        </>
-    ));
-};
 
+//Contacts
 const fetchContacts = async () => {
     const API_URL = '/api/Contacts';
     const response = await fetch(API_URL, {
@@ -86,6 +79,15 @@ const fetchContacts = async () => {
         textSearch: `${contact.jobTitle} ${contact.fullName}`
     })).sort((a, b) => a.priority - b.priority);
 };
+const toHtmlElements = (contacts) => {
+    return contacts.map((contact) => (
+        <>
+            <span>{contact.jobTitle} - {contact.fullName}</span>
+            <a href={`mailto:${contact.email}`} target="_blank" rel="noopener noreferrer">{contact.email}</a>
+        </>
+    ));
+};
+
 
 const ContactPage = () => {
     const [contacts, setContacts] = useState([]);

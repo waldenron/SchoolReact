@@ -21,34 +21,37 @@ const fetchNavItems = async () => {
   return data.sort((a, b) => a.priority - b.priority);
 }
 
-const parseStyle = (styleString) => {
-  const styleObj = {};
-  styleString.split(';').forEach(part => {
-    const [key, value] = part.split(':').map(str => str.trim());
-    if (key && value) {
-      styleObj[key] = value;
-    }
-  });
-  return styleObj;
-};
-
-const getDisplayElement = (pic) => {
-  if (pic.includes('<i ')) {
-    const classMatch = pic.match(/class="([^"]+)"/);
-    const classes = classMatch[1].split(' ');
-    const iconClass = classes.find(c => c.startsWith('fa-'));
-    const style = pic.match(/style="([^"]+)"/) ? parseStyle(pic.match(/style="([^"]+)"/)[1]) : {};
-
-    return <FontAwesomeIcon icon={iconClass} style={style} />;
-  } else {
-    //**** temp - the inages are on the server */
-    const url = "https://art-yeshiva.org.il/";
-
-    const srcMatch = pic.match(/src="([^"]+)"/);
-    return <img src={`${url}/${srcMatch[1]}`} />;
+const toHtmlElement = (itemIcon) => {
+  if (itemIcon.type == "fa") {
+    if (itemIcon.style != "")
+      return <FontAwesomeIcon icon={itemIcon.cssClass} style={itemIcon.style} />;
+    else
+      return <FontAwesomeIcon icon={itemIcon.cssClass} />;
   }
-};
-
+  else if (itemIcon.type == "img") {
+    //**** temp - the images are on the server */
+    const url = "https://art-yeshiva.org.il/";
+    return <img src={`${url}/${itemIcon.src}`} />;
+  }
+  else {
+    return <></>;
+  }
+}
+export const NavItem = ({ navItem, index }) => (
+  <Link
+    key={index}
+    className="px-md-3 px-2 text-dark text-decoration-none text-center"
+    data-bs-toggle="tooltip"
+    title={navItem.text}
+    to={navItem.link.replace(".aspx", "")}//***temp*** remove .aspx
+    target={navItem.isLinkNewTab ? '_blank' : '_self'}
+  >
+    <h5 className="d-inline">
+      {toHtmlElement(navItem.itemIcon)}
+      {navItem.name && (<span className="mx-1 text-decoration-underline">{navItem.name}</span>)}
+    </h5>
+  </Link>
+);
 export default function Nav() {
   const [navItems, setNavItems] = useState([]);
 
@@ -60,21 +63,9 @@ export default function Nav() {
   }, []);
 
   return (
-    <div className="navMenu">
+    <div className="d-flex flex-wrap btn-group justify-content-center">
       {navItems.map((navItem, index) => (
-        <Link
-          key={index}
-          className="px-md-3 px-2 text-dark text-decoration-none text-center"
-          data-bs-toggle="tooltip"
-          title={navItem.text}
-          to={navItem.link.replace(".aspx", "")}//***temp*** remove .aspx
-          target={navItem.isLinkNewTab ? '_blank' : '_self'}
-        >
-          <h5 className="d-inline">
-            {getDisplayElement(navItem.pic)}
-            {navItem.name && (<span className="ms-1 me-0text-decoration-underline">{navItem.name}</span>)}
-          </h5>
-        </Link>
+        <NavItem navItem={navItem} index={index} />
       ))}
     </div>
   );
