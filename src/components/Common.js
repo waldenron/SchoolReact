@@ -3,20 +3,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
+import { cleanText } from '../utils/utilityFunctions';
+
 const url = "https://art-yeshiva.org.il/";
 const logo = url + "images/LogoArtYeshiva.gif";
 
-const cleanText = (text) => {
-    if (text != null) {
-        text = text.toLowerCase();
-        text = text.replace(/ /g, "");
-        text = text.replace(/-/g, "");
-        text = text.replace(/\"/g, "");
-        text = text.replace(/\'/g, "");
-        return text;
-    }
-    return "";
-}
 
 export const SearchBar = ({ onSearch }) => {
     const clearInput = () => {

@@ -5,21 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Nav.css';
 
-const instCode = "1";
-
-const fetchNavItems = async () => {
-  const API_URL = '/api/NavItems';
-  const response = await fetch(API_URL, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'InstCode': instCode
-    }
-  });
-
-  const data = await response.json();
-  return data.sort((a, b) => a.priority - b.priority);
-}
+import { fetchData } from '../utils/apiServices';
 
 const toHtmlElement = (itemIcon) => {
   if (itemIcon.type == "fa") {
@@ -37,9 +23,8 @@ const toHtmlElement = (itemIcon) => {
     return <></>;
   }
 }
-export const NavItem = ({ navItem, index }) => (
+export const NavItem = ({ navItem }) => (
   <Link
-    key={index}
     className="px-md-3 px-2 text-dark text-decoration-none text-center"
     data-bs-toggle="tooltip"
     title={navItem.text}
@@ -57,7 +42,7 @@ export default function Nav() {
 
   useEffect(() => {
     (async () => {
-      const fetchedData = await fetchNavItems();
+      const fetchedData = await fetchData('/api/NavItems');
       setNavItems(fetchedData);
     })();
   }, []);
@@ -65,7 +50,7 @@ export default function Nav() {
   return (
     <div className="d-flex flex-wrap btn-group justify-content-center">
       {navItems.map((navItem, index) => (
-        <NavItem navItem={navItem} index={index} />
+        <NavItem navItem={navItem} key={index} />
       ))}
     </div>
   );

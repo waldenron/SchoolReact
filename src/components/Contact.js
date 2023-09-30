@@ -3,29 +3,17 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
+import { fetchData } from '../utils/apiServices';
+
 import { ItemsList, Logo, Header } from "./Common"
 
-const instCode = "1";
-
 //InstContactInfo
-const fetchInstContactInfo = async () => {
-    const API_URL = '/api/InstContactInfo';
-    const response = await fetch(API_URL, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'InstCode': instCode
-        }
-    });
-    const data = await response.json();
-    return data;
-};
 const InstContactInfo = () => {
     const [instContactInfo, setInstContactInfo] = useState();
  
     useEffect(() => {
         (async () => {
-            const fetchedData = await fetchInstContactInfo();
+            const fetchedData = await fetchData('/api/InstContactInfo');
             setInstContactInfo(fetchedData);
         })();
     }, []);
@@ -62,23 +50,12 @@ const InstContactInfo = () => {
     )
 };
 
-
 //Contacts
-const fetchContacts = async () => {
-    const API_URL = '/api/Contacts';
-    const response = await fetch(API_URL, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'InstCode': instCode
-        }
-    });
-    const data = await response.json();
-    return data.map(contact => ({
-        ...contact,
-        textSearch: `${contact.jobTitle} ${contact.fullName}`
-    })).sort((a, b) => a.priority - b.priority);
-};
+const contactsTransformFunction = (contact) => ({
+    ...contact,
+    textSearch: `${contact.jobTitle} ${contact.fullName}`
+});
+const contactsSortFunction = (a, b) => a.priority - b.priority;
 const toHtmlElements = (contacts) => {
     return contacts.map((contact) => (
         <>
@@ -89,16 +66,17 @@ const toHtmlElements = (contacts) => {
 };
 
 
+
 const ContactPage = () => {
     const [contacts, setContacts] = useState([]);
 
     useEffect(() => {
         (async () => {
-            const fetchedData = await fetchContacts();
+            const fetchedData = await fetchData('/api/Contacts', contactsTransformFunction, contactsSortFunction);
             setContacts(fetchedData);
         })();
     }, []);
-
+    
     return (
         <div className="py-3 w-md-75 mx-auto">
             <Logo />

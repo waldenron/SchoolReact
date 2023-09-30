@@ -7,53 +7,22 @@ import '../css/StyleSheet.css';
 import '../css/StyleSheet_AY.css';
 import { NavItem } from './Nav';
 
-const instCode = "1";
+import { toArchiveText, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
+import { fetchData } from '../utils/apiServices';
+
+const instCode = "2";
 
 const url = "https://art-yeshiva.org.il/";
 
-const infoLinks = [
-    {
-        icon: 'fas fa-calendar-alt',
-        text: 'יומנים',
-        href: '/Calendars.aspx',
-        tooltip: 'יומני גוגל לשכבות',
-    },
-    {
-        icon: 'fas fa-school',
-        text: 'מערכת',
-        href: 'Schedule.aspx',
-        tooltip: 'מערכת השעות',
-    },
-    {
-        icon: 'image',
-        imgSrc: '/images/mashuv.jpg',
-        text: 'משוב',
-        href: 'https://web.mashov.info/students/login',
-        tooltip: 'מערכת משוב לתלמידים ולהורים',
-    },
-];
-
-
-const fetchInfoLinksItems = async () => {
-    const API_URL = '/api/InfoLinksItems';
-    const response = await fetch(API_URL, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'InstCode': instCode
-        }
-    });
-
-    const data = await response.json();
-    return data.sort((a, b) => a.priority - b.priority);
-}
+//InfoNav
+const infoNavSortFunction = (a, b) => a.priority - b.priority;
 
 function InfoNav() {
     const [navItems, setNavItems] = useState([]);
 
     useEffect(() => {
         (async () => {
-            const fetchedData = await fetchInfoLinksItems();
+            const fetchedData = await fetchData('/api/InfoLinksItems', null, infoNavSortFunction);
             setNavItems(fetchedData);
         })();
     }, []);
@@ -61,100 +30,76 @@ function InfoNav() {
     return (
         <div className="d-flex flex-wrap btn-group justify-content-center">
             {navItems.map((navItem, index) => (
-                <NavItem navItem={navItem} index={index} />
+                <NavItem navItem={navItem} key={index} />
             ))}
         </div>
     );
 }
-const infoItems = [
-    {
-        id: 270,
-        name: "מידעון תשפ\"ד",
-        note: "",
-        lastUpdate: "2023-08-18",
-        textShort: "",
-        infoItemCategory: 3,
-        classes: [701, 702, 703, 801, 802, 803, 901, 902, 1001, 1002, 1101, 1102, 1201, 1202],
-        classesDescription: "",
-        lastUpdateText: "(עודכן 18/08 10:34)",
-        linkText: "",
-        link: "מידעון_תשפד.pdf",
-        fullLink: "../../Doc/InfoItem/מידעון_תשפד.pdf",
-        textSearch: "מידעון תשפ\"ד ז´ - 1, ז´ - 2, ז´ - 3, ח´ - 1, ח´ - 2, ח´ - 3, ט´ - 1, ט´ - 2, י´ - 1, י´ - 2, י\"א - 1, י\"א - 2, י\"ב - 1, י\"ב - 2  חוזרים"
-    },
-    {
-        id: 268,
-        name: "רשימת ספרי לימוד תשפ\"ד",
-        note: "",
-        lastUpdate: "2023-08-18",
-        textShort: "",
-        infoItemCategory: 3,
-        classes: [701, 702, 703, 801, 802, 803, 901, 902, 1001, 1002, 1101, 1102, 1201, 1202],
-        classesDescription: "",
-        lastUpdateText: "(עודכן 18/08 10:34)",
-        linkText: "",
-        link: "https://docs.google.com/spreadsheets/d/1L2P0iOUOLdiBtMMe-RGbatAEEDzjcvxvHqDXcydbHoM/edit?usp=sharing",
-        fullLink: "https://docs.google.com/spreadsheets/d/1L2P0iOUOLdiBtMMe-RGbatAEEDzjcvxvHqDXcydbHoM/edit?usp=sharing",
-        textSearch: "רשימת ספרי לימוד תשפ\"ד ז´ - 1, ז´ - 2, ז´ - 3, ח´ - 1, ח´ - 2, ח´ - 3, ט´ - 1, ט´ - 2, י´ - 1, י´ - 2, י\"א - 1, י\"א - 2, י\"ב - 1, י\"ב - 2  חוזרים"
-    },
-    {
-        id: 307,
-        name: "ערב התעוררות חט\"ב",
-        note: "",
-        lastUpdate: "2023-09-14",
-        textShort: "",
-        infoItemCategory: 3,
-        classes: [701, 702, 703, 801, 802, 803, 901, 902],
-        classesDescription: "חט\"ב",
-        lastUpdateText: "(עודכן 14/09 14:04)",
-        linkText: "",
-        link: "ערב_התעוררות_חטיבת_ביניים.pdf",
-        fullLink: "../../Doc/InfoItem/ערב_התעוררות_חטיבת_ביניים.pdf",
-        textSearch: "ערב התעוררות חט\"ב ז´ - 1, ז´ - 2, ז´ - 3, ח´ - 1, ח´ - 2, ח´ - 3, ט´ - 1, ט´ - 2  חוזרים"
-    },
-    {
-        id: 269,
-        name: "עבודות קיץ תשפ\"ג",
-        note: "",
-        lastUpdate: "2023-08-27",
-        textShort: "ראו כאן את הנושאים אותם עליכם ללמוד במהלך החופשה.\nבתחילת שנת הלמודים יתקיימו בע\"ה מבחנים על עבודות הקיץ.\nב\"הצלחה´.",
-        infoItemCategory: 1,
-        classes: [701, 702, 703, 801, 802, 803, 901, 902, 1001, 1002, 1101, 1102, 1201, 1202],
-        classesDescription: "",
-        lastUpdateText: "(עודכן 27/08 21:18)",
-        linkText: "לחצו כאן",
-        link: "https://drive.google.com/drive/folders/1JP6l7OerAqK3LI-EBvgF52KBm-tCj8SN?usp=drive_link",
-        fullLink: "https://drive.google.com/drive/folders/1JP6l7OerAqK3LI-EBvgF52KBm-tCj8SN?usp=drive_link",
-        textSearch: "עבודות קיץ תשפ\"ג ז´ - 1, ז´ - 2, ז´ - 3, ח´ - 1, ח´ - 2, ח´ - 3, ט´ - 1, ט´ - 2, י´ - 1, י´ - 2, י\"א - 1, י\"א - 2, י\"ב - 1, י\"ב - 2 ראו כאן את הנושאים אותם עליכם ללמוד במהלך החופשה.\nבתחילת שנת הלמודים יתקיימו בע\"ה מבחנים על עבודות הקיץ.\nב\"הצלחה´. הודעות"
-    },
-    {
-        id: 267,
-        name: "מצגת - מגמת הנדסת תכנה",
-        note: "",
-        lastUpdate: "2023-08-18",
-        textShort: "",
-        infoItemCategory: 12,
-        classes: [1001, 1002],
-        classesDescription: "שכבה י´",
-        lastUpdateText: "(עודכן 18/08 10:33)",
-        linkText: "",
-        link: "https://drive.google.com/file/d/1UVi2P0bX8zb4dEoRsZe1MCa05WeBEhQ7/view?usp=share_link",
-        fullLink: "https://drive.google.com/file/d/1UVi2P0bX8zb4dEoRsZe1MCa05WeBEhQ7/view?usp=share_link",
-        textSearch: "מצגת - מגמת הנדסת תכנה י´ - 1, י´ - 2  קישורים קבועים"
-    },
-];
+
+//infoItems
+const infoItemsTransformFunction = (infoItem) => ({
+    ...infoItem,
+    textSearch: `${infoItem.text}`
+});
+
+function InfoItemToHtml(item) {
+    const displayText = item.isArchive ? toArchiveText(whatsappStrToHtmlTags(item.text)) : whatsappStrToHtmlTags(item.text);
+    const link = item.link ? item.link.replace("../../", url) : "";
+    switch (item.type) {
+        case 'WithText':
+            return (
+                <div className="d-flex flex-wrap justify-content-between align-items-center w-100">
+                    <dl className="mb-0">
+                        <dt className="mb-1"> {displayText}</dt>
+                        <dd className="ms-1 me-0" dangerouslySetInnerHTML={{ __html: item.moreText.replace(/\r\n/g, '<br>') }}></dd>
+                        {item.link &&
+                            <dd className="ms-1 me-0">
+                                <a href={link} target="_blank" rel="noopener noreferrer">
+                                    {item.linkText}
+                                </a>
+                            </dd>
+                        }
+                    </dl>
+                    {item.lastUpdateText &&
+                        <span className="badge rounded-pill bg-secondary ml-auto align-self-end">
+                            <small>{item.lastUpdateText}</small>
+                        </span>
+                    }
+                </div>
+            );
+        case 'OnlyLink':
+            return (
+                <div className="d-flex flex-wrap justify-content-between align-items-center w-100">
+                    <a href={link} target="_blank" rel="noopener noreferrer">{displayText}</a>
+                    {item.lastUpdateText &&
+                        <span className="badge rounded-pill bg-secondary ml-auto align-self-end">
+                            <small>{item.lastUpdateText}</small>
+                        </span>
+                    }
+                </div>
+            );
+        default:
+            return null;
+    }
+}
+
 
 const toHtmlElements = (data) => {
-    return data.map((item) => (
-        <>
-            <a href={item.fullLink} target="_blank">
-                {item.name}
-            </a>
-        </>
+    return data.map((item, index) => (
+        <InfoItemToHtml key={index} {...item} />
     ));
 };
 
 const InfoItemsPage = () => {
+    const [infoItems, setInfoItems] = useState([]);
+
+    useEffect(() => {
+        (async () => {
+            const fetchedData = await fetchData('/api/InfoItems', infoItemsTransformFunction);
+            setInfoItems(fetchedData);
+        })();
+    }, []);
+
     const msg = (
         <div className="d-flex flex-wrap btn-group justify-content-end">
             <InfoNav />
