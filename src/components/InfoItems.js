@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-import { ItemsList, Logo, Header } from "./Common"
+import { ItemsList, Logo, Header, getHomePageUrl } from "./Common"
 import '../css/StyleSheet.css';
 import '../css/StyleSheet_AY.css';
 import { NavItem } from './Nav';
@@ -10,14 +10,11 @@ import { NavItem } from './Nav';
 import { toArchiveText, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
 import { fetchData } from '../utils/apiServices';
 
-const instCode = "2";
-
-const url = "https://art-yeshiva.org.il/";
 
 //InfoNav
 const infoNavSortFunction = (a, b) => a.priority - b.priority;
 
-function InfoNav() {
+function InfoNav({url}) {
     const [navItems, setNavItems] = useState([]);
 
     useEffect(() => {
@@ -30,7 +27,7 @@ function InfoNav() {
     return (
         <div className="d-flex flex-wrap btn-group justify-content-center">
             {navItems.map((navItem, index) => (
-                <NavItem navItem={navItem} key={index} />
+                <NavItem navItem={navItem} url={url} key={index} />
             ))}
         </div>
     );
@@ -42,8 +39,9 @@ const infoItemsTransformFunction = (infoItem) => ({
     textSearch: `${infoItem.text}`
 });
 
-function InfoItemToHtml(item) {
+function InfoItemToHtml(item, url) {
     const displayText = item.isArchive ? toArchiveText(whatsappStrToHtmlTags(item.text)) : whatsappStrToHtmlTags(item.text);
+    const displayMoreText = whatsappStrToHtmlTags(item.moreText).replace(/\r\n/g, '<br>');
     const link = item.link ? item.link.replace("../../", url) : "";
     switch (item.type) {
         case 'WithText':
@@ -51,7 +49,7 @@ function InfoItemToHtml(item) {
                 <div className="d-flex flex-wrap justify-content-between align-items-center w-100">
                     <dl className="mb-0">
                         <dt className="mb-1"> {displayText}</dt>
-                        <dd className="ms-1 me-0" dangerouslySetInnerHTML={{ __html: item.moreText.replace(/\r\n/g, '<br>') }}></dd>
+                        <dd className="ms-1 me-0" dangerouslySetInnerHTML={{ __html: displayMoreText }}></dd>
                         {item.link &&
                             <dd className="ms-1 me-0">
                                 <a href={link} target="_blank" rel="noopener noreferrer">
@@ -84,25 +82,29 @@ function InfoItemToHtml(item) {
 }
 
 
-const toHtmlElements = (data) => {
+const toHtmlElements = (data, url) => {
     return data.map((item, index) => (
-        <InfoItemToHtml key={index} {...item} />
+        <InfoItemToHtml {...item} url={url} key={index} />
     ));
 };
 
 const InfoItemsPage = () => {
+    const [url, setUrl] = useState(null);
     const [infoItems, setInfoItems] = useState([]);
 
     useEffect(() => {
         (async () => {
             const fetchedData = await fetchData('/api/InfoItems', infoItemsTransformFunction);
             setInfoItems(fetchedData);
+
+            const fetchedUrl = await getHomePageUrl();
+            setUrl(fetchedUrl);
         })();
     }, []);
 
     const msg = (
         <div className="d-flex flex-wrap btn-group justify-content-end">
-            <InfoNav />
+            <InfoNav url={url} />
         </div>
     );
     return (
@@ -112,7 +114,7 @@ const InfoItemsPage = () => {
                 header="מידע לתלמידים"
                 msg={msg}
             />
-            <ItemsList items={infoItems} toHtml={toHtmlElements} />
+            <ItemsList items={infoItems} toHtml={(data) => toHtmlElements(data, url)} />
         </div>
     )
 };

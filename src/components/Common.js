@@ -1,12 +1,15 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
+import { fetchData } from '../utils/apiServices';
 import { cleanText } from '../utils/utilityFunctions';
 
-const url = "https://art-yeshiva.org.il/";
-const logo = url + "images/LogoArtYeshiva.gif";
+
+export const getHomePageUrl = async () => {
+    const fetchedData = await fetchData('/api/InstDetails');
+    return fetchedData.homePageUrl;
+};
 
 
 export const SearchBar = ({ onSearch }) => {
@@ -26,7 +29,7 @@ export const SearchBar = ({ onSearch }) => {
                     onChange={(e) => onSearch(e.target.value)}
                 />
                 <span className="input-group-text rounded-0" onClick={clearInput}>
-                    <FontAwesomeIcon icon={faTrashAlt} className="mx-auto" />
+                    <FontAwesomeIcon icon="fas fa-trash-alt" className="mx-auto" />
                 </span>
             </div>
         </div>
@@ -66,9 +69,17 @@ export const ItemsList = ({ items, toHtml }) => {
 
 
 export const Logo = () => {
+    const [instDetails, setInstDetails] = useState();
+    useEffect(() => {
+        (async () => {
+            const fetchedData = await fetchData('/api/InstDetails');
+            setInstDetails(fetchedData);
+        })();
+    }, []);
+    if (!instDetails) return null;  // This will prevent rendering until the data is loaded
     return (
-        <a href={url} className="text-decoration-none">
-            <img src={logo} className="img-fluid d-block mx-auto pt-1" alt="Logo" />
+        <a href={instDetails.homePageUrl} className="text-decoration-none">
+            <img src={`${instDetails.homePageUrl}/images/${instDetails.logoFileName}`} className="img-fluid d-block mx-auto pt-1" alt="Logo" />
         </a>
     );
 };
