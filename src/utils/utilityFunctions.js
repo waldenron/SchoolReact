@@ -34,3 +34,16 @@ export function whatsappStrToHtmlTags(strWhatsApp, isReplaceLine = true) {
 export function toArchiveText(text) {
     return `- <span class="fst-italic">${text}</span>`;
 }
+
+export function cssStringToObject(cssString) {
+    const style = {};
+    const stylesArray = cssString.split(";");
+    stylesArray.forEach(item => {
+        const [property, value] = item.split(":");
+        if (property && value) {
+            const formattedProperty = property.trim().replace(/-([a-z])/g, g => g[1].toUpperCase());
+            style[formattedProperty] = value.trim();
+        }
+    });
+    return style;
+}

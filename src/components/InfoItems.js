@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { ItemsList, Logo, Header, getHomePageUrl } from "./Common"
 import '../css/StyleSheet.css';
@@ -14,7 +13,7 @@ import { fetchData } from '../utils/apiServices';
 //InfoNav
 const infoNavSortFunction = (a, b) => a.priority - b.priority;
 
-function InfoNav({url}) {
+function InfoNav({ homePageUrl }) {
     const [navItems, setNavItems] = useState([]);
 
     useEffect(() => {
@@ -27,7 +26,7 @@ function InfoNav({url}) {
     return (
         <div className="d-flex flex-wrap btn-group justify-content-center">
             {navItems.map((navItem, index) => (
-                <NavItem navItem={navItem} url={url} key={index} />
+                <NavItem navItem={navItem} url={homePageUrl} key={index} />
             ))}
         </div>
     );
@@ -39,10 +38,12 @@ const infoItemsTransformFunction = (infoItem) => ({
     textSearch: `${infoItem.text}`
 });
 
-function InfoItemToHtml(item, url) {
+function InfoItemToHtml(props) {
+    const { homePageUrl, ...item } = props;
+
     const displayText = item.isArchive ? toArchiveText(whatsappStrToHtmlTags(item.text)) : whatsappStrToHtmlTags(item.text);
     const displayMoreText = whatsappStrToHtmlTags(item.moreText).replace(/\r\n/g, '<br>');
-    const link = item.link ? item.link.replace("../../", url) : "";
+    const link = item.link ? item.link.replace("../../", homePageUrl) : "";
     switch (item.type) {
         case 'WithText':
             return (
@@ -82,14 +83,14 @@ function InfoItemToHtml(item, url) {
 }
 
 
-const toHtmlElements = (data, url) => {
+const toHtmlElements = (data, homePageUrl) => {
     return data.map((item, index) => (
-        <InfoItemToHtml {...item} url={url} key={index} />
+        <InfoItemToHtml key={index} {...item} homePageUrl={homePageUrl} />
     ));
 };
 
 const InfoItemsPage = () => {
-    const [url, setUrl] = useState(null);
+    const [homePageUrl, setHomePageUrl] = useState(null);
     const [infoItems, setInfoItems] = useState([]);
 
     useEffect(() => {
@@ -98,13 +99,13 @@ const InfoItemsPage = () => {
             setInfoItems(fetchedData);
 
             const fetchedUrl = await getHomePageUrl();
-            setUrl(fetchedUrl);
+            setHomePageUrl(fetchedUrl);
         })();
     }, []);
 
     const msg = (
         <div className="d-flex flex-wrap btn-group justify-content-end">
-            <InfoNav url={url} />
+            <InfoNav homePageUrl={homePageUrl} />
         </div>
     );
     return (
@@ -114,7 +115,7 @@ const InfoItemsPage = () => {
                 header="מידע לתלמידים"
                 msg={msg}
             />
-            <ItemsList items={infoItems} toHtml={(data) => toHtmlElements(data, url)} />
+            {homePageUrl && <ItemsList items={infoItems} toHtml={(data) => toHtmlElements(data, homePageUrl)} />}
         </div>
     )
 };

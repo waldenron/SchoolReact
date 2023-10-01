@@ -1,5 +1,5 @@
 
-const instCode = "2";
+const instCode = "1";
 
 export const fetchData = async (API_URL, transformFunction, sortFunction) => {
     try {

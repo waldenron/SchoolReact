@@ -7,22 +7,23 @@ import './Nav.css';
 
 import { fetchData } from '../utils/apiServices';
 import { getHomePageUrl } from './Common';
+import { cssStringToObject } from '../utils/utilityFunctions';
 
-const toHtmlElement = (itemIcon, url) => {
+const toHtmlElement = (itemIcon, homePageUrl) => {
   if (itemIcon.type == "fa") {
     if (itemIcon.style != "")
-      return <FontAwesomeIcon icon={itemIcon.cssClass} style={itemIcon.style} />;
+      return <FontAwesomeIcon icon={itemIcon.cssClass} style={cssStringToObject(itemIcon.style)} />;
     else
       return <FontAwesomeIcon icon={itemIcon.cssClass} />;
   }
-  else if (url && itemIcon.type == "img") {
-    return <img src={`${url}/${itemIcon.src}`} />;
+  else if (homePageUrl && itemIcon.type == "img") {
+    return <img src={`${homePageUrl}/${itemIcon.src}`} />;
   }
   else {
     return <></>;
   }
 }
-export const NavItem = ({ navItem, url }) => (
+export const NavItem = ({ navItem, homePageUrl }) => (
   <Link
     className="px-md-3 px-2 text-dark text-decoration-none text-center"
     data-bs-toggle="tooltip"
@@ -31,13 +32,13 @@ export const NavItem = ({ navItem, url }) => (
     target={navItem.isLinkNewTab ? '_blank' : '_self'}
   >
     <h5 className="d-inline">
-      {toHtmlElement(navItem.itemIcon, url)}
+      {toHtmlElement(navItem.itemIcon, homePageUrl)}
       {navItem.name && (<span className="mx-1 text-decoration-underline">{navItem.name}</span>)}
     </h5>
   </Link>
 );
 export default function Nav() {
-  const [url, setUrl] = useState(null);
+  const [homePageUrl, setHomePageUrl] = useState(null);
   const [navItems, setNavItems] = useState([]);
 
   useEffect(() => {
@@ -46,14 +47,14 @@ export default function Nav() {
       setNavItems(fetchedData);
 
       const fetchedUrl = await getHomePageUrl();
-      setUrl(fetchedUrl);
+      setHomePageUrl(fetchedUrl);
     })();
   }, []);
 
   return (
     <div className="d-flex flex-wrap btn-group justify-content-center">
       {navItems.map((navItem, index) => (
-        <NavItem navItem={navItem} url={url} key={index} />
+        <NavItem navItem={navItem} homePageUrl={homePageUrl} key={index} />
       ))}
     </div>
   );
