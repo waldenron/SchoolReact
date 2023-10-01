@@ -10,13 +10,13 @@ import { getHomePageUrl } from './Common';
 import { cssStringToObject } from '../utils/utilityFunctions';
 
 const toHtmlElement = (itemIcon, homePageUrl) => {
-  if (itemIcon.type == "fa") {
+  if (itemIcon.type === "fa") {
     if (itemIcon.style != "")
       return <FontAwesomeIcon icon={itemIcon.cssClass} style={cssStringToObject(itemIcon.style)} />;
     else
       return <FontAwesomeIcon icon={itemIcon.cssClass} />;
   }
-  else if (homePageUrl && itemIcon.type == "img") {
+  else if (homePageUrl && itemIcon.type === "img") {
     return <img src={`${homePageUrl}/${itemIcon.src}`} />;
   }
   else {

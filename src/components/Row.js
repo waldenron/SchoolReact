@@ -11,6 +11,7 @@ import { getHomePageUrl } from './Common';
 
 //rows
 const rowsSortFunction = (a, b) => a.priority - b.priority;
+
 const toHtmlElements = (row, homePageUrl, index) => {
 
   const shortText = whatsappStrToHtmlTags(row.shortText);
@@ -18,7 +19,7 @@ const toHtmlElements = (row, homePageUrl, index) => {
   return (
     <div key={index} className="row pt-5 mt-3">
       <div className={`col-md-9 ${index % 2 === 0 ? "order-md-1" : "order-md-2"}`}>
-        <img className="img-fluid" src={`${homePageUrl}/Images/${row.pic}`} alt={`תמונה בנושא ${row.name}`} />
+        <img className="img-fluid" src={`${homePageUrl}/${row.pic}`} alt={`תמונה בנושא ${row.name}`} />
       </div>
       <div className={`col-md-3 ${index % 2 === 1 ? "order-md-1" : "order-md-2"}`}>
         <h3 dangerouslySetInnerHTML={{ __html: header }} />
