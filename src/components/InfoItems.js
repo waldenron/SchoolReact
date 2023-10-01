@@ -26,11 +26,50 @@ function InfoNav({ homePageUrl }) {
     return (
         <div className="d-flex flex-wrap btn-group justify-content-center">
             {navItems.map((navItem, index) => (
-                <NavItem navItem={navItem} url={homePageUrl} key={index} />
+                <NavItem navItem={navItem} homePageUrl={homePageUrl} key={index} />
             ))}
         </div>
     );
 }
+
+//InfoItemCategories - buttons
+export const FilterButton = ({ item, isActive, onFilter }) => {
+    return (
+        <span
+            className={`btn btn-secondary btn-sm m-1 ${isActive ? 'active' : ''}`}
+            onClick={() => onFilter(item.id)}
+        >
+            {item.itemIcon.type === 'fa' && <i className={item.itemIcon.cssClass}></i>}
+            {item.name}
+        </span>
+    );
+}
+function InfoItemCategories({ onCategoryChange, homePageUrl }) {
+    const [infoItemCategories, setInfoItemCategories] = useState([]);
+    const [activeCategoryId, setActiveCategoryId] = useState(null);
+
+    useEffect(() => {
+        (async () => {
+            const fetchedData = await fetchData('/api/InfoItemCategories');
+            setInfoItemCategories(fetchedData);
+        })();
+    }, []);
+
+    const handleFilter = (categoryId) => {
+        setActiveCategoryId(categoryId);
+        if (onCategoryChange) {
+            onCategoryChange(categoryId);
+        }
+    };
+
+    return (
+        <div className="d-flex flex-wrap btn-group justify-content-center">
+            {infoItemCategories.map((item, index) => (
+                <FilterButton item={item} isActive={activeCategoryId === item.id} onFilter={handleFilter} key={index} />))}
+        </div>
+    );
+}
+
 
 //infoItems
 const infoItemsTransformFunction = (infoItem) => ({

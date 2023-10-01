@@ -25,7 +25,7 @@ function Home() {
 }
 function App() {
   return (
-    <div className="container rounded mt-3 mx-auto">
+    <div className="container-fluid rounded mt-3 mx-auto">
       <Routes>
         <Route path="/" element={<Home/>} />
         <Route path="/InfoItems" element={<InfoItems />} />

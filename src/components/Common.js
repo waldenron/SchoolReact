@@ -35,21 +35,70 @@ export const SearchBar = ({ onSearch }) => {
         </div>
     );
 };
+export const FilterButton = ({ item, isActive, onFilter }) => {
+    return (
+        <span
+            className={`btn btn-${isActive ? 'primary active' : 'secondary'} btn-sm m-1`}
+            onClick={() => onFilter(item.id)}
+        >
+            {item.itemIcon.type === 'fa' && <FontAwesomeIcon icon={item.itemIcon.cssClass}  className="mx-1"/>}
+            {item.name}
+        </span>
+    );
+}
+export function InfoItemCategories({ onFilterChange, homePageUrl }) {
+    const [infoItemCategories, setInfoItemCategories] = useState([]);
+    const [activeCategoryId, setActiveCategoryId] = useState(null);
 
+    useEffect(() => {
+        (async () => {
+            const fetchedData = await fetchData('/api/InfoItemCategories');
+            setInfoItemCategories(fetchedData);
+        })();
+    }, []);
+
+    const handleFilter = (categoryId) => {
+        if (activeCategoryId === categoryId) {
+            // If the category is already active, deactivate it
+            setActiveCategoryId(null);
+            if (onFilterChange) {
+                onFilterChange(null);
+            }
+        } else {
+            setActiveCategoryId(categoryId);
+            if (onFilterChange) {
+                onFilterChange(categoryId);
+            }
+        }
+    };
+
+    return (
+        <div className="d-flex flex-wrap btn-group justify-content-center">
+            {infoItemCategories.map((item, index) => (
+                <FilterButton item={item} isActive={activeCategoryId === item.id} onFilter={handleFilter} key={index} />))}
+        </div>
+    );
+}
 
 export const ItemsList = ({ items, toHtml }) => {
     const [searchInput, setSearchInput] = useState('');
+    const [activeFilter, setActiveFilter] = useState(null); 
 
     const filteredItems = useMemo(() => {
-        const results = items.filter(item =>
-            cleanText(item.textSearch).includes(cleanText(searchInput))
-        );
+        const results = items.filter(item => {
+            if (!activeFilter) {
+                return cleanText(item.textSearch).includes(cleanText(searchInput));
+            }
+            return cleanText(item.textSearch).includes(cleanText(searchInput)) && 
+                   item.category === activeFilter;
+        });
         return toHtml(results);
-    }, [searchInput, items]); // include items in the dependency list
+    }, [searchInput, activeFilter, items, toHtml]);
 
     return (
         <>
             <SearchBar onSearch={setSearchInput} />
+            <InfoItemCategories onFilterChange={setActiveFilter} />
 
             <div id="ListDiv">
                 <ul className="list-group rounded-0 border-secondary p-0">
@@ -91,6 +140,4 @@ export const Header = ({ header, msg }) => (
         <h5 className="d-flex-inline mx-auto">{msg}</h5>
     </div>
 );
-
-
 
