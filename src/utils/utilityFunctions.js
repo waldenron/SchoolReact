@@ -47,3 +47,8 @@ export function cssStringToObject(cssString) {
     });
     return style;
 }
+
+export function toPageTitle(text) {
+    //remove the HTML tags from the text
+    return text.replace(/<[^>]*>/g, "");
+}

@@ -1,20 +1,23 @@
+import React, { useEffect, useState } from 'react';
+import { Route, Routes, Outlet } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import { Route, Routes } from "react-router-dom";
 
 import Nav from "./components/Nav";
-import Row from "./components/Row";
+import Row, { RowDetails } from "./components/Row";
 import InfoItems from './components/InfoItems';
 import ContactPage from './components/Contact';
 import NotFound from "./components/NotFound";
+import { Logo, getHomePageUrl } from './components/Common';
+import { fetchData } from './utils/apiServices';
 
 
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { Logo, getHomePageUrl } from './components/Common';
-import { useEffect, useState } from 'react';
-import { fetchData } from './utils/apiServices';
+import { toPageTitle } from './utils/utilityFunctions';
 library.add(fas)
+
+export const RowContext = React.createContext([]);
 
 const InstFiles = ({ homePageUrl }) => {
 
@@ -44,33 +47,38 @@ const InstFiles = ({ homePageUrl }) => {
   return null; // this component doesn't render anything visually
 };
 
-function Home() {
+function Home({ instDescription }) {
+  document.title = toPageTitle(instDescription);
   return (
     <>
       <div className="container"><Logo /></div>
       <div className="mt-3"><Nav /></div>
-      <Row />
+      <Outlet />
     </>
   );
 }
 function App() {
-  const [homePageUrl, setHomePageUrl] = useState(null);
+  const [instDetails, setInstDetails] = useState(null);
   useEffect(() => {
-      (async () => {
-          const fetchedUrl = await getHomePageUrl();
-          setHomePageUrl(fetchedUrl);
-      })();
+    (async () => {
+      const fetchedData = await fetchData('/api/InstDetails');
+      setInstDetails(fetchedData);
+    })();
   }, []);
 
   return (
     <div className="container-fluid rounded mt-3 mx-auto">
-      {homePageUrl && <InstFiles homePageUrl={homePageUrl} />}
-      <Routes>
-        <Route path="/" element={<Home />} />
+      {instDetails && <InstFiles homePageUrl={instDetails.homePageUrl} />}
+      {instDetails && <Routes>
+        <Route path="/" element={<Home instDescription={instDetails.description} />}>
+          <Route index element={<Row />} />
+          <Route path="rowDetails/:id" element={<RowDetails />} />
+        </Route>
+
         <Route path="/InfoItems" element={<InfoItems />} />
         <Route path="/Contacts" element={<ContactPage />} />
         <Route path="*" element={<NotFound />} />
-      </Routes>
+      </Routes>}
     </div>
   );
 }
