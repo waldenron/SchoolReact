@@ -92,10 +92,14 @@ const toHtmlElements = (data, homePageUrl) => {
 
 const InfoItemsPage = () => {
     const [homePageUrl, setHomePageUrl] = useState(null);
+    const [infoItemCategories, setInfoItemCategories] = useState([]);
     const [infoItems, setInfoItems] = useState([]);
 
     useEffect(() => {
         (async () => {
+            const fetchedDataCategories = await fetchData('/api/InfoItemCategories');
+            setInfoItemCategories(fetchedDataCategories);
+
             const fetchedData = await fetchData('/api/InfoItems', infoItemsTransformFunction);
             setInfoItems(fetchedData);
 
@@ -111,7 +115,7 @@ const InfoItemsPage = () => {
     );
     const header = "מידע לתלמידים";
     return (
-        homePageUrl && <ItemsList header={header} msg={msg} items={infoItems} toHtml={(data) => toHtmlElements(data, homePageUrl)} />
+        homePageUrl && <ItemsList header={header} msg={msg} items={infoItems} toHtml={(data) => toHtmlElements(data, homePageUrl)} filterCategories={infoItemCategories} />
     )
 };
 

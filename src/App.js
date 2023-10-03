@@ -89,7 +89,7 @@ function App() {
       setInstDetails(fetchedData);
     })();
   }, []);
-
+  
   return (
     <div className="container-fluid rounded mt-3 mx-auto">
       {instDetails && <InstFiles homePageUrl={instDetails.homePageUrl} />}
@@ -99,7 +99,7 @@ function App() {
           <Route path="rowDetails/:id" element={<RowDetails />} />
         </Route>
 
-        <Route path="/Course" element={<Course />} />
+        <Route path="/Courses" element={<Course />} />
         <Route path="/InfoItems" element={<InfoItems />} />
         <Route path="/Contacts" element={<ContactPage />} />
         <Route path="*" element={<NotFound />} />

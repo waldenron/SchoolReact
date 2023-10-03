@@ -6,23 +6,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './Nav.css';
 
 import { fetchData } from '../utils/apiServices';
-import { getHomePageUrl } from './Common';
-import { cssStringToObject } from '../utils/utilityFunctions';
+import { ItemIcon, getHomePageUrl } from './Common';
 
-const toHtmlElement = (itemIcon, homePageUrl) => {
-  if (itemIcon.type === "fa") {
-    if (itemIcon.style != "")
-      return <FontAwesomeIcon icon={itemIcon.cssClass} style={cssStringToObject(itemIcon.style)} />;
-    else
-      return <FontAwesomeIcon icon={itemIcon.cssClass} />;
-  }
-  else if (homePageUrl && itemIcon.type === "img") {
-    return <img src={`${homePageUrl}/${itemIcon.src}`} />;
-  }
-  else {
-    return <></>;
-  }
-}
 export const NavItem = ({ navItem, homePageUrl }) => {
   let link = navItem.link;
   if (link.includes(".aspx")) link = link.replace(".aspx", "");//***temp*** remove .aspx
@@ -35,7 +20,7 @@ export const NavItem = ({ navItem, homePageUrl }) => {
     target={navItem.isLinkNewTab ? '_blank' : '_self'}
   >
     <h5 className="d-inline">
-      {toHtmlElement(navItem.itemIcon, homePageUrl)}
+    {<ItemIcon itemIcon={navItem.itemIcon} homePageUrl={homePageUrl} />}
       {navItem.name && (<span className="mx-1 text-decoration-underline">{navItem.name}</span>)}
     </h5>
   </Link>)

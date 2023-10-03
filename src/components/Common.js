@@ -60,16 +60,8 @@ export const ItemIcon = ({ itemIcon, homePageUrl }) => {
         return (<></>);
     }
 }
-export function InfoItemCategories({ onFilterChange, homePageUrl }) {
-    const [infoItemCategories, setInfoItemCategories] = useState([]);
+export function FilterCategories({ filterCategories, onFilterChange, homePageUrl }) {
     const [activeCategoryId, setActiveCategoryId] = useState(null);
-
-    useEffect(() => {
-        (async () => {
-            const fetchedData = await fetchData('/api/InfoItemCategories');
-            setInfoItemCategories(fetchedData);
-        })();
-    }, []);
 
     const handleFilter = (categoryId) => {
         if (activeCategoryId === categoryId) {
@@ -88,13 +80,13 @@ export function InfoItemCategories({ onFilterChange, homePageUrl }) {
 
     return (
         <div className="d-flex flex-wrap btn-group justify-content-center">
-            {infoItemCategories.map((item, index) => (
+            {filterCategories.map((item, index) => (
                 <FilterButton item={item} isActive={activeCategoryId === item.id} onFilter={handleFilter} key={index} />))}
         </div>
     );
 }
 
-export const ItemsList = ({ header, msg, items, toHtml }) => {
+export const ItemsList = ({ header, msg, items, toHtml, filterCategories }) => {
     const [searchInput, setSearchInput] = useState('');
     const [activeFilter, setActiveFilter] = useState(null);
 
@@ -115,7 +107,7 @@ export const ItemsList = ({ header, msg, items, toHtml }) => {
             <Logo />
             <Header header={header} msg={msg} />
             <SearchBar onSearch={setSearchInput} />
-            <InfoItemCategories onFilterChange={setActiveFilter} />
+            {filterCategories && <FilterCategories filterCategories={filterCategories} onFilterChange={setActiveFilter} />}
 
             <div id="ListDiv">
                 <ul className="list-group rounded-0 border-secondary p-0">
