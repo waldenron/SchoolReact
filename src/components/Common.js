@@ -101,7 +101,6 @@ export const ItemsList = ({ header, msg, items, toHtml, filterCategories }) => {
         return toHtml(results);
     }, [searchInput, activeFilter, items, toHtml]);
 
-    document.title = toPageTitle(header);
     return (
         <div className="py-3 w-md-75 mx-auto">
             <Logo />
@@ -142,10 +141,13 @@ export const Logo = () => {
     );
 };
 
-export const Header = ({ header, msg }) => (
-    <div>
-        <h3 className="d-inline">{header}</h3>
-        <h5 className="d-flex-inline mx-auto">{msg}</h5>
-    </div>
-);
+export const Header = ({ header, msg }) => {
+    document.title = toPageTitle(header);
+    return (
+        <div>
+            <h3 className="d-inline">{header}</h3>
+            <h5 className="d-flex-inline mx-auto">{msg}</h5>
+        </div>
+    )
+};
 

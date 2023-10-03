@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Nav from "./components/Nav";
 import Row, { RowDetails } from "./components/Row";
 import InfoItems from './components/InfoItems';
-import ContactPage from './components/Contact';
+import ContactPage from './components/Contacts';
 import NotFound from "./components/NotFound";
 import { Logo, getHomePageUrl } from './components/Common';
 import { fetchData } from './utils/apiServices';
@@ -15,7 +15,7 @@ import { fetchData } from './utils/apiServices';
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { toPageTitle } from './utils/utilityFunctions';
-import Course from './components/Course';
+import Course from './components/Courses';
 library.add(fas)
 
 export const RowContext = React.createContext([]);
@@ -89,7 +89,7 @@ function App() {
       setInstDetails(fetchedData);
     })();
   }, []);
-  
+
   return (
     <div className="container-fluid rounded mt-3 mx-auto">
       {instDetails && <InstFiles homePageUrl={instDetails.homePageUrl} />}
@@ -100,6 +100,7 @@ function App() {
         </Route>
 
         <Route path="/Courses" element={<Course />} />
+        <Route path="/Courses/:id" element={<Course />} />
         <Route path="/InfoItems" element={<InfoItems />} />
         <Route path="/Contacts" element={<ContactPage />} />
         <Route path="*" element={<NotFound />} />
