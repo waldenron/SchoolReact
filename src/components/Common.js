@@ -142,11 +142,11 @@ export const Logo = () => {
 };
 
 export const Header = ({ header, msg }) => {
-    document.title = toPageTitle(header);
+    if (header) document.title = toPageTitle(header);
     return (
         <div>
-            <h3 className="d-inline">{header}</h3>
-            <h5 className="d-flex-inline mx-auto">{msg}</h5>
+            {header && <h3 className="d-inline">{header}</h3>}
+            {msg && <h5 className="d-flex-inline mx-auto">{msg}</h5>}
         </div>
     )
 };

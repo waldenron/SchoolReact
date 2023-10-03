@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 import Nav from "./components/Nav";
-import Row, { RowDetails } from "./components/Row";
+import Row from "./components/Row";
 import InfoItems from './components/InfoItems';
 import ContactPage from './components/Contacts';
 import NotFound from "./components/NotFound";
@@ -59,7 +59,8 @@ function Home({ instDescription }) {
   //console.log(indexHeaderTextItems);
   document.title = toPageTitle(instDescription);
   return (
-    indexHeaderTextItems && indexHeaderTextItems.length > 0 && <>
+    indexHeaderTextItems && indexHeaderTextItems.length > 0 &&
+    <>
       <div className="container">
         <div className="hideOnLargeScreen">
           <div className="d-flex justify-content-between pt-1">
@@ -77,7 +78,9 @@ function Home({ instDescription }) {
         </div>
       </div>
       <div className="mt-3"><Nav /></div>
-      <Outlet />
+      <Routes>
+        <Route path="/" element={<Row />} />
+      </Routes>
     </>
   );
 }
@@ -93,18 +96,18 @@ function App() {
   return (
     <div className="container-fluid rounded mt-3 mx-auto">
       {instDetails && <InstFiles homePageUrl={instDetails.homePageUrl} />}
-      {instDetails && <Routes>
-        <Route path="/" element={<Home instDescription={instDetails.description} />}>
-          <Route index element={<Row />} />
-          <Route path="rowDetails/:id" element={<RowDetails />} />
-        </Route>
+      {instDetails &&
+        <Routes>
+          <Route path="/" element={<Home instDescription={instDetails.description} />} />
 
-        <Route path="/Courses" element={<Course />} />
-        <Route path="/Courses/:id" element={<Course />} />
-        <Route path="/InfoItems" element={<InfoItems />} />
-        <Route path="/Contacts" element={<ContactPage />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>}
+          <Route path="/Row/:id" element={<Row />} />
+
+          <Route path="/Courses" element={<Course />} />
+          <Route path="/Courses/:id" element={<Course />} />
+          <Route path="/InfoItems" element={<InfoItems />} />
+          <Route path="/Contacts" element={<ContactPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>}
     </div>
   );
 }
