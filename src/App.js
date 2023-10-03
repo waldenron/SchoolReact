@@ -16,6 +16,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { toPageTitle } from './utils/utilityFunctions';
 import Course from './components/Courses';
+import Calendar from './components/Calendars';
 library.add(fas)
 
 export const RowContext = React.createContext([]);
@@ -104,7 +105,10 @@ function App() {
 
           <Route path="/Courses" element={<Course />} />
           <Route path="/Courses/:id" element={<Course />} />
+          <Route path="/Calendars" element={<Calendar />} />
+          <Route path="/Calendars/:id" element={<Calendar />} />
           <Route path="/InfoItems" element={<InfoItems />} />
+          <Route path="/InfoItems/:id" element={<InfoItems />} />
           <Route path="/Contacts" element={<ContactPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>}

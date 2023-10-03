@@ -41,7 +41,7 @@ export const FilterButton = ({ item, isActive, onFilter }) => {
             className={`btn btn-${isActive ? 'primary active' : 'secondary'} btn-sm m-1`}
             onClick={() => onFilter(item.id)}
         >
-            {item.itemIcon.type === 'fa' && <FontAwesomeIcon icon={item.itemIcon.cssClass} className="mx-1" />}
+            {item.itemIcon && item.itemIcon.type === 'fa' && <FontAwesomeIcon icon={item.itemIcon.cssClass} className="mx-1" />}
             {item.name}
         </span>
     );

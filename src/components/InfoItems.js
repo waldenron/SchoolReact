@@ -8,6 +8,7 @@ import { NavItem } from './Nav';
 
 import { toArchiveText, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
 import { fetchData } from '../utils/apiServices';
+import { useParams } from 'react-router-dom';
 
 
 //InfoNav
@@ -91,6 +92,8 @@ const toHtmlElements = (data, homePageUrl) => {
 };
 
 const InfoItemsPage = () => {
+    const { id } = useParams();
+
     const [homePageUrl, setHomePageUrl] = useState(null);
     const [infoItemCategories, setInfoItemCategories] = useState([]);
     const [infoItems, setInfoItems] = useState([]);
@@ -115,7 +118,10 @@ const InfoItemsPage = () => {
     );
     const header = "מידע לתלמידים";
     return (
-        homePageUrl && <ItemsList header={header} msg={msg} items={infoItems} toHtml={(data) => toHtmlElements(data, homePageUrl)} filterCategories={infoItemCategories} />
+        <>
+            {homePageUrl && !id && <ItemsList header={header} msg={msg} items={infoItems.filter(item => item.isShowOnInfoItemsPage == true)} toHtml={(data) => toHtmlElements(data, homePageUrl)} filterCategories={infoItemCategories} />}
+            {homePageUrl && id && <ItemsList header={header} msg={msg} items={infoItems.filter(item => item.category == id)} toHtml={(data) => toHtmlElements(data, homePageUrl)} />}
+        </>
     )
 };
 
