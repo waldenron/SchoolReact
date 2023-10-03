@@ -1,11 +1,4 @@
-﻿h3 {
-    margin-top: 50px;
-    font-size: 48px;
-    font-weight: bold;
-    color: #333;
-}
-
-table {
+﻿table {
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 5px;
@@ -29,7 +22,7 @@ a {
     font-size: 14pt;
 }
 
-.ListDiv > i {
+.icon {
     font-size: 24px;
     color: #333;
 }

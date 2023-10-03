@@ -10,7 +10,7 @@ import { ItemsList, Logo, Header } from "./Common"
 //InstContactInfo
 const InstContactInfo = () => {
     const [instContactInfo, setInstContactInfo] = useState();
- 
+
     useEffect(() => {
         (async () => {
             const fetchedData = await fetchData('/api/InstContactInfo');
@@ -46,7 +46,7 @@ const InstContactInfo = () => {
                     </a>
                 </span>
             </h4>
-        </div>        
+        </div>
     )
 };
 
@@ -76,16 +76,11 @@ const ContactPage = () => {
             setContacts(fetchedData);
         })();
     }, []);
-    
+
+    const msg = <InstContactInfo />;
+    const header = "יצירת קשר";
     return (
-        <div className="py-3 w-md-75 mx-auto">
-            <Logo />
-            <Header
-                header="יצירת קשר"
-                msg={<InstContactInfo/>}
-            />
-            <ItemsList items={contacts} toHtml={toHtmlElements} />
-        </div>
+        <ItemsList header={header} msg={msg} items={contacts} toHtml={toHtmlElements} />
     )
 };
 

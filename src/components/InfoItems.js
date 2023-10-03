@@ -109,15 +109,9 @@ const InfoItemsPage = () => {
             <InfoNav homePageUrl={homePageUrl} />
         </div>
     );
+    const header = "מידע לתלמידים";
     return (
-        <div className="py-3 w-md-75 mx-auto">
-            <Logo />
-            <Header
-                header="מידע לתלמידים"
-                msg={msg}
-            />
-            {homePageUrl && <ItemsList items={infoItems} toHtml={(data) => toHtmlElements(data, homePageUrl)} />}
-        </div>
+        homePageUrl && <ItemsList header={header} msg={msg} items={infoItems} toHtml={(data) => toHtmlElements(data, homePageUrl)} />
     )
 };
 

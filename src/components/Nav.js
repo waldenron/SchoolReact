@@ -23,20 +23,23 @@ const toHtmlElement = (itemIcon, homePageUrl) => {
     return <></>;
   }
 }
-export const NavItem = ({ navItem, homePageUrl }) => (
-  <Link
+export const NavItem = ({ navItem, homePageUrl }) => {
+  let link = navItem.link;
+  if (link.includes(".aspx")) link = link.replace(".aspx", "");//***temp*** remove .aspx
+  if (link.includes(".htm")) link = `${homePageUrl}/${link}`;//***temp*** remove .aspx
+  return (<Link
     className="px-md-3 px-2 text-dark text-decoration-none text-center"
     data-bs-toggle="tooltip"
     title={navItem.text}
-    to={navItem.link.replace(".aspx", "")}//***temp*** remove .aspx
+    to={link}
     target={navItem.isLinkNewTab ? '_blank' : '_self'}
   >
     <h5 className="d-inline">
       {toHtmlElement(navItem.itemIcon, homePageUrl)}
       {navItem.name && (<span className="mx-1 text-decoration-underline">{navItem.name}</span>)}
     </h5>
-  </Link>
-);
+  </Link>)
+};
 export default function Nav() {
   const [homePageUrl, setHomePageUrl] = useState(null);
   const [navItems, setNavItems] = useState([]);

@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { fetchData } from '../utils/apiServices';
-import { cleanText } from '../utils/utilityFunctions';
+import { cleanText, cssStringToObject, toPageTitle } from '../utils/utilityFunctions';
 
 
 export const getHomePageUrl = async () => {
@@ -41,10 +41,24 @@ export const FilterButton = ({ item, isActive, onFilter }) => {
             className={`btn btn-${isActive ? 'primary active' : 'secondary'} btn-sm m-1`}
             onClick={() => onFilter(item.id)}
         >
-            {item.itemIcon.type === 'fa' && <FontAwesomeIcon icon={item.itemIcon.cssClass}  className="mx-1"/>}
+            {item.itemIcon.type === 'fa' && <FontAwesomeIcon icon={item.itemIcon.cssClass} className="mx-1" />}
             {item.name}
         </span>
     );
+}
+export const ItemIcon = ({ itemIcon, homePageUrl }) => {
+    if (itemIcon.type === "fa") {
+        if (itemIcon.style != "")
+            return (<FontAwesomeIcon icon={itemIcon.cssClass} style={cssStringToObject(itemIcon.style)} />);
+        else
+            return (<FontAwesomeIcon icon={itemIcon.cssClass} />);
+    }
+    else if (homePageUrl && itemIcon.type === "img") {
+        return (<img src={`${homePageUrl}/${itemIcon.src}`} />);
+    }
+    else {
+        return (<></>);
+    }
 }
 export function InfoItemCategories({ onFilterChange, homePageUrl }) {
     const [infoItemCategories, setInfoItemCategories] = useState([]);
@@ -80,23 +94,26 @@ export function InfoItemCategories({ onFilterChange, homePageUrl }) {
     );
 }
 
-export const ItemsList = ({ items, toHtml }) => {
+export const ItemsList = ({ header, msg, items, toHtml }) => {
     const [searchInput, setSearchInput] = useState('');
-    const [activeFilter, setActiveFilter] = useState(null); 
+    const [activeFilter, setActiveFilter] = useState(null);
 
     const filteredItems = useMemo(() => {
         const results = items.filter(item => {
             if (!activeFilter) {
                 return cleanText(item.textSearch).includes(cleanText(searchInput));
             }
-            return cleanText(item.textSearch).includes(cleanText(searchInput)) && 
-                   item.category === activeFilter;
+            return cleanText(item.textSearch).includes(cleanText(searchInput)) &&
+                item.category === activeFilter;
         });
         return toHtml(results);
     }, [searchInput, activeFilter, items, toHtml]);
 
+    document.title = toPageTitle(header);
     return (
-        <>
+        <div className="py-3 w-md-75 mx-auto">
+            <Logo />
+            <Header header={header} msg={msg} />
             <SearchBar onSearch={setSearchInput} />
             <InfoItemCategories onFilterChange={setActiveFilter} />
 
@@ -112,7 +129,7 @@ export const ItemsList = ({ items, toHtml }) => {
             <div className="container">
                 <p className="text-center">סה"כ: <span>{filteredItems.length}</span> פריטים בחתך</p>
             </div>
-        </>
+        </div>
     );
 };
 
@@ -135,7 +152,6 @@ export const Logo = () => {
 
 export const Header = ({ header, msg }) => (
     <div>
-        <div className="d-inline"></div>
         <h3 className="d-inline">{header}</h3>
         <h5 className="d-flex-inline mx-auto">{msg}</h5>
     </div>

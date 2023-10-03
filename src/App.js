@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Route, Routes, Outlet } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.css';
+
 
 import Nav from "./components/Nav";
 import Row, { RowDetails } from "./components/Row";
@@ -15,6 +15,7 @@ import { fetchData } from './utils/apiServices';
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { toPageTitle } from './utils/utilityFunctions';
+import Course from './components/Course';
 library.add(fas)
 
 export const RowContext = React.createContext([]);
@@ -48,10 +49,33 @@ const InstFiles = ({ homePageUrl }) => {
 };
 
 function Home({ instDescription }) {
+  const [indexHeaderTextItems, setIndexHeaderTextItems] = useState([]);
+  useEffect(() => {
+    (async () => {
+      const fetchedData = await fetchData('/api/IndexHeaderTextItems');
+      setIndexHeaderTextItems(fetchedData);
+    })();
+  }, []);
+  //console.log(indexHeaderTextItems);
   document.title = toPageTitle(instDescription);
   return (
-    <>
-      <div className="container"><Logo /></div>
+    indexHeaderTextItems && indexHeaderTextItems.length > 0 && <>
+      <div className="container">
+        <div className="hideOnLargeScreen">
+          <div className="d-flex justify-content-between pt-1">
+            {indexHeaderTextItems.map((item, index) => (
+              <span key={index}>{item.shortText}</span>
+            ))}          </div>
+        </div>
+        <Logo />
+        <div className="hideOnSmallScreen">
+          <div className="d-flex justify-content-between pt-1">
+            {indexHeaderTextItems.map((item, index) => (
+              <span key={index} className="fw-bolder h6">{item.text}</span>
+            ))}
+          </div>
+        </div>
+      </div>
       <div className="mt-3"><Nav /></div>
       <Outlet />
     </>
@@ -75,6 +99,7 @@ function App() {
           <Route path="rowDetails/:id" element={<RowDetails />} />
         </Route>
 
+        <Route path="/Course" element={<Course />} />
         <Route path="/InfoItems" element={<InfoItems />} />
         <Route path="/Contacts" element={<ContactPage />} />
         <Route path="*" element={<NotFound />} />
