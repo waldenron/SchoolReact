@@ -1,9 +1,10 @@
 
-const instCode = "2";
+const instCode = "1";
 
 export const fetchData = async (API_URL, transformFunction, sortFunction) => {
     try {
-        const response = await fetch(API_URL, {
+        const apiUrl = process.env.REACT_APP_API_URL;
+        const response = await fetch(`${apiUrl}${API_URL}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

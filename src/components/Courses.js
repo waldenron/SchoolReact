@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Route, Routes, useCourseigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/Courses.css';
 // import '../css/Course.css';

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Route, Routes, useRowigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { fetchData } from '../utils/apiServices';
-import { Header, ItemIcon, Logo, getHomePageUrl } from './Common';
+import { Logo, getHomePageUrl } from './Common';
 import { toPageTitle, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
 
 
@@ -51,7 +51,7 @@ const RowItems = ({ rowItems, homePageUrl }) => {
   return (
     <div className="container py-3">
       {rowItems.map((rowItem, index) => (
-        <RowItem rowItem={rowItem} homePageUrl={homePageUrl} rowIndex={index} />
+        <RowItem rowItem={rowItem} homePageUrl={homePageUrl} rowIndex={index} key={index} />
       ))}
     </div>
   )
