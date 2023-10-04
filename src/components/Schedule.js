@@ -9,10 +9,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 const days = ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי'];
 
 
-function LesoonDesc({ time, timeslotIndex }) {
+function LesonDesc({ time, number }) {
     return (
         <div className="col-1 text-center border border-dark bgLightGray px-0">
-            שיעור {timeslotIndex + 1}
+            שיעור {number}
             <br />
             <small>{time.start}-{time.end}</small>
         </div>
@@ -78,7 +78,7 @@ function WeeklyTimetable({ checkboxShowValue, lessons, scheduleItems }) {
     const activeDaysSet = new Set(scheduleItems.map(item => item.weekDay));
 
     return (
-        <div className="container-fluid">
+        <div className="container-fluid pt-3">
             <div className="row bgLightGray no-gutters sticky-top">
                 <div className="col-1 border border-dark text-center"></div>
                 {days.map((day, index) => (
@@ -88,14 +88,14 @@ function WeeklyTimetable({ checkboxShowValue, lessons, scheduleItems }) {
                         </div>)
                 ))}
             </div>
-            {lessons.map((time, timeslotIndex) => (
-                <div key={timeslotIndex} className="row bg-white">
-                    <LesoonDesc time={time} timeslotIndex={timeslotIndex} />
+            {lessons.map((time, lessonIndex) => (
+                <div key={lessonIndex} className="row bg-white">
+                    <LesonDesc time={time} number={lessonIndex + 1} />
                     {days.map((_, dayIndex) => {
                         if (activeDaysSet.has(dayIndex + 1)) {
 
-                            const lessonsForSlot = scheduleItems.filter(item => item.weekDay - 1 === dayIndex && item.lessonId - 1 === timeslotIndex);
-                            return <Lesson lessons={lessonsForSlot} showSubject={showSubject} showTeacher={showTeacher} showRoom={showRoom} showClass={showClass} key={dayIndex + '-' + timeslotIndex} />;
+                            const lessonsForSlot = scheduleItems.filter(item => item.weekDay - 1 === dayIndex && item.lessonId - 1 === lessonIndex);
+                            return <Lesson lessons={lessonsForSlot} showSubject={showSubject} showTeacher={showTeacher} showRoom={showRoom} showClass={showClass} key={dayIndex + '-' + lessonIndex} />;
                         }
                     })}
                 </div>
@@ -104,6 +104,38 @@ function WeeklyTimetable({ checkboxShowValue, lessons, scheduleItems }) {
     );
 }
 
+function DailyTimetable({ checkboxShowValue, lessons, scheduleItems, classes }) {
+    const { showSubject, showTeacher, showRoom, showClass } = checkboxShowValue;
+
+    return (
+        <div className="container-fluid pt-3">
+            {/* Header row with class names */}
+            <div className="row bgLightGray no-gutters sticky-top">
+                <div className="col-1 border border-dark text-center"></div>
+                {classes.map(c => (
+                    <div key={c.id} className="col border border-dark text-center">
+                        <b>{c.name}</b>
+                    </div>
+                ))}
+            </div>
+
+            {/* Rows for each time slot */}
+            {lessons.map((time, lessonIndex) => (
+                <div key={lessonIndex} className="row bg-white">
+                    <LesonDesc time={time} number={lessonIndex + 1} />
+
+                    {/* Cells for each class */}
+                    {classes.map(c => {
+                        const lessonsForClass = scheduleItems.filter(item =>
+                            item.classesIds.includes(c.id.toString()) && item.lessonId - 1 === lessonIndex
+                        );
+                        return <Lesson lessons={lessonsForClass} showSubject={showSubject} showTeacher={showTeacher} showRoom={showRoom} showClass={showClass} key={c.id + '-' + lessonIndex} />;
+                    })}
+                </div>
+            ))}
+        </div>
+    );
+}
 
 export default function Schedule() {
     const [lessons, setLessons] = useState([]);
@@ -111,25 +143,33 @@ export default function Schedule() {
     const [teachers, setTeachers] = useState([]);
     const [rooms, setRooms] = useState([]);
 
+    const [grades, setGrades] = useState([]);
+    const [sections, setSections] = useState([]);
+    const [weekDays, setWeekDays] = useState([]);
+
     const [showFilertMore, setFilertMore] = useState(false);
+    const [showShowAllSubjects, setShowAllSubjects] = useState(true);
 
-    const DEFAULT_Ids = { class: -1, teacher: -1, room: -1 };
+    const today = new Date().getDay() + 1;  // +1 because your weekDays array starts with 1 for Sunday
+    const DEFAULT_Ids = { class: -1, teacher: -1, room: -1, grade: -1, section: -1, weekDay: today };
     const [selectedIds, setSelectedIds] = useState(DEFAULT_Ids);
-    function resetSelectedIds() { setSelectedIds({ ...DEFAULT_Ids }); }
+    function resetSelectedIds(keepWeekDay) {
+        if (!keepWeekDay) setSelectedIds({ ...DEFAULT_Ids });
+        else setSelectedIds({ ...DEFAULT_Ids, weekDay: selectedIds.weekDay });
+    }
 
-
-    const DEFAULT_FieldsShow = { showSubject: true, showTeacher: true, showRoom: true, showClass: false };
+    const DEFAULT_FieldsShow = { subject: false, teacher: false, room: false, class: false, grade: false, section: false };
     const [showSelects, setShowSelects] = useState(DEFAULT_FieldsShow);
     function resetShowSelects() { setShowSelects({ ...DEFAULT_FieldsShow }); }
 
-    const [checkboxShowValue, setCheckboxShowValue] = useState(DEFAULT_FieldsShow);
-    function resetCheckboxShowValue() { setCheckboxShowValue({ ...DEFAULT_FieldsShow }); }
+    const DEFAULT_checkboxShowValue = { showSubject: true, showTeacher: true, showRoom: true, showClass: false };
+    const [checkboxShowValue, setCheckboxShowValue] = useState(DEFAULT_checkboxShowValue);
+    function resetCheckboxShowValue() { setCheckboxShowValue({ ...DEFAULT_checkboxShowValue }); }
 
     const [scheduleItems, setScheduleItems] = useState([]);
 
     function handleFilertMoreClick() {
-        setFilertMore(!showFilertMore);
-        handleShowClick("teacher");
+        setFilertMore(prevShow => !prevShow);
     }
     function handleShowClick(item) {
         resetSelectedIds();
@@ -137,6 +177,9 @@ export default function Schedule() {
         resetCheckboxShowValue();
 
         switch (item) {
+            case "class":
+                setShowSelects(prevState => ({ ...prevState, class: true }));
+                break;
             case "teacher":
                 setShowSelects(prevState => ({ ...prevState, teacher: true }));
                 setCheckboxShowValue(prevControls => ({
@@ -153,21 +196,32 @@ export default function Schedule() {
                     showClass: true
                 }));
                 break;
-
-        }
-    }
-    function handleSelect(dropdownItem, selectedId) {
-        resetSelectedIds();
-
-        switch (dropdownItem) {
-            case "class":
-                setSelectedIds(prevState => ({ ...prevState, class: selectedId }));
-                resetShowSelects();
+            case "grade":
+                setShowSelects(prevState => ({ ...prevState, grade: true }));
                 setCheckboxShowValue(prevControls => ({
                     ...prevControls,
                     showTeacher: true,
                     showClass: false
                 }));
+                break;
+            case "section":
+                setShowSelects(prevState => ({ ...prevState, section: true }));
+                setCheckboxShowValue(prevControls => ({
+                    ...prevControls,
+                    showTeacher: true,
+                    showClass: false
+                }));
+                break;
+        }
+    }
+    function handleSelect(dropdownItem, selectedId) {
+        // reset SelectedIds only if the selected dropdown is not weekday. if it's grade or section reset all but keep weekday
+        if (dropdownItem != "weekDay")
+            resetSelectedIds(dropdownItem === "grade" || dropdownItem === "section");
+
+        switch (dropdownItem) {
+            case "class":
+                setSelectedIds(prevState => ({ ...prevState, class: selectedId }));
                 break;
             case "teacher":
                 setSelectedIds(prevState => ({ ...prevState, teacher: selectedId }));
@@ -175,29 +229,61 @@ export default function Schedule() {
             case "room":
                 setSelectedIds(prevState => ({ ...prevState, room: selectedId }));
                 break;
+            case "grade":
+                setSelectedIds(prevState => ({ ...prevState, grade: selectedId }));
+                break;
+            case "section":
+                setSelectedIds(prevState => ({ ...prevState, section: selectedId }));
+                break;
+            case "weekDay":
+                setSelectedIds(prevState => ({ ...prevState, weekDay: selectedId }));
+                break;
         }
     }
     function getFilteredScheduleItems(id, type) {
+        let filterItems = [];
         switch (type) {
-            case "class": return scheduleItems.filter(item => item.classesIds.includes(id.toString()));
-            case "teacher": return scheduleItems.filter(item => item.teacher == getNameById(teachers, id));
-            case "room": return scheduleItems.filter(item => item.room == getNameById(rooms, id));
-            default: return [];
+            case "class": filterItems = scheduleItems.filter(item => item.classesIds.includes(id.toString())); break;
+            case "teacher": filterItems = scheduleItems.filter(item => item.teacher == getNameById(teachers, id)); break;
+            case "room": filterItems = scheduleItems.filter(item => item.room == getNameById(rooms, id)); break;
+            case "weekDay": filterItems = scheduleItems.filter(item => item.weekDay == id); break;
+            default: filterItems = [];
         }
+
+        if (!showShowAllSubjects) filterItems = filterItems.filter(item => item.isArtSubject === false);
+
+        return filterItems;
     }
-    function renderTimetable(id, type) {
+
+    function renderTimetable(id, type, weekDay) {
         if (id <= 0) return null;
-        const filteredItems = getFilteredScheduleItems(id, type);
-        return <WeeklyTimetable checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={filteredItems} />;
+        const filteredItems = !weekDay ? getFilteredScheduleItems(id, type) : getFilteredScheduleItems(weekDay, "weekDay");
+        if (weekDay) {
+            const filterClasses = type === "grade" ?
+                classes.filter(c => c.gradeId == id) :
+                classes.filter(c => c.sectionId == id);
+            return <DailyTimetable checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={filteredItems} classes={filterClasses} />;
+        }
+        else
+            return <WeeklyTimetable checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={filteredItems} />;
+
     }
 
     useEffect(() => {
         (async () => {
+            setWeekDays(days.map((day, index) => ({ id: index + 1, name: day })));
+
             const fetchedDataLessons = await fetchData('/api/Lessons');
             setLessons(fetchedDataLessons);
 
             const fetchedDataClasses = await fetchData('/api/Classes');
             setClasses(fetchedDataClasses);
+
+            const fetchedDataGrades = await fetchData('/api/Grades');
+            setGrades(fetchedDataGrades);
+
+            const fetchedDataSections = await fetchData('/api/Sections');
+            setSections(fetchedDataSections);
 
             const fetchedDataTeachers = await fetchData('/api/Teachers');
             setTeachers(fetchedDataTeachers);
@@ -207,42 +293,79 @@ export default function Schedule() {
 
             const fetchedDataSchedule = await fetchData('/api/Schedules');
             setScheduleItems(fetchedDataSchedule);
+
+
+            handleShowClick("class");
         })();
     }, []);
-
     return (
         <div className="container-fluid w-lg-90 pb-5">
             <Logo />
             <Header header="מערכת השעות" />
-            <div className="container-fluid input-group text-center pb-2">
-                <div className="input-group mx-auto w-md-25">
-                    {classes && <SelectItem filterBy="class" preText="מערכת שבועית לכיתה" items={classes} defaultText="בחירת כיתה" selectedValue={selectedIds.class} onSelect={handleSelect} />}
-                    <FontAwesomeIcon icon={showFilertMore ? "fas fa-circle-chevron-up" : "fas fa-circle-chevron-down"} className="my-auto mx-1" onClick={() => handleFilertMoreClick()} />
-                </div>
-            </div>
-            {showFilertMore &&
-                <div className="container-fluid pt-3">
+            <div className="w-md-75 mx-auto">
+                <div className="d-flex justify-content-center flex-wrap">
                     <div className="d-flex justify-content-center flex-wrap">
-                        <div className="d-flex justify-content-center flex-wrap">
-                            <IconButton show="teacher" icon="fas fa-chalkboard-user" text="למורה" isChose={showSelects.teacher} onClick={handleShowClick} />
-                            <IconButton show="room" icon="fas fa-house" text="לחדר" isChose={showSelects.room} onClick={handleShowClick} />
-                        </div>
+                        <IconButton show="class" icon="fas fa-user-group" text="לכיתה" isChose={showSelects.class} onClick={handleShowClick} />
+                        <IconButton show="teacher" icon="fas fa-chalkboard-user" text="למורה" isChose={showSelects.teacher} onClick={handleShowClick} />
+                        <IconButton show="room" icon="fas fa-house" text="לחדר" isChose={showSelects.room} onClick={handleShowClick} />
+
+                        <FontAwesomeIcon className="my-auto ms-5" icon={showFilertMore ? "fas fa-circle-chevron-up" : "fas fa-circle-chevron-down"} onClick={() => handleFilertMoreClick()} />
                     </div>
-                    <div className="">
-                        <div className="input-group mx-auto w-md-25 pt-3">
-                            {showSelects.teacher && teachers &&
-                                <SelectItem filterBy="teacher" preText="מערכת שבועית למורה" items={teachers} defaultText="בחירת מורה" selectedValue={selectedIds.teacher} onSelect={handleSelect} />
-                            }
-                            {showSelects.room && rooms &&
-                                <SelectItem filterBy="room" preText="מערכת שבועית לחדר" items={rooms} defaultText="בחירת חדר" selectedValue={selectedIds.room} onSelect={handleSelect} />
-                            }
-                        </div>
+                </div>
+                <div className="">
+                    <div className="input-group mx-auto w-md-50 pt-3">
+                        <b className="my-auto">מערכת שבועית</b>
+                        {showSelects.class && classes &&
+                            <SelectItem filterBy="class" preText="" items={classes} defaultText=" בחירת כיתה" selectedValue={selectedIds.class} onSelect={handleSelect} />
+                        }
+                        {showSelects.teacher && teachers &&
+                            <SelectItem filterBy="teacher" preText="" items={teachers} defaultText="בחירת מורה" selectedValue={selectedIds.teacher} onSelect={handleSelect} />
+                        }
+                        {showSelects.room && rooms &&
+                            <SelectItem filterBy="room" preText="" items={rooms} defaultText="בחירת חדר" selectedValue={selectedIds.room} onSelect={handleSelect} />
+                        }
                     </div>
-                    <CheckboxControls controls={checkboxShowValue} setControls={setCheckboxShowValue} />
-                </div>}
+                </div>
+                {showFilertMore &&
+                    <>
+                        <div className="d-flex justify-content-center flex-wrap pt-3">
+                            <div className="d-flex justify-content-center flex-wrap">
+                                <IconButton show="grade" icon="fas fa-people-group" text="לשכבה" isChose={showSelects.grade} onClick={handleShowClick} />
+                                <IconButton show="section" icon="fas fa-school" text="לחטיבה" isChose={showSelects.section} onClick={handleShowClick} />
+                            </div>
+                        </div>
+                        <div className="input-group mx-auto w-md-50 pt-3">
+                            <b className="my-auto">מערכת יומית</b>
+                            <div className="input-group mx-auto w-md-50 pt-3">
+                                {showSelects.grade && grades &&
+                                    <SelectItem filterBy="grade" preText="" items={grades} defaultText="בחירת שכבה" selectedValue={selectedIds.grade} onSelect={handleSelect} />
+                                }
+                                {showSelects.section && sections &&
+                                    <SelectItem filterBy="section" preText="" items={sections} defaultText="בחירת חטיבה" selectedValue={selectedIds.section} onSelect={handleSelect} />
+                                }
+                                {(showSelects.grade || showSelects.section) && weekDays &&
+                                    <SelectItem filterBy="weekDay" preText="" items={weekDays} defaultText="בחירת יום בשבוע" selectedValue={selectedIds.weekDay} onSelect={handleSelect} />
+                                }
+
+                            </div>
+                        </div>
+                        <div className="d-flex justify-content-center flex-wrap pt-3">
+                            <b className="">הצגת:</b>
+                            <CheckboxControls controls={checkboxShowValue} setControls={setCheckboxShowValue} />
+                            <div className="form-check form-switch ms-3 me-0">
+                                <input type="checkbox" id="SwitchFilterSubject" className="form-check-input" checked={showShowAllSubjects} onChange={() => setShowAllSubjects(prev => !prev)}
+                                />
+                                <label htmlFor="SwitchFilterSubject" className="form-check-label">כל המקצועות</label>
+                            </div>
+                        </div>
+                    </>
+                }
+            </div>
             {renderTimetable(selectedIds.class, "class")}
             {renderTimetable(selectedIds.teacher, "teacher")}
             {renderTimetable(selectedIds.room, "room")}
+            {renderTimetable(selectedIds.grade, "grade", selectedIds.weekDay)}
+            {renderTimetable(selectedIds.section, "section", selectedIds.weekDay)}
         </div>
     )
 }

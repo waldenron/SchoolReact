@@ -169,7 +169,7 @@ export function SelectItem({ filterBy, preText, items, defaultText, selectedValu
 
 export function IconButton({ show, icon, text, isChose, onClick }) {
     return (
-        <span className="my-auto ms-0 me-2 text-primary" onClick={() => onClick(show)}>
+        <span className="my-auto ms-0 me-2 text-primary" role="button" onClick={() => onClick(show)}>
             <FontAwesomeIcon icon={icon} className="mx-1" />
             <span className={`${isChose ? " primarySelected" : ""}`}>{text}</span>
         </span>
