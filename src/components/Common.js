@@ -151,3 +151,27 @@ export const Header = ({ header, msg }) => {
     )
 };
 
+export function SelectItem({ filterBy, preText, items, defaultText, selectedValue, onSelect }) {
+    return (
+        <>
+            <b className="my-auto">{preText}</b>
+            <select className="form-select mx-2" value={selectedValue} onChange={e => onSelect(filterBy, Number(e.target.value))}>
+                <option value="-1" disabled>{defaultText}</option>
+                {items.map(item => (
+                    <option key={item.id} value={item.id}>
+                        {item.name}
+                    </option>
+                ))}
+            </select>
+        </>
+    );
+}
+
+export function IconButton({ show, icon, text, isChose, onClick }) {
+    return (
+        <span className="my-auto ms-0 me-2 text-primary" onClick={() => onClick(show)}>
+            <FontAwesomeIcon icon={icon} className="mx-1" />
+            <span className={`${isChose ? " primarySelected" : ""}`}>{text}</span>
+        </span>
+    );
+}

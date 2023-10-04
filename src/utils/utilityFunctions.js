@@ -52,3 +52,8 @@ export function toPageTitle(text) {
     //remove the HTML tags from the text
     return text.replace(/<[^>]*>/g, "");
 }
+
+export function getNameById(items, id) {
+    const item = items.find(t => t.id === id);
+    return item ? item.name : null;
+}
