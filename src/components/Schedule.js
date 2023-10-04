@@ -11,7 +11,7 @@ const days = ['יום ראשון', 'יום שני', 'יום שלישי', 'יום
 
 function LesonDesc({ time, number }) {
     return (
-        <div className="col-1 text-center border border-dark bgLightGray px-0">
+        <div className="col col-2 text-center border border-dark bgLightGray px-0">
             שיעור {number}
             <br />
             <small>{time.start}-{time.end}</small>
@@ -80,7 +80,7 @@ function WeeklyTimetable({ checkboxShowValue, lessons, scheduleItems }) {
     return (
         <div className="container-fluid pt-3">
             <div className="row bgLightGray no-gutters sticky-top">
-                <div className="col-1 border border-dark text-center"></div>
+                <div className="col col-2 border border-dark text-center"></div>
                 {days.map((day, index) => (
                     activeDaysSet.has(index + 1) && (  // Only render if the day is in activeDaysSet
                         <div key={index} className={`col border border-dark text-center ${index === currentDayIndex ? 'bgToday' : ''}`}>
@@ -313,72 +313,79 @@ export default function Schedule() {
                 <Header header="מערכת השעות" />
             </div>
             <div className="w-md-75 mx-auto">
-                <div className="d-flex justify-content-center flex-wrap">
-                    <div className="d-flex justify-content-center flex-wrap">
+                <div className="row">
+                    <div className="col col-3"></div>
+                    <div className="col">
+                        <div className="d-flex justify-content-start flex-wrap">
+                            {showWeekly &&
+                                <>
+                                    <IconButton show="class" icon="fas fa-user-group" text="לכיתה" isChose={showSelects.class} onClick={handleShowClick} />
+                                    <IconButton show="teacher" icon="fas fa-chalkboard-user" text="למורה" isChose={showSelects.teacher} onClick={handleShowClick} />
+                                    <IconButton show="room" icon="fas fa-house" text="לחדר" isChose={showSelects.room} onClick={handleShowClick} />
+                                </>}
+
+                            {!showWeekly &&
+                                <>
+                                    <IconButton show="grade" icon="fas fa-people-group" text="לשכבה" isChose={showSelects.grade} onClick={handleShowClick} />
+                                    <IconButton show="section" icon="fas fa-school" text="לחטיבה" isChose={showSelects.section} onClick={handleShowClick} />
+                                </>}
+                        </div>
+                    </div>
+                </div>
+                <div className="row pt-3">
+                    <div className="col col-3 align-self-end">
+                        <div className="btn-group" role="group">
+                            <button type="button" className={`btn ${showWeekly ? 'btn-secondary' : 'btn-outline-secondary'}`} onClick={() => handleShowWeekly(true)}>
+                                מערכת שבועית
+                            </button>
+                            <button type="button" className={`btn ${!showWeekly ? 'btn-secondary' : 'btn-outline-secondary'}`} onClick={() => handleShowWeekly(false)}                    >
+                                מערכת יומית
+                            </button>
+                        </div>
+                    </div>
+                    <div className="col input-group">
                         {showWeekly &&
                             <>
-                                <IconButton show="class" icon="fas fa-user-group" text="לכיתה" isChose={showSelects.class} onClick={handleShowClick} />
-                                <IconButton show="teacher" icon="fas fa-chalkboard-user" text="למורה" isChose={showSelects.teacher} onClick={handleShowClick} />
-                                <IconButton show="room" icon="fas fa-house" text="לחדר" isChose={showSelects.room} onClick={handleShowClick} />
+                                {showSelects.class && classes &&
+                                    <SelectItem filterBy="class" preText="" items={classes} defaultText=" בחירת כיתה" selectedValue={selectedIds.class} onSelect={handleSelect} />
+                                }
+                                {showSelects.teacher && teachers &&
+                                    <SelectItem filterBy="teacher" preText="" items={teachers} defaultText="בחירת מורה" selectedValue={selectedIds.teacher} onSelect={handleSelect} />
+                                }
+                                {showSelects.room && rooms &&
+                                    <SelectItem filterBy="room" preText="" items={rooms} defaultText="בחירת חדר" selectedValue={selectedIds.room} onSelect={handleSelect} />
+                                }
                             </>}
-
                         {!showWeekly &&
                             <>
-                                <IconButton show="grade" icon="fas fa-people-group" text="לשכבה" isChose={showSelects.grade} onClick={handleShowClick} />
-                                <IconButton show="section" icon="fas fa-school" text="לחטיבה" isChose={showSelects.section} onClick={handleShowClick} />
+                                {showSelects.grade && grades &&
+                                    <SelectItem filterBy="grade" preText="" items={grades} defaultText="בחירת שכבה" selectedValue={selectedIds.grade} onSelect={handleSelect} />
+                                }
+                                {showSelects.section && sections &&
+                                    <SelectItem filterBy="section" preText="" items={sections} defaultText="בחירת חטיבה" selectedValue={selectedIds.section} onSelect={handleSelect} />
+                                }
+                                {(showSelects.grade || showSelects.section) && weekDays &&
+                                    <SelectItem filterBy="weekDay" preText="" items={weekDays} defaultText="בחירת יום בשבוע" selectedValue={selectedIds.weekDay} onSelect={handleSelect} moreCss="ms-2" />
+                                }
                             </>}
+                        <FontAwesomeIcon className="my-auto ms-1" icon={showFilertMore ? "fas fa-circle-chevron-up" : "fas fa-circle-chevron-down"} onClick={() => handleFilertMoreClick()} />
                     </div>
                 </div>
-                <div className="input-group mx-auto w-md-50 pt-3">
-                    {/* <FontAwesomeIcon title="החלפה בין הצגת מערכת שבועית/יומית" className="my-auto ms-5" icon={showWeekly ? "fas fa-chevron-up" : "fas fa-chevron-down"} onClick={() => handleShowWeekly()} /> */}
-                    <div className="btn-group" role="group">
-                        <button type="button" className={`btn ${showWeekly ? 'btn-secondary' : 'btn-outline-secondary'}`} onClick={() => handleShowWeekly(true)}>
-                            מערכת שבועית
-                        </button>
-                        <button type="button" className={`btn ${!showWeekly ? 'btn-secondary' : 'btn-outline-secondary'}`} onClick={() => handleShowWeekly(false)}                    >
-                            מערכת יומית
-                        </button>
-                    </div>
-                    {showWeekly &&
-                        <>
-                            {/* <b className="my-auto">מערכת שבועית</b> */}
-                            {showSelects.class && classes &&
-                                <SelectItem filterBy="class" preText="" items={classes} defaultText=" בחירת כיתה" selectedValue={selectedIds.class} onSelect={handleSelect} />
-                            }
-                            {showSelects.teacher && teachers &&
-                                <SelectItem filterBy="teacher" preText="" items={teachers} defaultText="בחירת מורה" selectedValue={selectedIds.teacher} onSelect={handleSelect} />
-                            }
-                            {showSelects.room && rooms &&
-                                <SelectItem filterBy="room" preText="" items={rooms} defaultText="בחירת חדר" selectedValue={selectedIds.room} onSelect={handleSelect} />
-                            }
-                        </>}
-                    {!showWeekly &&
-                        <>
-                            {/* <b className="my-auto">מערכת יומית</b> */}
-                            {showSelects.grade && grades &&
-                                <SelectItem filterBy="grade" preText="" items={grades} defaultText="בחירת שכבה" selectedValue={selectedIds.grade} onSelect={handleSelect} />
-                            }
-                            {showSelects.section && sections &&
-                                <SelectItem filterBy="section" preText="" items={sections} defaultText="בחירת חטיבה" selectedValue={selectedIds.section} onSelect={handleSelect} />
-                            }
-                            {(showSelects.grade || showSelects.section) && weekDays &&
-                                <SelectItem filterBy="weekDay" preText="" items={weekDays} defaultText="בחירת יום בשבוע" selectedValue={selectedIds.weekDay} onSelect={handleSelect} />
-                            }
-                        </>}
-                    <FontAwesomeIcon className="my-auto" icon={showFilertMore ? "fas fa-circle-chevron-up" : "fas fa-circle-chevron-down"} onClick={() => handleFilertMoreClick()} />
-                </div>
-                <div className="mx-auto w-md-50 pt-3">
-                    {showFilertMore &&
-                        <div className="col d-flex ps-0">
-                            <b className="">הצגת:</b>
-                            <CheckboxControls controls={checkboxShowValue} setControls={setCheckboxShowValue} />
-                            <div className="form-check form-switch ms-3 me-0">
-                                <input type="checkbox" id="SwitchFilterSubject" className="form-check-input" checked={showShowAllSubjects} onChange={() => setShowAllSubjects(prev => !prev)}
-                                />
-                                <label htmlFor="SwitchFilterSubject" className="form-check-label">כל המקצועות</label>
+                <div className="row pt-3">
+                    <div className="col col-3"></div>
+                    <div className="col input-group">
+                        {showFilertMore &&
+                            <div className="d-flex ps-0">
+                                <b className="">הצגת:</b>
+                                <CheckboxControls controls={checkboxShowValue} setControls={setCheckboxShowValue} />
+                                <div className="form-check form-switch ms-3 me-0">
+                                    <input type="checkbox" id="SwitchFilterSubject" className="form-check-input" checked={showShowAllSubjects} onChange={() => setShowAllSubjects(prev => !prev)}
+                                    />
+                                    <label htmlFor="SwitchFilterSubject" className="form-check-label">כל המקצועות</label>
+                                </div>
                             </div>
-                        </div>
-                    }
+                        }
+                    </div>
                 </div>
             </div>
             {renderTimetable(selectedIds.class, "class")}

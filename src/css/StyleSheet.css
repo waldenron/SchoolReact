@@ -151,13 +151,19 @@ ul.list-group li:hover {
     .w-md-90 {
         width: 90% !important;
     }
-
+    .max-w-select {
+        max-width: 40%; 
+    }
+    
     .width-third {
         flex: 0 0 calc(33.333% - 1rem);
     }
 
     .width-quater {
         flex: 0 0 calc(25.0% - 1rem);
+    }
+    .width-fifth {
+        flex: 0 0 calc(20.0% - 1rem);
     }
 
     .hideOnLargeScreen {

@@ -151,18 +151,18 @@ export const Header = ({ header, msg }) => {
     )
 };
 
-export function SelectItem({ filterBy, preText, items, defaultText, selectedValue, onSelect }) {
+export function SelectItem({ filterBy, preText, items, defaultText, selectedValue, onSelect, moreCss }) {
     return (
         <>
             <b className="my-auto">{preText}</b>
-            <select className="form-select mx-2" value={selectedValue} onChange={e => onSelect(filterBy, Number(e.target.value))}>
+            <select className={`form-select max-w-select ${moreCss ? moreCss : ""}`} value={selectedValue} onChange={e => onSelect(filterBy, Number(e.target.value))}>
                 <option value="-1" disabled>{defaultText}</option>
                 {items.map(item => (
                     <option key={item.id} value={item.id}>
                         {item.name}
                     </option>
                 ))}
-            </select>
+            </select >
         </>
     );
 }
