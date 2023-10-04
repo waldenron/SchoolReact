@@ -3,7 +3,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { ItemsList, Logo, Header, getHomePageUrl } from "./Common"
 import '../css/StyleSheet.css';
-import '../css/StyleSheet_AY.css';
 import { NavItem } from './Nav';
 
 import { toArchiveText, whatsappStrToHtmlTags } from '../utils/utilityFunctions';

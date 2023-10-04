@@ -10,9 +10,11 @@ import { ItemIcon, getHomePageUrl } from './Common';
 
 export const NavItem = ({ navItem, homePageUrl }) => {
   let link = navItem.link;
-  if (link.includes(".aspx")) link = link.replace(".aspx", "");//***temp*** remove .aspx
+  if (link.includes(".aspx")) link = "/" + link.replace(".aspx", "");//***temp*** remove .aspx
   if (link.includes("?iic=")) link = link.replace("?iic=", "/");//***temp*** 
   if (link.includes(".htm")) link = `${homePageUrl}/${link}`;//***temp*** 
+  link = link.replace("//", "/");
+  
   return (<Link
     className="px-md-3 px-2 text-dark text-decoration-none text-center"
     data-bs-toggle="tooltip"

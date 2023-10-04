@@ -21,13 +21,13 @@ function LesoonDesc({ time, timeslotIndex }) {
 function Lesson({ lessons = [], showSubject, showTeacher, showRoom, showClass }) {
     return (
         <div className="col text-center border border-dark px-0">
-            {lessons.map(({ subject, teacher, room, sClass }, index) => (
+            {lessons.map(({ subject, teacher, room, classesNames }, index) => (
                 <div key={index} className="text-center bg-white" title="">
                     {index > 0 && <hr className="my-1 mx-auto p-0 g-0 w-50" />}
                     {showSubject && subject && <> {subject} <br /> </>}
                     {showTeacher && teacher && <> {teacher} <br /> </>}
-                    {showRoom && room && <> {`[${room}]`} <br /> </>}
-                    {showClass && sClass}
+                    {showClass && classesNames.length > 0 && <> {`{${classesNames}}`} <br /> </>}
+                    {showRoom && room && <> {`[${room}]`}  </>}
                 </div>
             ))}
         </div>
@@ -127,6 +127,10 @@ export default function Schedule() {
 
     const [scheduleItems, setScheduleItems] = useState([]);
 
+    function handleFilertMoreClick() {
+        setFilertMore(!showFilertMore);
+        handleShowClick("teacher");
+    }
     function handleShowClick(item) {
         resetSelectedIds();
         resetShowSelects();
@@ -173,6 +177,19 @@ export default function Schedule() {
                 break;
         }
     }
+    function getFilteredScheduleItems(id, type) {
+        switch (type) {
+            case "class": return scheduleItems.filter(item => item.classesIds.includes(id.toString()));
+            case "teacher": return scheduleItems.filter(item => item.teacher == getNameById(teachers, id));
+            case "room": return scheduleItems.filter(item => item.room == getNameById(rooms, id));
+            default: return [];
+        }
+    }
+    function renderTimetable(id, type) {
+        if (id <= 0) return null;
+        const filteredItems = getFilteredScheduleItems(id, type);
+        return <WeeklyTimetable checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={filteredItems} />;
+    }
 
     useEffect(() => {
         (async () => {
@@ -200,7 +217,7 @@ export default function Schedule() {
             <div className="container-fluid input-group text-center pb-2">
                 <div className="input-group mx-auto w-md-25">
                     {classes && <SelectItem filterBy="class" preText="מערכת שבועית לכיתה" items={classes} defaultText="בחירת כיתה" selectedValue={selectedIds.class} onSelect={handleSelect} />}
-                    <FontAwesomeIcon icon={showFilertMore ? "fas fa-circle-chevron-up" : "fas fa-circle-chevron-down"} className="my-auto mx-1" onClick={() => setFilertMore(!showFilertMore)} />
+                    <FontAwesomeIcon icon={showFilertMore ? "fas fa-circle-chevron-up" : "fas fa-circle-chevron-down"} className="my-auto mx-1" onClick={() => handleFilertMoreClick()} />
                 </div>
             </div>
             {showFilertMore &&
@@ -223,9 +240,9 @@ export default function Schedule() {
                     </div>
                     <CheckboxControls controls={checkboxShowValue} setControls={setCheckboxShowValue} />
                 </div>}
-            {selectedIds.class > 0 && <WeeklyTimetable checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={scheduleItems.filter(item => item.classId == selectedIds.class)} />}
-            {selectedIds.teacher > 0 && <WeeklyTimetable checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={scheduleItems.filter(item => item.teacher == getNameById(teachers, selectedIds.teacher))} />}
-            {selectedIds.room > 0 && <WeeklyTimetable checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={scheduleItems.filter(item => item.room == getNameById(rooms, selectedIds.room))} />}
+            {renderTimetable(selectedIds.class, "class")}
+            {renderTimetable(selectedIds.teacher, "teacher")}
+            {renderTimetable(selectedIds.room, "room")}
         </div>
     )
 }
