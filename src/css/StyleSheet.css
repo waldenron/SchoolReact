@@ -63,10 +63,6 @@ ul.list-group li:hover {
     background-color: #748DA6 !important;
 }
 
-.album-color {
-    color: #e47792
-}
-
 .image-container {
     position: relative;
     padding-top: 100%;

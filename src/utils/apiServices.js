@@ -1,14 +1,23 @@
 const instCode = "1";
 
-export const fetchData = async (API_URL, transformFunction, sortFunction) => {
+export const fetchData = async (API_URL, transformFunction, sortFunction, headers = []) => {
     try {
         const apiUrl = process.env.REACT_APP_API_URL;
+        
+        //Base headers
+        let fetchHeaders = {
+            'Content-Type': 'application/json',
+            'InstCode': instCode
+        };
+
+        // Additional headers provided to the function
+        headers.forEach(header => {
+            fetchHeaders[header.name] = header.value;
+        });
+
         const response = await fetch(`${apiUrl}${API_URL}`, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'InstCode': instCode
-            }
+            headers: fetchHeaders
         });
 
         if (response.status === 404) {

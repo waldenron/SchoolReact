@@ -19,7 +19,8 @@
 }
 
 .card-body {
-    background-color: rgba(255, 255, 255, 0.7); /* semi-transparent white */
+    background-color: rgba(255, 255, 255, 0.7);
+    /* semi-transparent white */
 }
 
 .card-text {
@@ -41,7 +42,15 @@
 .btn-close.btn-lg {
     width: 2.5rem;
     height: 2.5rem;
-    background-color: white;    
-    background-size: 1.5rem 1.5rem; 
+    background-color: white;
+    background-size: 1.5rem 1.5rem;
 }
 
+.album-color {
+    color: #e47792
+}
+
+.selected-album {
+    font-weight: 900;
+    border-bottom: 2px solid #e47792;
+}
