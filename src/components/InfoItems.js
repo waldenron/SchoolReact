@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
-import { ItemsList, Logo, Header, getHomePageUrl } from "./Common"
-import '../css/StyleSheet.css';
+import { ItemsList, getHomePageUrl, LoadingSpinner, NotAllowed } from "./Common"
 import { NavItem } from './Nav';
 
 import { toArchiveText, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
@@ -18,7 +16,7 @@ function InfoNav({ homePageUrl }) {
 
     useEffect(() => {
         (async () => {
-            const fetchedData = await fetchData('/api/InfoLinksItems', null, infoNavSortFunction);
+            const { data: fetchedData, error } = await fetchData('/api/InfoLinksItems', null, infoNavSortFunction);
             setNavItems(fetchedData);
         })();
     }, []);
@@ -90,8 +88,11 @@ const toHtmlElements = (data, homePageUrl) => {
     ));
 };
 
-const InfoItemsPage = () => {
+export default function InfoItemsPage() {
     const { id } = useParams();
+
+    const [loading, setLoading] = useState(true);
+    const [notAlowed, setNotAlowed] = useState(false);
 
     const [homePageUrl, setHomePageUrl] = useState(null);
     const [infoItemCategories, setInfoItemCategories] = useState([]);
@@ -99,15 +100,18 @@ const InfoItemsPage = () => {
 
     useEffect(() => {
         (async () => {
-            const fetchedDataCategories = await fetchData('/api/InfoItemCategories');
+            const { data: fetchedData, error } = await fetchData('/api/InfoItems', infoItemsTransformFunction);
+            if (error && error.message === "Resource not found") setNotAlowed(true);
+            else setInfoItems(fetchedData);
+            
+            const { data: fetchedDataCategories } = await fetchData('/api/InfoItemCategories');
             setInfoItemCategories(fetchedDataCategories);
-
-            const fetchedData = await fetchData('/api/InfoItems', infoItemsTransformFunction);
-            setInfoItems(fetchedData);
-
+            
             const fetchedUrl = await getHomePageUrl();
             setHomePageUrl(fetchedUrl);
         })();
+
+        setLoading(false);
     }, []);
 
     const msg = (
@@ -116,6 +120,9 @@ const InfoItemsPage = () => {
         </div>
     );
     const header = "מידע לתלמידים";
+
+    if (loading) { return <LoadingSpinner />; }
+    if (notAlowed) { return <NotAllowed />; }
     return (
         <>
             {homePageUrl && !id && <ItemsList header={header} msg={msg} items={infoItems.filter(item => item.isShowOnInfoItemsPage == true)} toHtml={(data) => toHtmlElements(data, homePageUrl)} filterCategories={infoItemCategories} />}
@@ -123,5 +130,3 @@ const InfoItemsPage = () => {
         </>
     )
 };
-
-export default InfoItemsPage;

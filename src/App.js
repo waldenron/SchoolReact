@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Route, Routes, Outlet } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
+
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
+import './css/StyleSheet.css';
 
 
-import Nav from "./components/Nav";
-import Row from "./components/Row";
-import InfoItems from './components/InfoItems';
-import ContactPage from './components/Contacts';
-import NotFound from "./components/NotFound";
-import { Logo, getHomePageUrl } from './components/Common';
 import { fetchData } from './utils/apiServices';
 
+import { LoadingSpinner, Logo, getHomePageUrl } from './components/Common';
+import HomePageNav from "./components/Nav";
+import Row from "./components/Row";
+import InfoItems from './components/InfoItems';
+import ContactPage, { InstContactInfoFooter } from './components/Contacts';
+import NotFound from "./components/NotFound";
 
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -26,13 +29,13 @@ const InstFiles = ({ homePageUrl }) => {
 
   useEffect(() => {
     async function loadInstFiles() {
-      const instUtilFiles = await fetchData('/api/InstUtilFiles');
+      const { data: fetchedData, error } = await fetchData('/api/InstUtils');
 
       // Update the favicon
       const link = document.querySelector("link[rel*='icon']") || document.createElement("link");
       link.type = "image/x-icon";
       link.rel = "shortcut icon";
-      link.href = `${homePageUrl}/${instUtilFiles.favicon}`;
+      link.href = `${homePageUrl}/${fetchedData.favicon}`;
 
       document.getElementsByTagName("head")[0].appendChild(link);
 
@@ -40,7 +43,7 @@ const InstFiles = ({ homePageUrl }) => {
       const cssLink = document.createElement("link");
       cssLink.type = "text/css";
       cssLink.rel = "stylesheet";
-      cssLink.href = `${homePageUrl}/${instUtilFiles.cssFile}`;
+      cssLink.href = `${homePageUrl}/${fetchedData.cssFile}`;
       document.getElementsByTagName("head")[0].appendChild(cssLink);
     }
 
@@ -50,18 +53,38 @@ const InstFiles = ({ homePageUrl }) => {
   return null; // this component doesn't render anything visually
 };
 
+function NonHomePageHeader() {
+  const location = useLocation();
+
+  if (location.pathname !== "/") {
+    return <><HomePageNav /><Logo /></>;
+  }
+
+  return null;
+}
+
+function NonHomePageFooter() {
+  const location = useLocation();
+
+  if (location.pathname !== "/") {
+    return <><InstContactInfoFooter /></>;
+  }
+
+  return null;
+}
 function Home({ instDescription }) {
   const [indexHeaderTextItems, setIndexHeaderTextItems] = useState([]);
+
   useEffect(() => {
     (async () => {
-      const fetchedData = await fetchData('/api/IndexHeaderTextItems');
+      const { data: fetchedData, error } = await fetchData('/api/IndexHeaderTextItems');
       setIndexHeaderTextItems(fetchedData);
     })();
   }, []);
-  //console.log(indexHeaderTextItems);
+
   document.title = toPageTitle(instDescription);
   return (
-    indexHeaderTextItems && indexHeaderTextItems.length > 0 &&
+    indexHeaderTextItems &&
     <>
       <div className="container">
         <div className="hideOnLargeScreen">
@@ -79,43 +102,53 @@ function Home({ instDescription }) {
           </div>
         </div>
       </div>
-      <div className="mt-3"><Nav /></div>
+      <div className="mt-3"><HomePageNav /></div>
       <Routes>
         <Route path="/" element={<Row />} />
       </Routes>
     </>
   );
 }
-function App() {
+export default function App() {
+  const [loading, setLoading] = useState(true);
+
   const [instDetails, setInstDetails] = useState(null);
   useEffect(() => {
     (async () => {
-      const fetchedData = await fetchData('/api/InstDetails');
+      const { data: fetchedData, error } = await fetchData('/api/InstDetails');
       setInstDetails(fetchedData);
+
+      setLoading(false);
     })();
   }, []);
 
+  if (loading) { return <LoadingSpinner />; }
   return (
     <div className="container-fluid rounded mt-3 mx-auto">
       {instDetails && <InstFiles homePageUrl={instDetails.homePageUrl} />}
       {instDetails &&
-        <Routes>
-          <Route path="/" element={<Home instDescription={instDetails.description} />} />
+        <>
+          <NonHomePageHeader />
 
-          <Route path="/Row/:id" element={<Row />} />
+          <Routes>
+            <Route path="/" element={<Home instDescription={instDetails.description} />} />
 
-          <Route path="/Courses" element={<Course />} />
-          <Route path="/Courses/:id" element={<Course />} />
-          <Route path="/Calendars" element={<Calendar />} />
-          <Route path="/Calendars/:id" element={<Calendar />} />
-          <Route path="/InfoItems" element={<InfoItems />} />
-          <Route path="/InfoItems/:id" element={<InfoItems />} />
-          <Route path="/Contacts" element={<ContactPage />} />
-          <Route path="/Schedule" element={<Schedule />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>}
+            <Route path="/Row/:id" element={<Row />} />
+
+            <Route path="/Courses" element={<Course />} />
+            <Route path="/Courses/:id" element={<Course />} />
+            <Route path="/Calendars" element={<Calendar />} />
+            <Route path="/Calendars/:id" element={<Calendar />} />
+            <Route path="/InfoItems" element={<InfoItems />} />
+            <Route path="/InfoItems/:id" element={<InfoItems />} />
+            <Route path="/Contacts" element={<ContactPage />} />
+            <Route path="/Schedule" element={<Schedule />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+
+          <NonHomePageFooter />
+        </>
+      }
     </div>
   );
 }
-
-export default App;

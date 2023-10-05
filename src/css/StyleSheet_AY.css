@@ -5,3 +5,9 @@
 .bgLight {
     background-color: #FBEFE5;
 }
+
+.hrFooter {
+    background-color: #343a40;
+    width: 75% !important;
+    margin: auto;
+}

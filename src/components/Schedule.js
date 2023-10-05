@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import { fetchData } from '../utils/apiServices';
-import { IconButton, Header, Logo, SelectItem } from './Common';
+import { IconButton, Header, SelectItem, LoadingSpinner, NotAllowed } from './Common';
 import { getNameById } from '../utils/utilityFunctions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -111,7 +111,7 @@ function DailyTimetable({ checkboxShowValue, lessons, scheduleItems, classes }) 
         <div className="container-fluid pt-3">
             {/* Header row with class names */}
             <div className="row bgLightGray no-gutters sticky-top">
-                <div className="col-1 border border-dark text-center"></div>
+                <div className="col-2 border border-dark text-center"></div>
                 {classes.map(c => (
                     <div key={c.id} className="col border border-dark text-center">
                         <b>{c.name}</b>
@@ -138,6 +138,9 @@ function DailyTimetable({ checkboxShowValue, lessons, scheduleItems, classes }) 
 }
 
 export default function Schedule() {
+    const [loading, setLoading] = useState(true);
+    const [notAlowed, setNotAlowed] = useState(false);
+
     const [lessons, setLessons] = useState([]);
     const [classes, setClasses] = useState([]);
     const [teachers, setTeachers] = useState([]);
@@ -281,34 +284,39 @@ export default function Schedule() {
         (async () => {
             setWeekDays(days.map((day, index) => ({ id: index + 1, name: day })));
 
-            const fetchedDataLessons = await fetchData('/api/Lessons');
+            const { data: fetchedDataSchedule, error } = await fetchData('/api/Schedules');
+            if (error && error.message === "Resource not found") setNotAlowed(true);
+            else setScheduleItems(fetchedDataSchedule);
+
+            const { data: fetchedDataLessons } = await fetchData('/api/Lessons');
             setLessons(fetchedDataLessons);
 
-            const fetchedDataClasses = await fetchData('/api/Classes');
+            const { data: fetchedDataClasses } = await fetchData('/api/Classes');
             setClasses(fetchedDataClasses);
 
-            const fetchedDataGrades = await fetchData('/api/Grades');
+            const { data: fetchedDataGrades } = await fetchData('/api/Grades');
             setGrades(fetchedDataGrades);
 
-            const fetchedDataSections = await fetchData('/api/Sections');
+            const { data: fetchedDataSections } = await fetchData('/api/Sections');
             setSections(fetchedDataSections);
 
-            const fetchedDataTeachers = await fetchData('/api/Teachers');
+            const { data: fetchedDataTeachers } = await fetchData('/api/Teachers');
             setTeachers(fetchedDataTeachers);
 
-            const fetchedDataRooms = await fetchData('/api/Rooms');
+            const { data: fetchedDataRooms } = await fetchData('/api/Rooms');
             setRooms(fetchedDataRooms);
-
-            const fetchedDataSchedule = await fetchData('/api/Schedules');
-            setScheduleItems(fetchedDataSchedule);
 
 
             handleShowClick("class");
+
+            setLoading(false);
         })();
     }, []);
+
+    if (loading) { return <LoadingSpinner />; }
+    if (notAlowed) { return <NotAllowed />; }
     return (
         <div className="container-fluid w-lg-90 pb-5">
-            <Logo />
             <div className="d-inline">
                 <Header header="מערכת השעות" />
             </div>

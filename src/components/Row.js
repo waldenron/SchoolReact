@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom'
 
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { fetchData } from '../utils/apiServices';
-import { Logo, getHomePageUrl } from './Common';
 import { toPageTitle, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
+import { LoadingSpinner, getHomePageUrl } from './Common';
 
 
 const RowDetails = ({ id, rowItems, homePageUrl }) => {
@@ -39,7 +38,7 @@ const RowItem = ({ rowItem, homePageUrl, rowIndex }) => {
         <img className="img-fluid" src={`${homePageUrl}/${rowItem.pic}`} alt={`תמונה בנושא ${rowItem.name}`} />
       </div>
       <div className={`col-md-3 ${rowIndex % 2 === 1 ? "order-md-1" : "order-md-2"}`}>
-        <h3 dangerouslySetInnerHTML={{ __html: header }} />
+        <h3 className="mt-3 mt-sm-0" dangerouslySetInnerHTML={{ __html: header }} />
         <p dangerouslySetInnerHTML={{ __html: shortText }} />
         <Link to={`/Row/${rowItem.id}`} target="_blank"><small className="text-muted">מידע נוסף</small></Link>
       </div>
@@ -59,26 +58,29 @@ const RowItems = ({ rowItems, homePageUrl }) => {
 export default function Row() {
   const { id } = useParams();
 
+  const [loading, setLoading] = useState(true);
+
   const [homePageUrl, setHomePageUrl] = useState(null);
   const [rowItems, setRowItems] = useState([]);
 
   useEffect(() => {
     (async () => {
-      const fetchedData = await fetchData('/api/IndexRowsItems');
+      const { data: fetchedData, error } = await fetchData('/api/IndexRowsItems');
       setRowItems(fetchedData);
 
       const fetchedUrl = await getHomePageUrl();
       setHomePageUrl(fetchedUrl);
     })();
+
+    setLoading(false);
   }, []);
 
+  if (loading) { return <LoadingSpinner />; }
   return (
     <div className="py-3 w-md-75 mx-auto">
       {!id && rowItems.length > 0 && <RowItems rowItems={rowItems} homePageUrl={homePageUrl} />}
       {id && rowItems.length > 0 &&
         <>
-          <Logo />
-          {/* <Header header="מגמות הלימוד" /> */}
           <RowDetails id={id} rowItems={rowItems} homePageUrl={homePageUrl} />
         </>
       }

@@ -1,5 +1,4 @@
-
-const instCode = "1";
+const instCode = "2";
 
 export const fetchData = async (API_URL, transformFunction, sortFunction) => {
     try {
@@ -12,6 +11,10 @@ export const fetchData = async (API_URL, transformFunction, sortFunction) => {
             }
         });
 
+        if (response.status === 404) {
+            throw new Error('Resource not found'); // Specific error for NotFound
+        }
+
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
@@ -19,15 +22,16 @@ export const fetchData = async (API_URL, transformFunction, sortFunction) => {
         let data = await response.json();
 
         // If a transformFunction is provided, transform the data.
-        if (transformFunction) {
-            data = data.map(transformFunction);
-        }
+        if (transformFunction) data = data.map(transformFunction);
 
         // If a sortFunction is provided, sort the data.
-        return sortFunction ? data.sort(sortFunction) : data;
+        if (sortFunction) data = data.sort(sortFunction);
+
+        return { data, error: "none" };
 
     } catch (error) {
         console.error('Fetch error:', error);
-        throw error; // or handle error as appropriate
+        // throw error; // or handle error as appropriate
+        return { data: null, error };
     }
 }

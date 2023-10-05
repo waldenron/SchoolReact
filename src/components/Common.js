@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { fetchData } from '../utils/apiServices';
@@ -7,8 +6,12 @@ import { cleanText, cssStringToObject, toPageTitle } from '../utils/utilityFunct
 
 
 export const getHomePageUrl = async () => {
-    const fetchedData = await fetchData('/api/InstDetails');
+    const { data: fetchedData, error } = await fetchData('/api/InstDetails');
     return fetchedData.homePageUrl;
+};
+export const getInstUtils = async () => {
+    const { data: fetchedData, error } = await fetchData('/api/InstUtils');
+    return fetchedData;
 };
 
 
@@ -103,7 +106,6 @@ export const ItemsList = ({ header, msg, items, toHtml, filterCategories }) => {
 
     return (
         <div className="py-3 w-md-75 mx-auto">
-            <Logo />
             <Header header={header} msg={msg} />
             <SearchBar onSearch={setSearchInput} />
             {filterCategories && <FilterCategories filterCategories={filterCategories} onFilterChange={setActiveFilter} />}
@@ -129,7 +131,7 @@ export const Logo = () => {
     const [instDetails, setInstDetails] = useState();
     useEffect(() => {
         (async () => {
-            const fetchedData = await fetchData('/api/InstDetails');
+            const { data: fetchedData, error } = await fetchData('/api/InstDetails');
             setInstDetails(fetchedData);
         })();
     }, []);
@@ -173,5 +175,22 @@ export function IconButton({ show, icon, text, isChose, onClick }) {
             <FontAwesomeIcon icon={icon} className="mx-1" />
             <span className={`${isChose ? " primarySelected" : ""}`}>{text}</span>
         </span>
+    );
+}
+
+export function LoadingSpinner() {
+    return (
+        <div className="spinner-container">
+            <div className="spinner"></div>
+            Loading...
+        </div>
+    );
+}
+
+export function NotAllowed() {
+    return (
+        <div className="container mx-auto bg-warning">
+            <h2 className="display-4 text-center">עמוד זה אינו פתוח לבית הספר</h2>
+        </div>
     );
 }

@@ -1,51 +1,80 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom'
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './Nav.css';
-
 import { fetchData } from '../utils/apiServices';
-import { ItemIcon, getHomePageUrl } from './Common';
+import { ItemIcon, LoadingSpinner, getHomePageUrl, getInstUtils } from './Common';
 
-export const NavItem = ({ navItem, homePageUrl }) => {
-  let link = navItem.link;
+import './Nav.module.css';
+
+function fixNavLink(link, homePageUrl) {
   if (link.includes(".aspx")) link = "/" + link.replace(".aspx", "");//***temp*** remove .aspx
+  if (link.includes(".Aspx")) link = "/" + link.replace(".Aspx", "");//***temp*** remove .aspx
   if (link.includes("?iic=")) link = link.replace("?iic=", "/");//***temp*** 
   if (link.includes(".htm")) link = `${homePageUrl}/${link}`;//***temp*** 
-  link = link.replace("//", "/");
-  
-  return (<Link
-    className="px-md-3 px-2 text-dark text-decoration-none text-center"
-    data-bs-toggle="tooltip"
-    title={navItem.text}
-    to={link}
-    target={navItem.isLinkNewTab ? '_blank' : '_self'}
-  >
-    <h5 className="d-inline">
-    {<ItemIcon itemIcon={navItem.itemIcon} homePageUrl={homePageUrl} />}
-      {navItem.name && (<span className="mx-1 text-decoration-underline">{navItem.name}</span>)}
-    </h5>
-  </Link>)
+  return link.replace("//", "/");
+}
+
+export const NavItem = ({ navType, navItem, homePageUrl }) => {
+  const link = fixNavLink(navItem.link, homePageUrl);
+  if (navType === "Line")
+    return (
+      <li className="list-group-item rounded-0 border-secondary">
+        <Link to={link} className="nav-link" data-bs-toggle="tooltip" title={navItem.text} target={navItem.isLinkNewTab ? '_blank' : '_self'}      >
+          <ItemIcon itemIcon={navItem.itemIcon} homePageUrl={homePageUrl} />
+          {navItem.name && <span className="mx-1">{navItem.name}</span>}
+        </Link>
+      </li>
+    )
+  else //if (navType === "Buttons")
+    return (
+      <Link to={link} className="px-md-3 px-2 text-dark text-decoration-none text-center" data-bs-toggle="tooltip" title={navItem.text} target={navItem.isLinkNewTab ? '_blank' : '_self'}>
+        <h5 className="d-inline">
+          {<ItemIcon itemIcon={navItem.itemIcon} homePageUrl={homePageUrl} />}
+          {navItem.name && (<span className="mx-1 text-decoration-underline">{navItem.name}</span>)}
+        </h5>
+      </Link>
+    )
 };
+
 export default function Nav() {
+  const [loading, setLoading] = useState(true);
+
   const [homePageUrl, setHomePageUrl] = useState(null);
+  const [navType, setNavType] = useState(null);
   const [navItems, setNavItems] = useState([]);
 
   useEffect(() => {
     (async () => {
-      const fetchedData = await fetchData('/api/NavItems');
+      const { data: fetchedData, error } = await fetchData('/api/NavItems');
       setNavItems(fetchedData);
 
       const fetchedUrl = await getHomePageUrl();
       setHomePageUrl(fetchedUrl);
+
+      const fetchedNavType = await getInstUtils();
+      setNavType(fetchedNavType.navType);
     })();
+
+    setLoading(false);
   }, []);
 
+  if (loading) { return <LoadingSpinner />; }
   return (
-    <div className="d-flex flex-wrap btn-group justify-content-center">
-      {navItems.map((navItem, index) => (
-        <NavItem navItem={navItem} homePageUrl={homePageUrl} key={index} />
-      ))}
-    </div>
+    <>
+      {navType === "Buttons" &&
+        <div className="d-flex flex-wrap btn-group justify-content-center">
+          {navItems.map((navItem, index) => (
+            <NavItem navType={navType} navItem={navItem} homePageUrl={homePageUrl} key={index} />
+          ))}
+        </div>}
+      {navType === "Line" &&
+        <div className="collapse navbar-collapse" id="navbarNav">
+          <ul className="list-group rounded-0 border-secondary navbar-nav">
+            {navItems.map((navItem, index) => (
+              <NavItem navType={navType} navItem={navItem} homePageUrl={homePageUrl} key={index} />
+            ))}
+          </ul>
+        </div>}
+    </>
   );
 }
