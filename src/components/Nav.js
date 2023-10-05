@@ -18,12 +18,12 @@ export const NavItem = ({ navType, navItem, homePageUrl }) => {
   const link = fixNavLink(navItem.link, homePageUrl);
   if (navType === "Line")
     return (
-      <li className="list-group-item rounded-0 border-secondary">
+      // <li className="list-group-item rounded-0 border-secondary">
         <Link to={link} className="nav-link" data-bs-toggle="tooltip" title={navItem.text} target={navItem.isLinkNewTab ? '_blank' : '_self'}      >
           <ItemIcon itemIcon={navItem.itemIcon} homePageUrl={homePageUrl} />
           {navItem.name && <span className="mx-1">{navItem.name}</span>}
         </Link>
-      </li>
+      // </li>
     )
   else //if (navType === "Buttons")
     return (
@@ -42,6 +42,9 @@ export default function Nav() {
   const [homePageUrl, setHomePageUrl] = useState(null);
   const [navType, setNavType] = useState(null);
   const [navItems, setNavItems] = useState([]);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const toggle = () => { setIsOpen(!isOpen); };
 
   useEffect(() => {
     (async () => {
@@ -68,13 +71,21 @@ export default function Nav() {
           ))}
         </div>}
       {navType === "Line" &&
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="list-group rounded-0 border-secondary navbar-nav">
-            {navItems.map((navItem, index) => (
-              <NavItem navType={navType} navItem={navItem} homePageUrl={homePageUrl} key={index} />
-            ))}
-          </ul>
-        </div>}
+        // <div className="collapse navbar-collapse" id="navbarNav">
+        <nav className="navbar navbar-expand-lg navbar-dark py-1 mb-2">
+          <button className="navbar-toggler" type="button" onClick={toggle}
+            // data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className={`collapse navbar-collapse ${isOpen ? 'show' : ''}`} onClick={toggle}>
+            <ul className="list-group rounded-0 border-secondary navbar-nav">
+              {navItems.map((navItem, index) => (
+                <NavItem navType={navType} navItem={navItem} homePageUrl={homePageUrl} key={index} />
+              ))}
+            </ul>
+          </div>
+        </nav>}
     </>
   );
 }

@@ -316,10 +316,8 @@ export default function Schedule() {
     if (loading) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }
     return (
-        <div className="container-fluid w-lg-90 pb-5">
-            <div className="d-inline">
-                <Header header="מערכת השעות" />
-            </div>
+        <div className="py-3 w-lg-90 mx-auto">
+            <Header header="מערכת השעות" />
             <div className="w-md-75 mx-auto">
                 <div className="row">
                     <div className="col col-3"></div>
