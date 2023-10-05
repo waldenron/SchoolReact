@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'
+import { useParams } from 'react-router-dom';
+
 
 import { fetchData } from '../utils/apiServices';
-import { Header, ItemIcon, LoadingSpinner, NotAllowed, getHomePageUrl, getInstUtils } from './Common';
+import { Header, LoadingSpinner, NotAllowed } from './Common';
 
 import '../css/Gallery.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -53,7 +54,12 @@ function PicAlbums({ albums, selectedAlbum, handleOnClickAlbum }) {
         </div>
     );
 }
-function PicGalleryForDir() {
+export function PicGalleryForDir() {
+    const folderId = localStorage.getItem('folderId');
+    
+    let { name: folderName } = useParams();
+    folderName = decodeURIComponent(folderName);
+    
     const [loading, setLoading] = useState(true);
     const [notAlowed, setNotAlowed] = useState(false);
 
@@ -62,7 +68,9 @@ function PicGalleryForDir() {
 
     useEffect(() => {
         (async () => {
-            const { data: fetchedData, error } = await fetchData('/api/DirPics');
+            const additionalHeaders = folderId && [{ name: 'folderId', value: folderId }];
+
+            const { data: fetchedData, error } = await fetchData('/api/PicGalleryForDir', null, null, additionalHeaders);
             if (error && error.message === "Resource not found") setNotAlowed(true);
             else setImages(fetchedData);
         })();
@@ -72,11 +80,12 @@ function PicGalleryForDir() {
 
     if (loading) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }
+    const header = `אלבום תמונות - ${folderName && folderName}`;
     return (
         <div className="container-fluid w-lg-90 pb-5">
-            <Header header="אלבום תמונות" />
-            <div className="row row-cols-1 row-cols-md-3 g-4 pt-3">
-                {images.map((img, index) => (
+            <Header header={header} />
+            <div className="row row-cols-1 row-cols-md-3 g-4 py-3">
+                {images && images.map((img, index) => (
                     <PicImage key={index} img={img} handleOnClickImg={setSelectedImg} />
                 ))}
             </div>
@@ -92,8 +101,7 @@ export default function PicGallery() {
     const [albums, setAlbums] = useState([]);
     const [selectedAlbum, setSelectedAlbum] = useState(null);
 
-    const [images, setImages] = useState([]);
-    const [selectedImg, setSelectedImg] = useState(null);
+    const [folderImages, setFolderImages] = useState([]);
 
     useEffect(() => {
         (async () => {
@@ -107,12 +115,18 @@ export default function PicGallery() {
                 const additionalHeaders = selectedAlbum && [{ name: 'albumId', value: selectedAlbum.id }];
                 const { data: fetchedData, error } = await fetchData('/api/PicGallery', null, null, additionalHeaders);
                 if (error && error.message === "Resource not found") setNotAlowed(true);
-                else setImages(fetchedData);
+                else setFolderImages(fetchedData);
             }
         })();
 
         setLoading(false);
     }, [selectedAlbum]);
+
+    const handleOnClickImg = (folderImage) => {
+        localStorage.setItem('folderId', folderImage.folderId);
+        const folderUrl = `/PicGallery/${encodeURIComponent(`${selectedAlbum.name} - ${folderImage.name}`)}`;
+        window.open(folderUrl, "_blank");
+    };
 
     if (loading) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }
@@ -121,13 +135,11 @@ export default function PicGallery() {
     return (
         <div className="container-fluid w-lg-90 pb-5">
             <Header header={header} />
-            <div className="row row-cols-1 row-cols-md-3 g-4 pt-3">
-                {images && images.map((img, index) => (
-                    <PicImage key={index} img={img} handleOnClickImg={setSelectedImg} />
+            <div className="row row-cols-1 row-cols-md-3 g-4 py-3">
+                {folderImages && folderImages.map((folderImage, index) => (
+                    <PicImage key={index} img={folderImage} handleOnClickImg={handleOnClickImg} />
                 ))}
             </div>
-
-            {selectedImg && <PicModal img={selectedImg} handleOnClickX={setSelectedImg} />}
             <PicAlbums albums={albums} selectedAlbum={selectedAlbum} handleOnClickAlbum={setSelectedAlbum} />
         </div>
     );

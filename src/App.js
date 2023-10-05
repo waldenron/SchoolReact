@@ -21,7 +21,7 @@ import { toPageTitle } from './utils/utilityFunctions';
 import Course from './components/Courses';
 import Calendar from './components/Calendars';
 import Schedule from './components/Schedule';
-import PicGallery from './components/PicGallery';
+import PicGallery, { PicGalleryForDir } from './components/PicGallery';
 library.add(fas)
 
 export const RowContext = React.createContext([]);
@@ -145,6 +145,7 @@ export default function App() {
             <Route path="/Contacts" element={<ContactPage />} />
             <Route path="/Schedule" element={<Schedule />} />
             <Route path="/PicGallery" element={<PicGallery />} />
+            <Route path="/PicGallery/:name" element={<PicGalleryForDir />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
 
