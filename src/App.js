@@ -22,6 +22,7 @@ import Course from './components/Courses';
 import Calendar from './components/Calendars';
 import Schedule from './components/Schedule';
 import PicGallery, { PicGalleryForDir } from './components/PicGallery';
+import Login from './components/Login';
 library.add(fas)
 
 export const RowContext = React.createContext([]);
@@ -146,6 +147,7 @@ export default function App() {
             <Route path="/Schedule" element={<Schedule />} />
             <Route path="/PicGallery" element={<PicGallery />} />
             <Route path="/PicGallery/:name" element={<PicGalleryForDir />} />
+            <Route path="/Login" element={<Login />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
 

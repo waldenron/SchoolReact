@@ -57,3 +57,28 @@ export function getNameById(items, id) {
     const item = items.find(t => t.id === id);
     return item ? item.name : null;
 }
+
+export function setWithExpiry(key, value, timeToLiveMinutes) {
+    const now = new Date();
+    const item = {
+        value: value,
+        expiry: now.getTime() + timeToLiveMinutes * 60 * 1000,
+    }
+    localStorage.setItem(key, JSON.stringify(item));
+}
+
+export function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key);
+
+    if (!itemStr) return null;
+
+    const item = JSON.parse(itemStr);
+    const now = new Date();
+
+    if (now.getTime() > item.expiry) {
+        localStorage.removeItem(key);
+        return null;
+    }
+
+    return item.value;
+}

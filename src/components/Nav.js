@@ -10,7 +10,7 @@ function fixNavLink(link, homePageUrl) {
   if (link.includes(".aspx")) link = "/" + link.replace(".aspx", "");//***temp*** remove .aspx
   if (link.includes(".Aspx")) link = "/" + link.replace(".Aspx", "");//***temp*** remove .aspx
   if (link.includes("?iic=")) link = link.replace("?iic=", "/");//***temp*** 
-  if (link.includes(".htm")) link = `${homePageUrl}/${link}`;//***temp*** 
+  //if (link.includes(".htm")) link = `${homePageUrl}/${link}`;//***temp*** 
   return link.replace("//", "/");
 }
 

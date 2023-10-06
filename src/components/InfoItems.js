@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { ItemsList, getHomePageUrl, LoadingSpinner, NotAllowed } from "./Common"
 import { NavItem } from './Nav';
 
-import { toArchiveText, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
+import { getWithExpiry, toArchiveText, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
 import { fetchData } from '../utils/apiServices';
 import { useParams } from 'react-router-dom';
 
@@ -90,6 +90,7 @@ const toHtmlElements = (data, homePageUrl) => {
 
 export default function InfoItemsPage() {
     const { id } = useParams();
+    const token = getWithExpiry("token");
 
     const [loading, setLoading] = useState(true);
     const [notAlowed, setNotAlowed] = useState(false);
@@ -100,13 +101,15 @@ export default function InfoItemsPage() {
 
     useEffect(() => {
         (async () => {
-            const { data: fetchedData, error } = await fetchData('/api/InfoItems', infoItemsTransformFunction);
+            const additionalHeaders = token ? [{ name: 'token', value: token }] : [];
+            
+            const { data: fetchedData, error } = await fetchData('/api/InfoItems', infoItemsTransformFunction, null, additionalHeaders);
             if (error && error.message === "Resource not found") setNotAlowed(true);
             else setInfoItems(fetchedData);
-            
-            const { data: fetchedDataCategories } = await fetchData('/api/InfoItemCategories');
+
+            const { data: fetchedDataCategories } = await fetchData('/api/InfoItemCategories',null, null, additionalHeaders);
             setInfoItemCategories(fetchedDataCategories);
-            
+
             const fetchedUrl = await getHomePageUrl();
             setHomePageUrl(fetchedUrl);
         })();
