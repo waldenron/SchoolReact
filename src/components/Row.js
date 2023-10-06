@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 
 import { fetchData } from '../utils/apiServices';
 import { toPageTitle, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
-import { LoadingSpinner, getHomePageUrl } from './Common';
+import { LoadingSpinner, ToLink, getHomePageUrl } from './Common';
 
 
 const RowDetails = ({ id, rowItems, homePageUrl }) => {
@@ -40,7 +40,7 @@ const RowItem = ({ rowItem, homePageUrl, rowIndex }) => {
       <div className={`col-md-3 ${rowIndex % 2 === 1 ? "order-md-1" : "order-md-2"}`}>
         <h3 className="mt-3 mt-sm-0" dangerouslySetInnerHTML={{ __html: header }} />
         <p dangerouslySetInnerHTML={{ __html: shortText }} />
-        <Link to={`/Row/${rowItem.id}`} target="_blank"><small className="text-muted">מידע נוסף</small></Link>
+        <ToLink to={`/Row/${rowItem.id}`} target="_blank"><small className="text-muted">מידע נוסף</small></ToLink>
       </div>
     </div>
   )

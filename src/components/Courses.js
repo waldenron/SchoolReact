@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 import '../css/Courses.css';
 // import '../css/Course.css';
 
 import { fetchData } from '../utils/apiServices';
 import { toPageTitle } from '../utils/utilityFunctions';
-import { Header, ItemIcon, LoadingSpinner, Logo, NotAllowed, getHomePageUrl } from './Common';
+import { Header, ItemIcon, LoadingSpinner, Logo, NotAllowed, ToLink, getHomePageUrl } from './Common';
 
 
 const CourseDetails = ({ id, courseItems, homePageUrl }) => {
@@ -36,11 +36,12 @@ const CourseItem = ({ courseItem, homePageUrl }) => {
             </td>
             {/* <td className="col-11"><h5>{courseItem.header}</h5></td> */}
             <td className="col-11 courses">
-                <Link to={`/${"Courses"}/${courseItem.id}`} target="_blank" rel="noopener noreferrer"><h5>{courseItem.header}</h5></Link>
+                <ToLink to={`/${"Courses"}/${courseItem.id}`} target="_blank" rel="noopener noreferrer" ><h5>{courseItem.header}</h5></ToLink>
             </td>
         </tr>
     )
 };
+
 const CourseItems = ({ courseItems, homePageUrl }) => {
     return (
         <table className="table courses coursesTable">

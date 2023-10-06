@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { fetchData } from '../utils/apiServices';
 import { cleanText, cssStringToObject, toPageTitle } from '../utils/utilityFunctions';
+import { Link } from 'react-router-dom';
 
 
 export const getHomePageUrl = async () => {
@@ -176,6 +177,16 @@ export function IconButton({ show, icon, text, isChose, onClick }) {
             <span className={`${isChose ? " primarySelected" : ""}`}>{text}</span>
         </span>
     );
+}
+export function ToLink({ to, ...props }) {
+    const isExternalLink = to.startsWith("http") || to.startsWith("www");
+    if (isExternalLink) {
+        const targetProp = props.target ? {} : { target: "_blank" };
+        const relProp = props.rel ? {} : { rel: "noopener noreferrer" };
+        return <a href={to} {...props} {...targetProp} {...relProp} />;
+    } else {
+        return <Link to={to} {...props} />;
+    }
 }
 
 export function LoadingSpinner() {
