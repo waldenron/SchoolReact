@@ -179,6 +179,7 @@ export function IconButton({ show, icon, text, isChose, onClick }) {
     );
 }
 export function ToLink({ to, ...props }) {
+    //console.log("ToLink: to=", to);
     const isExternalLink = to.startsWith("http") || to.startsWith("www");
     if (isExternalLink) {
         const targetProp = props.target ? {} : { target: "_blank" };
@@ -192,7 +193,7 @@ export function ToLink({ to, ...props }) {
 export function LoadingSpinner() {
     return (
         <div className="spinner-container">
-            <div className="spinner"></div>
+            <div className="spinner mx-2"></div>
             Loading...
         </div>
     );

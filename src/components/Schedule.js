@@ -339,7 +339,7 @@ export default function Schedule() {
                     </div>
                 </div>
                 <div className="row pt-3">
-                    <div className="col col-3 align-self-end">
+                    <div className="col col-3 text-start">
                         <div className="btn-group" role="group">
                             <button type="button" className={`btn ${showWeekly ? 'btn-secondary' : 'btn-outline-secondary'}`} onClick={() => handleShowWeekly(true)}>
                                 מערכת שבועית

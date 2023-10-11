@@ -10,11 +10,12 @@ function fixNavLink(link, homePageUrl) {
   if (link.includes(".Aspx")) link = "/" + link.replace(".Aspx", "");//***temp*** remove .aspx
   if (link.includes("?iic=")) link = link.replace("?iic=", "/");//***temp*** 
   if (link.includes(".htm")) link = `${homePageUrl}/${link}`;//***temp*** 
-  return link.replace("//", "/");
+  return link;//.replace("//", "/");
 }
 
 export const NavItem = ({ navType, navItem, homePageUrl }) => {
-  const link = fixNavLink(navItem.link, homePageUrl);
+  //const link = fixNavLink(navItem.link, homePageUrl);
+  const link = navItem.link;
   if (navType === "Line")
     return (
         <ToLink to={link} className="nav-link" data-bs-toggle="tooltip" title={navItem.text} target={navItem.isLinkNewTab ? '_blank' : '_self'}      >
