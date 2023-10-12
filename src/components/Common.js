@@ -180,6 +180,10 @@ export function IconButton({ show, icon, text, isChose, onClick }) {
 }
 export function ToLink({ to, ...props }) {
     //console.log("ToLink: to=", to);
+    if (typeof to !== 'string') {
+        console.error("The 'to' prop should be a string. Received:", typeof to);
+        return null; // or return a default link or handle it some other way
+    }
     const isExternalLink = to.startsWith("http") || to.startsWith("www");
     if (isExternalLink) {
         const targetProp = props.target ? {} : { target: "_blank" };
