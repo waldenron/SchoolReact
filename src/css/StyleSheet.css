@@ -7,6 +7,9 @@
     font-size: 7pt;
     margin-right: 0.3rem;
 }
+.bullet::before {
+    content: "▪️";
+}
 
 .btn-group-vertical>button {
     margin-bottom: 10px;
@@ -121,7 +124,7 @@ ul.list-group li:hover {
     }
 
     .w-md-40 {
-        width: 39% !important;
+        width: 40% !important;
     }
 
     .w-md-50 {
