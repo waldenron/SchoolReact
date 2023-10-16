@@ -50,46 +50,6 @@ export const FilterButton = ({ item, isActive, onFilter }) => {
         </span>
     );
 }
-export const ItemIcon = ({ itemIcon, homePageUrl }) => {
-    if (itemIcon.type === "fa") {
-        if (itemIcon.style != "")
-            return (<FontAwesomeIcon icon={itemIcon.cssClass} style={cssStringToObject(itemIcon.style)} />);
-        else
-            return (<FontAwesomeIcon icon={itemIcon.cssClass} />);
-    }
-    else if (homePageUrl && itemIcon.type === "img") {
-        return (<img src={`${homePageUrl}/${itemIcon.src}`} />);
-    }
-    else {
-        return (<></>);
-    }
-}
-export function FilterCategories({ filterCategories, onFilterChange, homePageUrl }) {
-    const [activeCategoryId, setActiveCategoryId] = useState(null);
-
-    const handleFilter = (categoryId) => {
-        if (activeCategoryId === categoryId) {
-            // If the category is already active, deactivate it
-            setActiveCategoryId(null);
-            if (onFilterChange) {
-                onFilterChange(null);
-            }
-        } else {
-            setActiveCategoryId(categoryId);
-            if (onFilterChange) {
-                onFilterChange(categoryId);
-            }
-        }
-    };
-
-    return (
-        <div className="d-flex flex-wrap btn-group justify-content-center">
-            {filterCategories.map((item, index) => (
-                <FilterButton item={item} isActive={activeCategoryId === item.id} onFilter={handleFilter} key={index} />))}
-        </div>
-    );
-}
-
 export const ItemsList = ({ header, msg, items, toHtml, filterCategories }) => {
     const [searchInput, setSearchInput] = useState('');
     const [activeFilter, setActiveFilter] = useState(null);
@@ -126,6 +86,49 @@ export const ItemsList = ({ header, msg, items, toHtml, filterCategories }) => {
         </div>
     );
 };
+
+
+export function FilterCategories({ filterCategories, onFilterChange, homePageUrl }) {
+    const [activeCategoryId, setActiveCategoryId] = useState(null);
+
+    const handleFilter = (categoryId) => {
+        if (activeCategoryId === categoryId) {
+            // If the category is already active, deactivate it
+            setActiveCategoryId(null);
+            if (onFilterChange) {
+                onFilterChange(null);
+            }
+        } else {
+            setActiveCategoryId(categoryId);
+            if (onFilterChange) {
+                onFilterChange(categoryId);
+            }
+        }
+    };
+
+    return (
+        <div className="d-flex flex-wrap btn-group justify-content-center">
+            {filterCategories.map((item, index) => (
+                <FilterButton item={item} isActive={activeCategoryId === item.id} onFilter={handleFilter} key={index} />))}
+        </div>
+    );
+}
+export const ItemIcon = ({ itemIcon, homePageUrl }) => {
+    if (itemIcon.type === "fa") {
+        if (itemIcon.style != "")
+            return (<FontAwesomeIcon icon={itemIcon.cssClass} style={cssStringToObject(itemIcon.style)} />);
+        else
+            return (<FontAwesomeIcon icon={itemIcon.cssClass} />);
+    }
+    else if (homePageUrl && itemIcon.type === "img") {
+        return (<img src={`${homePageUrl}/${itemIcon.src}`} />);
+    }
+    else {
+        return (<></>);
+    }
+}
+
+
 
 
 export const Logo = () => {
@@ -178,6 +181,7 @@ export function IconButton({ show, icon, text, isChose, onClick }) {
         </span>
     );
 }
+
 export function ToLink({ to, ...props }) {
     //console.log("ToLink: to=", to);
     if (typeof to !== 'string') {

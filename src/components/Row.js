@@ -55,7 +55,7 @@ const RowItems = ({ rowItems, homePageUrl }) => {
   )
 };
 
-export default function Row() {
+export function Row() {
   const { id } = useParams();
 
   const [loading, setLoading] = useState(true);
@@ -85,5 +85,138 @@ export default function Row() {
         </>
       }
     </div>
+  );
+}
+
+export function PictureSlider() {
+  const [loading, setLoading] = useState(true);
+
+  const [homePageUrl, setHomePageUrl] = useState(null);
+  const [indexPics, setIndexPics] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentSmIndex, setCurrentSmIndex] = useState(0);
+  const [currentIndex1, setCurrentIndex1] = useState(-1);
+  const [currentIndex2, setCurrentIndex2] = useState(-1);
+  const [currentIndex3, setCurrentIndex3] = useState(-1);
+  const [fadeInSm, setFadeInSm] = useState(false);
+  const [fadeInArr, setFadeInArr] = useState([false, false, false]);
+
+  useEffect(() => {
+    (async () => {
+      const { data: fetchedData, error } = await fetchData('/api/IndexPics');
+
+      setIndexPics(fetchedData);
+      setCurrentIndex1(0);
+      setCurrentIndex2(Math.floor(fetchedData.length / 3));
+      setCurrentIndex3(Math.floor(fetchedData.length * 2 / 3));
+
+      const fetchedUrl = await getHomePageUrl();
+      setHomePageUrl(fetchedUrl);
+    })();
+
+    setLoading(false);
+  }, []);
+
+
+
+  // Change currentIndex every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => {
+        return (prevIndex + 1) >= 3 ? 0 : prevIndex + 1;
+      });
+    }, 1000);
+
+    // Clear the interval when the component is unmounted
+    return () => clearInterval(interval);
+  }, [indexPics]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSmIndex((prevIndex) => { return (prevIndex + 1) >= indexPics.length ? 0 : prevIndex + 1; });
+    }, 2000);
+
+    // Clear the interval when the component is unmounted
+    return () => clearInterval(interval);
+  }, [indexPics]);
+
+  useEffect(() => {
+    let fadeInArrCopy = [...fadeInArr];
+    switch (currentIndex % 3) {
+      case 0:
+        setCurrentIndex1((prevIndex) => { return (prevIndex + 1) >= (Math.floor(indexPics.length / 3)) ? 0 : prevIndex + 1; });
+        fadeInArrCopy[0] = true;
+        break;
+      case 1:
+        setCurrentIndex2((prevIndex) => { return (prevIndex + 1) >= (Math.floor(indexPics.length * 2 / 3)) ? (Math.floor(indexPics.length / 3)) : prevIndex + 1; });
+        fadeInArrCopy[1] = true;
+        break;
+      case 2:
+        setCurrentIndex3((prevIndex) => { return (prevIndex + 1) >= indexPics.length ? (Math.floor(indexPics.length * 2 / 3)) : prevIndex + 1; });
+        fadeInArrCopy[2] = true;
+        break;
+    }
+
+    setFadeInArr(fadeInArrCopy);
+
+    const fadeTimeout = setTimeout(() => {
+      let updatedFadeIn = [...fadeInArrCopy];
+      updatedFadeIn[currentIndex % 3] = !updatedFadeIn[currentIndex % 3];
+      setFadeInArr(updatedFadeIn);
+    }, 50);
+    return () => clearTimeout(fadeTimeout);
+
+  }, [currentIndex]);
+
+  useEffect(() => {
+    setFadeInSm(false);
+    const fadeTimeout = setTimeout(() => {
+      setFadeInSm(true);
+    }, 50);
+    return () => clearTimeout(fadeTimeout);
+  }, [currentSmIndex]);
+
+
+  if (loading) { return <LoadingSpinner />; }
+  return (
+    <>
+      {indexPics && indexPics.length > 0 &&
+        <>
+          <div className="hideOnSmallScreen">
+            <div className="d-flex w-md-75 mx-auto">
+              <div className="width-third">
+                <img key={currentSmIndex}
+                  className="img-fluid mb-0"
+                  //className={`img-fluid mb-0 fade-img ${fadeInArr[0] ? 'showing' : ''}`}
+                  src={indexPics[currentIndex1]?.src} alt={indexPics[currentIndex1]?.alt} />
+              </div>
+              <div className="width-third mx-2">
+                <img
+                  key={currentSmIndex}
+                  className="img-fluid mb-0"
+                  //className={`img-fluid mb-0 fade-img ${fadeInArr[1] ? 'showing' : ''}`}
+                  src={indexPics[currentIndex2]?.src} alt={indexPics[currentIndex2]?.alt} />
+              </div>
+              <div className="width-third">
+                <img key={currentSmIndex}
+                  className="img-fluid mb-0"
+                  //className={`img-fluid mb-0 fade-img ${fadeInArr[2] ? 'showing' : ''}`}
+                  src={indexPics[currentIndex3]?.src} alt={indexPics[currentIndex3]?.alt} />
+              </div>
+            </div>
+          </div>
+          <div className="hideOnLargeScreen">
+            <div className="d-flex mx-auto">
+              <img
+                key={currentSmIndex}
+                className={`img-fluid mb-0 fade-img ${fadeInSm ? 'showing' : ''}`}
+                src={indexPics[currentSmIndex]?.src}
+                alt={indexPics[currentSmIndex]?.alt}
+              />
+            </div>
+          </div>
+        </>
+      }
+    </>
   );
 }

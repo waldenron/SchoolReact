@@ -10,7 +10,7 @@ import { fetchData } from './utils/apiServices';
 
 import { LoadingSpinner, Logo, getHomePageUrl } from './components/Common';
 import HomePageNav from "./components/Nav";
-import Row from "./components/Row";
+import {PictureSlider, Row} from "./components/Row";
 import InfoItems from './components/InfoItems';
 import ContactPage, { InstContactInfoFooter } from './components/Contacts';
 import NotFound from "./components/NotFound";
@@ -106,7 +106,8 @@ function Home({ instDescription }) {
       </div>
       <div className="mt-3"><HomePageNav /></div>
       <Routes>
-        <Route path="/" element={<Row />} />
+        {/* <Route path="/" element={<Row />} /> */}
+        <Route path="/" element={<PictureSlider />} />
       </Routes>
     </>
   );

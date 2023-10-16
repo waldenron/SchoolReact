@@ -17,6 +17,29 @@
   animation: spin 1s linear infinite;
 }
 
+.slider-image {
+  transform: translateX(-100%);
+  /* Initially place images to the left, outside of view */
+  transition: transform 1s ease;
+  /* Transition effect */
+}
+
+.slide-in {
+  transform: translateX(0);
+  /* When this class is added, it brings the image into view */
+}
+
+.fade-img {
+  opacity: 0;
+  transition: opacity 1s;
+}
+
+.fade-img.showing {
+  opacity: 1;
+}
+
+
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);

@@ -1,4 +1,4 @@
-const instCode = "1";
+const instCode = "2";
 
 export const fetchData = async (API_URL, transformFunction, sortFunction, headers = []) => {
     try {
@@ -21,7 +21,11 @@ export const fetchData = async (API_URL, transformFunction, sortFunction, header
         });
 
         if (response.status === 404) {
-            throw new Error('Resource not found'); // Specific error for NotFound
+            return { data: null, error: 'Resource not found' };
+        } else if (response.status === 204) {
+            return { data: null, error: 'No content' };
+        } else if (!response.ok) {
+            return { data: null, error: 'Network response was not ok' };
         }
 
         if (!response.ok) {
