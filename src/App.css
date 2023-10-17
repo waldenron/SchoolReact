@@ -17,17 +17,17 @@
   animation: spin 1s linear infinite;
 }
 
-.slider-image {
-  transform: translateX(-100%);
-  /* Initially place images to the left, outside of view */
-  transition: transform 1s ease;
-  /* Transition effect */
+.slide-img {
+  transform: translateX(10%);  /* Slide out to the left by default */
+  opacity: 0;                     /* Make it invisible by default */
+  transition: transform 1s, opacity 1s;
 }
 
-.slide-in {
-  transform: translateX(0);
-  /* When this class is added, it brings the image into view */
+.slide-img.showing {
+  transform: translateX(0);   /* Slide in from left to its original position */
+  opacity: 1;                 /* Make it visible */
 }
+
 
 .fade-img {
   opacity: 0;
@@ -38,7 +38,16 @@
   opacity: 1;
 }
 
+/* Fading animation */
+.fade {
+  animation-name: fade;
+  animation-duration: 1.5s;
+}
 
+@keyframes fade {
+  from {opacity: .4} 
+  to {opacity: 1}
+}
 
 @keyframes spin {
   0% {

@@ -91,15 +91,16 @@ export function Row() {
 export function PictureSlider() {
   const [loading, setLoading] = useState(true);
 
-  const [homePageUrl, setHomePageUrl] = useState(null);
   const [indexPics, setIndexPics] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentSmIndex, setCurrentSmIndex] = useState(0);
   const [currentIndex1, setCurrentIndex1] = useState(-1);
   const [currentIndex2, setCurrentIndex2] = useState(-1);
   const [currentIndex3, setCurrentIndex3] = useState(-1);
+  const [fadeIn1, setFadeIn1] = useState(false);
+  const [fadeIn2, setFadeIn2] = useState(false);
+  const [fadeIn3, setFadeIn3] = useState(false);
   const [fadeInSm, setFadeInSm] = useState(false);
-  const [fadeInArr, setFadeInArr] = useState([false, false, false]);
 
   useEffect(() => {
     (async () => {
@@ -109,21 +110,18 @@ export function PictureSlider() {
       setCurrentIndex1(0);
       setCurrentIndex2(Math.floor(fetchedData.length / 3));
       setCurrentIndex3(Math.floor(fetchedData.length * 2 / 3));
-
-      const fetchedUrl = await getHomePageUrl();
-      setHomePageUrl(fetchedUrl);
     })();
 
     setLoading(false);
   }, []);
 
 
-
+  const loopCircle = 5;//5 - so in each loop it'll wait for 2 seconds after showing the first 3 pics
   // Change currentIndex every second
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => {
-        return (prevIndex + 1) >= 3 ? 0 : prevIndex + 1;
+        return (prevIndex + 1) >= loopCircle ? 0 : prevIndex + 1;
       });
     }, 1000);
 
@@ -141,40 +139,39 @@ export function PictureSlider() {
   }, [indexPics]);
 
   useEffect(() => {
-    let fadeInArrCopy = [...fadeInArr];
-    switch (currentIndex % 3) {
+    switch (currentIndex % loopCircle) {
       case 0:
         setCurrentIndex1((prevIndex) => { return (prevIndex + 1) >= (Math.floor(indexPics.length / 3)) ? 0 : prevIndex + 1; });
-        fadeInArrCopy[0] = true;
         break;
       case 1:
         setCurrentIndex2((prevIndex) => { return (prevIndex + 1) >= (Math.floor(indexPics.length * 2 / 3)) ? (Math.floor(indexPics.length / 3)) : prevIndex + 1; });
-        fadeInArrCopy[1] = true;
         break;
       case 2:
         setCurrentIndex3((prevIndex) => { return (prevIndex + 1) >= indexPics.length ? (Math.floor(indexPics.length * 2 / 3)) : prevIndex + 1; });
-        fadeInArrCopy[2] = true;
         break;
     }
-
-    setFadeInArr(fadeInArrCopy);
-
-    const fadeTimeout = setTimeout(() => {
-      let updatedFadeIn = [...fadeInArrCopy];
-      updatedFadeIn[currentIndex % 3] = !updatedFadeIn[currentIndex % 3];
-      setFadeInArr(updatedFadeIn);
-    }, 50);
-    return () => clearTimeout(fadeTimeout);
-
   }, [currentIndex]);
 
   useEffect(() => {
     setFadeInSm(false);
-    const fadeTimeout = setTimeout(() => {
-      setFadeInSm(true);
-    }, 50);
+    const fadeTimeout = setTimeout(() => { setFadeInSm(true); }, 50);
     return () => clearTimeout(fadeTimeout);
   }, [currentSmIndex]);
+  useEffect(() => {
+    setFadeIn1(false);
+    const fadeTimeout = setTimeout(() => { setFadeIn1(true); }, 50);
+    return () => clearTimeout(fadeTimeout);
+  }, [currentIndex1]);
+  useEffect(() => {
+    setFadeIn2(false);
+    const fadeTimeout = setTimeout(() => { setFadeIn2(true); }, 50);
+    return () => clearTimeout(fadeTimeout);
+  }, [currentIndex2]);
+  useEffect(() => {
+    setFadeIn3(false);
+    const fadeTimeout = setTimeout(() => { setFadeIn3(true); }, 50);
+    return () => clearTimeout(fadeTimeout);
+  }, [currentIndex3]);
 
 
   if (loading) { return <LoadingSpinner />; }
@@ -185,22 +182,19 @@ export function PictureSlider() {
           <div className="hideOnSmallScreen">
             <div className="d-flex w-md-75 mx-auto">
               <div className="width-third">
-                <img key={currentSmIndex}
-                  className="img-fluid mb-0"
-                  //className={`img-fluid mb-0 fade-img ${fadeInArr[0] ? 'showing' : ''}`}
+                <img key={currentIndex1}
+                  className={`img-fluid mb-0 slide-img ${fadeIn1 ? 'showing' : ''}`}
                   src={indexPics[currentIndex1]?.src} alt={indexPics[currentIndex1]?.alt} />
               </div>
               <div className="width-third mx-2">
                 <img
-                  key={currentSmIndex}
-                  className="img-fluid mb-0"
-                  //className={`img-fluid mb-0 fade-img ${fadeInArr[1] ? 'showing' : ''}`}
+                  key={currentIndex2}
+                  className={`img-fluid mb-0 slide-img ${fadeIn2 ? 'showing' : ''}`}
                   src={indexPics[currentIndex2]?.src} alt={indexPics[currentIndex2]?.alt} />
               </div>
               <div className="width-third">
-                <img key={currentSmIndex}
-                  className="img-fluid mb-0"
-                  //className={`img-fluid mb-0 fade-img ${fadeInArr[2] ? 'showing' : ''}`}
+                <img key={currentIndex3}
+                  className={`img-fluid mb-0 slide-img ${fadeIn3 ? 'showing' : ''}`}
                   src={indexPics[currentIndex3]?.src} alt={indexPics[currentIndex3]?.alt} />
               </div>
             </div>
