@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom'
-
+import ReactDOMServer from 'react-dom/server';
 
 import { fetchData } from '../utils/apiServices';
 import { toPageTitle, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
@@ -183,18 +183,18 @@ export function PictureSlider() {
             <div className="d-flex w-md-75 mx-auto">
               <div className="width-third">
                 <img key={currentIndex1}
-                  className={`img-fluid mb-0 slide-img ${fadeIn1 ? 'showing' : ''}`}
+                  className={`img-fluid slide-img ${fadeIn1 ? 'showing' : ''}`}
                   src={indexPics[currentIndex1]?.src} alt={indexPics[currentIndex1]?.alt} />
               </div>
               <div className="width-third mx-2">
                 <img
                   key={currentIndex2}
-                  className={`img-fluid mb-0 slide-img ${fadeIn2 ? 'showing' : ''}`}
+                  className={`img-fluid slide-img ${fadeIn2 ? 'showing' : ''}`}
                   src={indexPics[currentIndex2]?.src} alt={indexPics[currentIndex2]?.alt} />
               </div>
               <div className="width-third">
                 <img key={currentIndex3}
-                  className={`img-fluid mb-0 slide-img ${fadeIn3 ? 'showing' : ''}`}
+                  className={`img-fluid slide-img ${fadeIn3 ? 'showing' : ''}`}
                   src={indexPics[currentIndex3]?.src} alt={indexPics[currentIndex3]?.alt} />
               </div>
             </div>
@@ -203,7 +203,7 @@ export function PictureSlider() {
             <div className="d-flex mx-auto">
               <img
                 key={currentSmIndex}
-                className={`img-fluid mb-0 fade-img ${fadeInSm ? 'showing' : ''}`}
+                className={`img-fluid fade-img ${fadeInSm ? 'showing' : ''}`}
                 src={indexPics[currentSmIndex]?.src}
                 alt={indexPics[currentSmIndex]?.alt}
               />
@@ -213,4 +213,79 @@ export function PictureSlider() {
       }
     </>
   );
+}
+
+export function NavPics() {
+  const [loading, setLoading] = useState(true);
+
+  const [indexNavPics, setIndexNavPics] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data: fetchedData, error } = await fetchData('/api/IndexNavPics');
+
+      setIndexNavPics(fetchedData);
+    })();
+
+    setLoading(false);
+  }, []);
+
+  if (loading) { return <LoadingSpinner />; }
+  return (
+    <>
+      {indexNavPics && indexNavPics.length > 0 &&
+        <div className="row w-md-75 mx-auto">
+          <div className="col-md-4 text-center">
+            <ToLink to={indexNavPics[0].link} target={indexNavPics[0].isLinkNewTab ? '_blank' : '_self'}>
+              <img src={indexNavPics[0].src} className="img-fluid" alt={indexNavPics[0].alt} width="50%" />
+            </ToLink>
+          </div>
+          <div className="col-md-4 text-center">
+            <ToLink to={indexNavPics[1].link} target={indexNavPics[0].isLinkNewTab ? '_blank' : '_self'}>
+              <img src={indexNavPics[1].src} className="img-fluid" alt={indexNavPics[1].alt} width="50%" />
+            </ToLink>
+          </div>
+          <div className="col-md-4 text-center">
+            <ToLink to={indexNavPics[2].link} target={indexNavPics[2].isLinkNewTab ? '_blank' : '_self'}>
+              <img src={indexNavPics[2].src} className="img-fluid" alt={indexNavPics[2].alt} width="50%" />
+            </ToLink>
+          </div>
+        </div>
+      }
+    </>
+  );
+}
+
+export default function IndexPageItems() {
+  const [isSliderEmpty, setIsSliderEmpty] = useState(true);
+  const [isNavPicsEmpty, setIsNavPicsEmpty] = useState(true);
+
+  const sliderRef = useRef(null);
+  const navPicsRef = useRef(null);
+
+  useEffect(() => {
+    const loadingSpinnerHTML = ReactDOMServer.renderToString(<LoadingSpinner />);
+    const innerHTML = sliderRef.current && sliderRef.current.innerHTML.trim();
+    if (sliderRef.current && innerHTML !== loadingSpinnerHTML && innerHTML !== "") {
+      setIsSliderEmpty(false);
+    }
+  }, [sliderRef.current?.innerHTML]);
+
+  useEffect(() => {
+    const loadingSpinnerHTML = ReactDOMServer.renderToString(<LoadingSpinner />);
+    const innerHTML = navPicsRef.current && navPicsRef.current.innerHTML.trim();
+    if (navPicsRef.current && innerHTML !== loadingSpinnerHTML && innerHTML !== "") {
+      setIsNavPicsEmpty(false);
+    }
+  }, [navPicsRef.current?.innerHTML]);
+
+  console.log("isSliderEmpty", isSliderEmpty, "isNavPicsEmpty", isNavPicsEmpty);
+  return (
+    <>
+      <Row />
+      <div ref={sliderRef}><PictureSlider /></div>
+      {!isSliderEmpty && !isNavPicsEmpty && <hr className="hrIndex w-md-75 mx-auto" />}
+      <div ref={navPicsRef}><NavPics /></div>
+    </>
+  )
 }

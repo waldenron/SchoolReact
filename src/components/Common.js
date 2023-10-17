@@ -10,6 +10,12 @@ export const getHomePageUrl = async () => {
     const { data: fetchedData, error } = await fetchData('/api/InstDetails');
     return fetchedData.homePageUrl;
 };
+export const getPageHeader = async ({ pageName }) => {
+    const additionalHeaders = pageName ? [{ name: 'PageName', value: pageName }] : [];
+    const { data: fetchedData, error } = await fetchData('/api/PageHeader', null, null, additionalHeaders);
+
+    return fetchedData.pageHeader;
+};
 export const getInstUtils = async () => {
     const { data: fetchedData, error } = await fetchData('/api/InstUtils');
     return fetchedData;
@@ -50,7 +56,7 @@ export const FilterButton = ({ item, isActive, onFilter }) => {
         </span>
     );
 }
-export const ItemsList = ({ header, msg, items, toHtml, filterCategories }) => {
+export const ItemsList = ({ header, msg, items, toHtml, filterCategories, noItemShow }) => {
     const [searchInput, setSearchInput] = useState('');
     const [activeFilter, setActiveFilter] = useState(null);
 
@@ -65,10 +71,12 @@ export const ItemsList = ({ header, msg, items, toHtml, filterCategories }) => {
         return toHtml(results);
     }, [searchInput, activeFilter, items, toHtml]);
 
+    const hasItems = filteredItems.length > 0;
+    const showNoItem = items.length === 0 && noItemShow;
     return (
         <div className="py-3 w-md-75 mx-auto">
             <Header header={header} msg={msg} />
-            <SearchBar onSearch={setSearchInput} />
+            {!showNoItem && <SearchBar onSearch={setSearchInput} />}
             {filterCategories && <FilterCategories filterCategories={filterCategories} onFilterChange={setActiveFilter} />}
 
             <div id="ListDiv">
@@ -81,7 +89,12 @@ export const ItemsList = ({ header, msg, items, toHtml, filterCategories }) => {
                 </ul>
             </div>
             <div className="container">
-                <p className="text-center">סה"כ: <span>{filteredItems.length}</span> פריטים בחתך</p>
+                {hasItems && <p className="text-center">סה"כ: {filteredItems.length} פריטים בחתך</p>}
+                {!hasItems && !showNoItem && <p className="text-center my-3 fw-bold">אין פריטים העונים לחתך</p>}
+                {showNoItem && <p className="text-center h3 my-5">
+                    <FontAwesomeIcon icon="fas fa-times-circle" className="text-danger me-2" />
+                    אין פריטים מתאימים
+                </p>}
             </div>
         </div>
     );
@@ -107,7 +120,7 @@ export function FilterCategories({ filterCategories, onFilterChange, homePageUrl
     };
 
     return (
-        <div className="d-flex flex-wrap btn-group justify-content-center">
+        <div className="d-flex flex-wrap btn-group justify-content-center my-1">
             {filterCategories.map((item, index) => (
                 <FilterButton item={item} isActive={activeCategoryId === item.id} onFilter={handleFilter} key={index} />))}
         </div>

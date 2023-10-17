@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { ItemsList, getHomePageUrl, LoadingSpinner, NotAllowed } from "./Common"
+import { ItemsList, getHomePageUrl, LoadingSpinner, NotAllowed, getPageHeader } from "./Common"
 import { NavItem } from './Nav';
 
 import { getWithExpiry, toArchiveText, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
@@ -96,22 +96,26 @@ export default function InfoItemsPage() {
     const [notAlowed, setNotAlowed] = useState(false);
 
     const [homePageUrl, setHomePageUrl] = useState(null);
+    const [pageHeader, setPageHeader] = useState(null);
     const [infoItemCategories, setInfoItemCategories] = useState([]);
     const [infoItems, setInfoItems] = useState([]);
 
     useEffect(() => {
         (async () => {
             const additionalHeaders = token ? [{ name: 'token', value: token }] : [];
-            
+
             const { data: fetchedData, error } = await fetchData('/api/InfoItems', infoItemsTransformFunction, null, additionalHeaders);
             if (error && error.message === "Resource not found") setNotAlowed(true);
             else setInfoItems(fetchedData);
 
-            const { data: fetchedDataCategories } = await fetchData('/api/InfoItemCategories',null, null, additionalHeaders);
+            const { data: fetchedDataCategories } = await fetchData('/api/InfoItemCategories', null, null, additionalHeaders);
             setInfoItemCategories(fetchedDataCategories);
 
             const fetchedUrl = await getHomePageUrl();
             setHomePageUrl(fetchedUrl);
+
+            const fetchedPageHeader = await getPageHeader({ pageName: "InfoItems" });
+            setPageHeader(fetchedPageHeader);
         })();
 
         setLoading(false);
@@ -122,14 +126,15 @@ export default function InfoItemsPage() {
             <InfoNav homePageUrl={homePageUrl} />
         </div>
     );
-    const header = "מידע לתלמידים";
+    const infoItemCategoryName = infoItemCategories && infoItemCategories.length > 0 ? infoItemCategories.find(item => item.id == id)?.name : "";
+    const header = pageHeader && (pageHeader + (id && infoItemCategoryName ? " - " + infoItemCategoryName : ""));
 
     if (loading) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }
     return (
         <>
             {homePageUrl && !id && <ItemsList header={header} msg={msg} items={infoItems.filter(item => item.isShowOnInfoItemsPage == true)} toHtml={(data) => toHtmlElements(data, homePageUrl)} filterCategories={infoItemCategories} />}
-            {homePageUrl && id && <ItemsList header={header} msg={msg} items={infoItems.filter(item => item.category == id)} toHtml={(data) => toHtmlElements(data, homePageUrl)} />}
+            {homePageUrl && id && <ItemsList header={header} msg={msg} items={infoItems.filter(item => item.category == id)} toHtml={(data) => toHtmlElements(data, homePageUrl)} noItemShow="true" />}
         </>
     )
 };
