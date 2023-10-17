@@ -220,6 +220,13 @@ export function NavPics() {
 
   const [indexNavPics, setIndexNavPics] = useState([]);
 
+  const IndexNavPic = (item) => {
+    return (
+      <ToLink to={item.link} target={item.isLinkNewTab ? '_blank' : '_self'}>
+        <img src={item.src} className="img-fluid" alt={item.alt} width="50%" />
+      </ToLink>)
+  };
+
   useEffect(() => {
     (async () => {
       const { data: fetchedData, error } = await fetchData('/api/IndexNavPics');
@@ -236,19 +243,13 @@ export function NavPics() {
       {indexNavPics && indexNavPics.length > 0 &&
         <div className="row w-md-75 mx-auto">
           <div className="col-md-4 text-center">
-            <ToLink to={indexNavPics[0].link} target={indexNavPics[0].isLinkNewTab ? '_blank' : '_self'}>
-              <img src={indexNavPics[0].src} className="img-fluid" alt={indexNavPics[0].alt} width="50%" />
-            </ToLink>
+            {IndexNavPic(indexNavPics[0])}
           </div>
           <div className="col-md-4 text-center">
-            <ToLink to={indexNavPics[1].link} target={indexNavPics[0].isLinkNewTab ? '_blank' : '_self'}>
-              <img src={indexNavPics[1].src} className="img-fluid" alt={indexNavPics[1].alt} width="50%" />
-            </ToLink>
+            {IndexNavPic(indexNavPics[1])}
           </div>
           <div className="col-md-4 text-center">
-            <ToLink to={indexNavPics[2].link} target={indexNavPics[2].isLinkNewTab ? '_blank' : '_self'}>
-              <img src={indexNavPics[2].src} className="img-fluid" alt={indexNavPics[2].alt} width="50%" />
-            </ToLink>
+            {IndexNavPic(indexNavPics[2])}
           </div>
         </div>
       }

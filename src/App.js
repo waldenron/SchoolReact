@@ -18,7 +18,7 @@ import NotFound from "./components/NotFound";
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { toPageTitle } from './utils/utilityFunctions';
-import Course from './components/Courses';
+import CoursePage from './components/Courses';
 import Calendar from './components/Calendars';
 import Schedule from './components/Schedule';
 import PicGallery, { PicGalleryForDir } from './components/PicGallery';
@@ -137,8 +137,8 @@ export default function App() {
 
             <Route path="/Row/:id" element={<Row />} />
 
-            <Route path="/Courses" element={<Course />} />
-            <Route path="/Courses/:id" element={<Course />} />
+            <Route path="/Courses" element={<CoursePage />} />
+            <Route path="/Courses/:id" element={<CoursePage />} />
             <Route path="/Calendars" element={<Calendar />} />
             <Route path="/Calendars/:id" element={<Calendar />} />
             <Route path="/InfoItems" element={<InfoItems />} />

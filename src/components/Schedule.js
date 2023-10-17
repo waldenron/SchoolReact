@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import { fetchData } from '../utils/apiServices';
-import { IconButton, Header, SelectItem, LoadingSpinner, NotAllowed } from './Common';
+import { IconButton, Header, SelectItem, LoadingSpinner, NotAllowed, getPageHeader } from './Common';
 import { getNameById } from '../utils/utilityFunctions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -18,6 +18,7 @@ function LesonDesc({ time, number }) {
         </div>
     )
 }
+
 function Lesson({ lessons = [], showSubject, showTeacher, showRoom, showClass }) {
     return (
         <div className="col text-center border border-dark px-0">
@@ -68,8 +69,6 @@ function CheckboxControls({ controls, setControls }) {
 }
 
 
-
-
 function WeeklyTimetable({ checkboxShowValue, lessons, scheduleItems }) {
 
     const { showSubject, showTeacher, showRoom, showClass } = checkboxShowValue;
@@ -103,7 +102,6 @@ function WeeklyTimetable({ checkboxShowValue, lessons, scheduleItems }) {
         </div>
     );
 }
-
 function DailyTimetable({ checkboxShowValue, lessons, scheduleItems, classes }) {
     const { showSubject, showTeacher, showRoom, showClass } = checkboxShowValue;
 
@@ -140,6 +138,8 @@ function DailyTimetable({ checkboxShowValue, lessons, scheduleItems, classes }) 
 export default function Schedule() {
     const [loading, setLoading] = useState(true);
     const [notAlowed, setNotAlowed] = useState(false);
+
+    const [pageHeader, setPageHeader] = useState(null);
 
     const [lessons, setLessons] = useState([]);
     const [classes, setClasses] = useState([]);
@@ -309,15 +309,19 @@ export default function Schedule() {
 
             handleShowClick("class");
 
-            setLoading(false);
+            const fetchedPageHeader = await getPageHeader({ pageName: "Schedule" });
+            setPageHeader(fetchedPageHeader);
+
         })();
+
+        setLoading(false);
     }, []);
 
     if (loading) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }
     return (
         <div className="py-3 w-lg-90 mx-auto">
-            <Header header="מערכת השעות" />
+            <Header header={pageHeader} />
             <div className="w-md-75 mx-auto">
                 <div className="row">
                     <div className="col col-3"></div>

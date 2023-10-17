@@ -127,7 +127,7 @@ export default function InfoItemsPage() {
         </div>
     );
     const infoItemCategoryName = infoItemCategories && infoItemCategories.length > 0 ? infoItemCategories.find(item => item.id == id)?.name : "";
-    const header = pageHeader && (pageHeader + (id && infoItemCategoryName ? " - " + infoItemCategoryName : ""));
+    const header = pageHeader && (pageHeader + (id && infoItemCategoryName ? " - <span class='fw-bolder'>" + infoItemCategoryName + "</span>" : ""));
 
     if (loading) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }

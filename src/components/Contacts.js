@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { fetchData } from '../utils/apiServices';
-import { ItemsList, LoadingSpinner, NotAllowed } from "./Common"
+import { ItemsList, LoadingSpinner, NotAllowed, getPageHeader } from "./Common"
 
 //InstContactInfo
 const InstContactInfo = () => {
@@ -69,6 +69,8 @@ export default function ContactPage() {
     const [loading, setLoading] = useState(true);
     const [notAlowed, setNotAlowed] = useState(false);
 
+    const [pageHeader, setPageHeader] = useState(null);
+
     const [contacts, setContacts] = useState([]);
 
     useEffect(() => {
@@ -76,13 +78,16 @@ export default function ContactPage() {
             const { data: fetchedData, error } = await fetchData('/api/Contacts', contactsTransformFunction, contactsSortFunction);
             if (error && error.message === "Resource not found") setNotAlowed(true);
             else setContacts(fetchedData);
+
+            const fetchedPageHeader = await getPageHeader({ pageName: "Contacts" });
+            setPageHeader(fetchedPageHeader);
         })();
 
         setLoading(false);
     }, []);
 
     const msg = <InstContactInfo />;
-    const header = "יצירת קשר";
+    const header = pageHeader;
 
     if (loading) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }

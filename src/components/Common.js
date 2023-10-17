@@ -164,7 +164,7 @@ export const Header = ({ header, msg, divCss }) => {
     if (header) document.title = toPageTitle(header);
     return (
         <div className={divCss ? divCss : ""}>
-            {header && <h3 className="d-inline">{header}</h3>}
+            {header && <h3 className="d-inline" dangerouslySetInnerHTML={{ __html: header }} />}
             {msg && <h5 className="d-flex-inline mx-auto">{msg}</h5>}
         </div>
     )

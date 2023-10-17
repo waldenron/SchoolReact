@@ -6,7 +6,7 @@ import '../css/Courses.css';
 
 import { fetchData } from '../utils/apiServices';
 import { toPageTitle } from '../utils/utilityFunctions';
-import { Header, ItemIcon, LoadingSpinner, Logo, NotAllowed, ToLink, getHomePageUrl } from './Common';
+import { Header, ItemIcon, LoadingSpinner, Logo, NotAllowed, ToLink, getHomePageUrl, getPageHeader } from './Common';
 
 
 const CourseDetails = ({ id, courseItems, homePageUrl }) => {
@@ -54,13 +54,15 @@ const CourseItems = ({ courseItems, homePageUrl }) => {
     )
 };
 
-export default function Course() {
+export default function CoursePage() {
     const { id } = useParams();
 
     const [loading, setLoading] = useState(true);
     const [notAlowed, setNotAlowed] = useState(false);
 
     const [homePageUrl, setHomePageUrl] = useState(null);
+    const [pageHeader, setPageHeader] = useState(null);
+    
     const [courseItems, setCourseItems] = useState([]);
 
     useEffect(() => {
@@ -71,6 +73,9 @@ export default function Course() {
 
             const fetchedUrl = await getHomePageUrl();
             setHomePageUrl(fetchedUrl);
+
+            const fetchedPageHeader = await getPageHeader({ pageName: "Courses" });
+            setPageHeader(fetchedPageHeader);
         })();
 
         setLoading(false);
@@ -78,9 +83,11 @@ export default function Course() {
 
     if (loading) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }
+
+    const header = pageHeader;
     return (
         <div className="py-3 w-md-75 mx-auto">
-            <Header header="מגמות הלימוד" />
+            <Header header={header} />
             {!id && courseItems.length > 0 && <CourseItems courseItems={courseItems} homePageUrl={homePageUrl} />}
             {id && courseItems.length > 0 && <CourseDetails id={id} courseItems={courseItems} homePageUrl={homePageUrl} />}
         </div>
