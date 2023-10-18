@@ -20,6 +20,10 @@ export const getInstUtils = async () => {
     const { data: fetchedData, error } = await fetchData('/api/InstUtils');
     return fetchedData;
 };
+export const getInstParams = async () => {
+    const { data: fetchedData, error } = await fetchData('/api/InstParams');
+    return fetchedData;
+};
 
 
 export const SearchBar = ({ onSearch }) => {

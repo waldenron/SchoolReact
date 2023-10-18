@@ -116,9 +116,9 @@ export default function InfoItemsPage() {
 
             const fetchedPageHeader = await getPageHeader({ pageName: "InfoItems" });
             setPageHeader(fetchedPageHeader);
-        })();
 
-        setLoading(false);
+            setLoading(false);
+        })();
     }, []);
 
     const msg = (

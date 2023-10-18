@@ -76,9 +76,9 @@ export default function CoursePage() {
 
             const fetchedPageHeader = await getPageHeader({ pageName: "Courses" });
             setPageHeader(fetchedPageHeader);
+            
+            setLoading(false);
         })();
-
-        setLoading(false);
     }, []);
 
     if (loading) { return <LoadingSpinner />; }

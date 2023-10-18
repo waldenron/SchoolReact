@@ -19,9 +19,9 @@ export default function Calendar() {
             const { data: fetchedData, error } = await fetchData('/api/Calendars');
             if (error.message === "Resource not found") setNotAlowed(true);
             else setCalendarItems(fetchedData);
-        })();
 
-        setLoading(false);
+            setLoading(false);
+        })();
     }, []);
 
     const iframeSrc = useMemo(() => {

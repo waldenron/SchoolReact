@@ -56,10 +56,10 @@ function PicAlbums({ albums, selectedAlbum, handleOnClickAlbum }) {
 }
 export function PicGalleryForDir() {
     const folderId = localStorage.getItem('folderId');
-    
+
     let { name: folderName } = useParams();
     folderName = decodeURIComponent(folderName);
-    
+
     const [loading, setLoading] = useState(true);
     const [notAlowed, setNotAlowed] = useState(false);
 
@@ -73,9 +73,9 @@ export function PicGalleryForDir() {
             const { data: fetchedData, error } = await fetchData('/api/PicGalleryForDir', null, null, additionalHeaders);
             if (error && error.message === "Resource not found") setNotAlowed(true);
             else setImages(fetchedData);
-        })();
 
-        setLoading(false);
+            setLoading(false);
+        })();
     }, []);
 
     if (loading) { return <LoadingSpinner />; }
@@ -117,9 +117,9 @@ export default function PicGallery() {
                 if (error && error.message === "Resource not found") setNotAlowed(true);
                 else setFolderImages(fetchedData);
             }
-        })();
 
-        setLoading(false);
+            setLoading(false);
+        })();
     }, [selectedAlbum]);
 
     const handleOnClickImg = (folderImage) => {
@@ -128,7 +128,7 @@ export default function PicGallery() {
         window.open(folderUrl, "_blank");
     };
 
-    if (loading) { return <LoadingSpinner />; }
+    if (loading || !folderImages || folderImages.length === 0) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }
 
     const header = `אלבום תמונות - ${selectedAlbum && selectedAlbum.name}`;

@@ -70,9 +70,9 @@ export function Row() {
 
       const fetchedUrl = await getHomePageUrl();
       setHomePageUrl(fetchedUrl);
-    })();
 
-    setLoading(false);
+      setLoading(false);
+    })();
   }, []);
 
   if (loading) { return <LoadingSpinner />; }
@@ -110,9 +110,9 @@ export function PictureSlider() {
       setCurrentIndex1(0);
       setCurrentIndex2(Math.floor(fetchedData.length / 3));
       setCurrentIndex3(Math.floor(fetchedData.length * 2 / 3));
-    })();
 
-    setLoading(false);
+      setLoading(false);
+    })();
   }, []);
 
 
@@ -232,9 +232,9 @@ export function NavPics() {
       const { data: fetchedData, error } = await fetchData('/api/IndexNavPics');
 
       setIndexNavPics(fetchedData);
-    })();
 
-    setLoading(false);
+      setLoading(false);
+    })();
   }, []);
 
   if (loading) { return <LoadingSpinner />; }

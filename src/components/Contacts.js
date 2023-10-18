@@ -81,9 +81,9 @@ export default function ContactPage() {
 
             const fetchedPageHeader = await getPageHeader({ pageName: "Contacts" });
             setPageHeader(fetchedPageHeader);
+            
+            setLoading(false);
         })();
-
-        setLoading(false);
     }, []);
 
     const msg = <InstContactInfo />;
