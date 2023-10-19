@@ -280,7 +280,6 @@ export default function IndexPageItems() {
     }
   }, [navPicsRef.current?.innerHTML]);
 
-  console.log("isSliderEmpty", isSliderEmpty, "isNavPicsEmpty", isNavPicsEmpty);
   return (
     <>
       <Row />

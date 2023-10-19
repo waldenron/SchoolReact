@@ -1,10 +1,10 @@
+
 .spinner-container {
   direction: ltr;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  /* It will take full viewport height */
   font-family: Arial, sans-serif;
 }
 
@@ -18,14 +18,18 @@
 }
 
 .slide-img {
-  transform: translateX(10%);  /* Slide out to the left by default */
-  opacity: 0;                     /* Make it invisible by default */
+  transform: translateX(10%);
+  /* Slide out to the left by default */
+  opacity: 0;
+  /* Make it invisible by default */
   transition: transform 1s, opacity 1s;
 }
 
 .slide-img.showing {
-  transform: translateX(0);   /* Slide in from left to its original position */
-  opacity: 1;                 /* Make it visible */
+  transform: translateX(0);
+  /* Slide in from left to its original position */
+  opacity: 1;
+  /* Make it visible */
 }
 
 
@@ -45,8 +49,13 @@
 }
 
 @keyframes fade {
-  from {opacity: .4} 
-  to {opacity: 1}
+  from {
+    opacity: .4
+  }
+
+  to {
+    opacity: 1
+  }
 }
 
 @keyframes spin {

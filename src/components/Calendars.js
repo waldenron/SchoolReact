@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom'
 
 import { fetchData } from '../utils/apiServices';
-import { FilterCategories, Header, LoadingSpinner, NotAllowed } from './Common';
+import { Header, LoadingSpinner, NotAllowed } from './Common';
+import { FilterCategories } from './ItemsList';
 
 
 export default function Calendar() {

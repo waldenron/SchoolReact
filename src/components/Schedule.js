@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import { fetchData } from '../utils/apiServices';
-import { IconButton, Header, SelectItem, LoadingSpinner, NotAllowed, getPageHeader } from './Common';
+import { IconButton, Header, SelectItems, LoadingSpinner, NotAllowed, getPageHeader } from './Common';
 import { getNameById } from '../utils/utilityFunctions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -357,25 +357,25 @@ export default function Schedule() {
                         {showWeekly &&
                             <>
                                 {showSelects.class && classes &&
-                                    <SelectItem filterBy="class" preText="" items={classes} defaultText=" בחירת כיתה" selectedValue={selectedIds.class} onSelect={handleSelect} />
+                                    <SelectItems filterBy="class" preText="" items={classes} defaultText=" בחירת כיתה" selectedValue={selectedIds.class} onSelect={handleSelect} />
                                 }
                                 {showSelects.teacher && teachers &&
-                                    <SelectItem filterBy="teacher" preText="" items={teachers} defaultText="בחירת מורה" selectedValue={selectedIds.teacher} onSelect={handleSelect} />
+                                    <SelectItems filterBy="teacher" preText="" items={teachers} defaultText="בחירת מורה" selectedValue={selectedIds.teacher} onSelect={handleSelect} />
                                 }
                                 {showSelects.room && rooms &&
-                                    <SelectItem filterBy="room" preText="" items={rooms} defaultText="בחירת חדר" selectedValue={selectedIds.room} onSelect={handleSelect} />
+                                    <SelectItems filterBy="room" preText="" items={rooms} defaultText="בחירת חדר" selectedValue={selectedIds.room} onSelect={handleSelect} />
                                 }
                             </>}
                         {!showWeekly &&
                             <>
                                 {showSelects.grade && grades &&
-                                    <SelectItem filterBy="grade" preText="" items={grades} defaultText="בחירת שכבה" selectedValue={selectedIds.grade} onSelect={handleSelect} />
+                                    <SelectItems filterBy="grade" preText="" items={grades} defaultText="בחירת שכבה" selectedValue={selectedIds.grade} onSelect={handleSelect} />
                                 }
                                 {showSelects.section && sections &&
-                                    <SelectItem filterBy="section" preText="" items={sections} defaultText="בחירת חטיבה" selectedValue={selectedIds.section} onSelect={handleSelect} />
+                                    <SelectItems filterBy="section" preText="" items={sections} defaultText="בחירת חטיבה" selectedValue={selectedIds.section} onSelect={handleSelect} />
                                 }
                                 {(showSelects.grade || showSelects.section) && weekDays &&
-                                    <SelectItem filterBy="weekDay" preText="" items={weekDays} defaultText="בחירת יום בשבוע" selectedValue={selectedIds.weekDay} onSelect={handleSelect} moreCss="ms-2" />
+                                    <SelectItems filterBy="weekDay" preText="" items={weekDays} defaultText="בחירת יום בשבוע" selectedValue={selectedIds.weekDay} onSelect={handleSelect} moreCss="ms-2" />
                                 }
                             </>}
                         <FontAwesomeIcon className="my-auto ms-1" icon={showFilertMore ? "fas fa-circle-chevron-up" : "fas fa-circle-chevron-down"} onClick={() => handleFilertMoreClick()} />

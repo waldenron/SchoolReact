@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { fetchData } from '../utils/apiServices';
-import { ItemsList, LoadingSpinner, NotAllowed, getPageHeader } from "./Common"
+import { LoadingSpinner, NotAllowed, getPageHeader } from "./Common"
+import { ItemsList } from './ItemsList';
+
 
 //InstContactInfo
 const InstContactInfo = () => {
@@ -81,7 +83,7 @@ export default function ContactPage() {
 
             const fetchedPageHeader = await getPageHeader({ pageName: "Contacts" });
             setPageHeader(fetchedPageHeader);
-            
+
             setLoading(false);
         })();
     }, []);

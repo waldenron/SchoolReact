@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
-import { ItemsList, getHomePageUrl, LoadingSpinner, NotAllowed, getPageHeader } from "./Common"
+import { getHomePageUrl, LoadingSpinner, NotAllowed, getPageHeader, SelectItems } from "./Common"
+import { ItemsList } from './ItemsList';
 import { NavItem } from './Nav';
 
 import { getWithExpiry, toArchiveText, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
@@ -97,6 +98,8 @@ export default function InfoItemsPage() {
 
     const [homePageUrl, setHomePageUrl] = useState(null);
     const [pageHeader, setPageHeader] = useState(null);
+    const [grades, setGrades] = useState([]);
+    const [selectedGrade, setSelectedGrade] = useState(-1);
     const [infoItemCategories, setInfoItemCategories] = useState([]);
     const [infoItems, setInfoItems] = useState([]);
 
@@ -111,6 +114,9 @@ export default function InfoItemsPage() {
             const { data: fetchedDataCategories } = await fetchData('/api/InfoItemCategories', null, null, additionalHeaders);
             setInfoItemCategories(fetchedDataCategories);
 
+            const { data: fetchedDataGrades } = await fetchData('/api/Grades');
+            setGrades(fetchedDataGrades);
+
             const fetchedUrl = await getHomePageUrl();
             setHomePageUrl(fetchedUrl);
 
@@ -121,20 +127,32 @@ export default function InfoItemsPage() {
         })();
     }, []);
 
-    const msg = (
-        <div className="d-flex flex-wrap btn-group justify-content-end">
-            <InfoNav homePageUrl={homePageUrl} />
-        </div>
-    );
+    if (notAlowed) { return <NotAllowed />; }
+    if (loading) { return <LoadingSpinner />; }
+
+    //Show InfoNav only on a not filtered page
+    const msg =
+        !id &&
+        <>
+            <div className="d-flex flex-wrap btn-group justify-content-end">
+                <InfoNav homePageUrl={homePageUrl} />
+            </div>
+            {grades && <div className="d-flex w-md-50">
+                <SelectItems filterBy="grade" preText="הצגת מידע הנוגע לשכבה - " items={grades} defaultText="כל השכבות" selectedValue={selectedGrade} onSelect={(_, value) => setSelectedGrade(value)} isChoosableDefault="true" />
+            </div>
+            }
+        </>
     const infoItemCategoryName = infoItemCategories && infoItemCategories.length > 0 ? infoItemCategories.find(item => item.id == id)?.name : "";
     const header = pageHeader && (pageHeader + (id && infoItemCategoryName ? " - <span class='fw-bolder'>" + infoItemCategoryName + "</span>" : ""));
-
-    if (loading) { return <LoadingSpinner />; }
-    if (notAlowed) { return <NotAllowed />; }
+    const filterCategories = infoItemCategories.filter(item => item.isShowOnInfoItemsPage === true);
+    let infoItemsToShow = !id ?
+        infoItems.filter(item => item.isShowOnInfoItemsPage == true)
+        : infoItems.filter(item => item.category == id);
+    if (selectedGrade != -1) infoItemsToShow = infoItemsToShow.filter(item => item.grades === "" || item.grades.includes(selectedGrade));
     return (
-        <>
-            {homePageUrl && !id && <ItemsList header={header} msg={msg} items={infoItems.filter(item => item.isShowOnInfoItemsPage == true)} toHtml={(data) => toHtmlElements(data, homePageUrl)} filterCategories={infoItemCategories} />}
-            {homePageUrl && id && <ItemsList header={header} msg={msg} items={infoItems.filter(item => item.category == id)} toHtml={(data) => toHtmlElements(data, homePageUrl)} noItemShow="true" />}
-        </>
+        <ItemsList header={header} msg={msg} items={infoItemsToShow} toHtml={(data) => toHtmlElements(data, homePageUrl)}
+            filterCategories={!id ? filterCategories : null}
+            noItemShow={id ? "true" : null}
+        />
     )
 };
