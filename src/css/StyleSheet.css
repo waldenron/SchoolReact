@@ -2,6 +2,10 @@
     font-size: inherit;
 }
 
+.sticky-top {
+    z-index: 1;
+    
+}
 .requiredField::after {
     content: "🟥";
     font-size: 7pt;

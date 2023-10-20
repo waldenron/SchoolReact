@@ -3,27 +3,15 @@ import React, { useEffect, useState, useRef } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { DownloadTableExcel } from 'react-export-table-to-excel';
-// import html2canvas from 'html2canvas';
-// import { saveAs } from 'file-saver';
-// import * as XLSX from 'xlsx';
 
 import { fetchData } from '../utils/apiServices';
-import { IconButton, Header, SelectItems, LoadingSpinner, NotAllowed, getPageHeader } from './Common';
+import { IconButton, Header, SelectItems, CheckboxControls, LoadingSpinner, NotAllowed, getPageHeader } from './Common';
 import { getNameById } from '../utils/utilityFunctions';
 
 const days = ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי'];
 
 
-function LesonDesc({ time, number }) {
-    return (
-        <div className="col col-2 text-center border border-dark bgLightGray px-0">
-            שיעור {number}
-            <br />
-            <small>{time.start}-{time.end}</small>
-        </div>
-    )
-}
-function LesonDesc_Td({ time, number }) {
+function LessonDesc({ time, number }) {
     return (
         <td colSpan="2" className="text-center border border-dark bgLightGray px-0">
             שיעור {number}
@@ -34,21 +22,6 @@ function LesonDesc_Td({ time, number }) {
 }
 
 function Lesson({ lessons = [], showSubject, showTeacher, showRoom, showClass }) {
-    return (
-        <div className="col text-center border border-dark px-0">
-            {lessons.map(({ subject, teacher, room, classesNames }, index) => (
-                <div key={index} className="text-center bg-white" title="">
-                    {index > 0 && <hr className="my-1 mx-auto p-0 g-0 w-50" />}
-                    {showSubject && subject && <> {subject} <br /> </>}
-                    {showTeacher && teacher && <> {teacher} <br /> </>}
-                    {showClass && classesNames.length > 0 && <> {`{${classesNames}}`} <br /> </>}
-                    {showRoom && room && <> {`[${room}]`}  </>}
-                </div>
-            ))}
-        </div>
-    );
-}
-function Lesson_Td({ lessons = [], showSubject, showTeacher, showRoom, showClass }) {
     return (
         <td className="text-center border border-dark px-0">
             {lessons.map(({ subject, teacher, room, classesNames }, index) => (
@@ -64,105 +37,6 @@ function Lesson_Td({ lessons = [], showSubject, showTeacher, showRoom, showClass
     );
 }
 
-function CheckboxControls({ controls, setControls }) {
-
-    const toggleControl = (key) => {
-        const updatedControls = { ...controls };
-        updatedControls[key] = !controls[key];
-        setControls(updatedControls);
-    }
-
-    const controlDefinitions = [
-        { key: 'showSubject', label: 'מקצוע' },
-        { key: 'showTeacher', label: 'מורה' },
-        { key: 'showRoom', label: 'חדר' },
-        { key: 'showClass', label: 'כיתה' }
-    ];
-
-    return (
-        <div className="d-flex justify-content-center flex-wrap mb-3">
-            {controlDefinitions.map(({ key, label }) => (
-                <div key={key} className="form-check form-check-inline rtl-form-check-inline mx-0">
-                    <label htmlFor={`Checkbox${key}`} className="form-check-label mx-1">{label}</label>
-                    <input
-                        type="checkbox"
-                        id={`Checkbox${key}`}
-                        className="form-check-input"
-                        checked={controls[key]}
-                        onChange={() => toggleControl(key)}
-                    />
-                </div>
-            ))}
-        </div>
-    );
-}
-
-
-function WeeklyTimetable({ checkboxShowValue, lessons, scheduleItems }) {
-
-    const { showSubject, showTeacher, showRoom, showClass } = checkboxShowValue;
-    const currentDayIndex = new Date().getDay();  // Note: Sunday is 0, Monday is 1, ...
-
-    const activeDaysSet = new Set(scheduleItems.map(item => item.weekDay));
-
-    return (
-        <div className="container-fluid pt-3">
-            <div className="row bgLightGray no-gutters sticky-top">
-                <div className="col col-2 border border-dark text-center"></div>
-                {days.map((day, index) => (
-                    activeDaysSet.has(index + 1) && (  // Only render if the day is in activeDaysSet
-                        <div key={index} className={`col border border-dark text-center ${index === currentDayIndex ? 'bgToday' : ''}`}>
-                            <b>{day}</b>
-                        </div>)
-                ))}
-            </div>
-            {lessons.map((time, lessonIndex) => (
-                <div key={lessonIndex} className="row bg-white">
-                    <LesonDesc time={time} number={lessonIndex + 1} />
-                    {days.map((_, dayIndex) => {
-                        if (activeDaysSet.has(dayIndex + 1)) {
-
-                            const lessonsForSlot = scheduleItems.filter(item => item.weekDay - 1 === dayIndex && item.lessonId - 1 === lessonIndex);
-                            return <Lesson lessons={lessonsForSlot} showSubject={showSubject} showTeacher={showTeacher} showRoom={showRoom} showClass={showClass} key={dayIndex + '-' + lessonIndex} />;
-                        }
-                    })}
-                </div>
-            ))}
-        </div>
-    );
-}
-function DailyTimetable({ checkboxShowValue, lessons, scheduleItems, classes }) {
-    const { showSubject, showTeacher, showRoom, showClass } = checkboxShowValue;
-
-    return (
-        <div className="container-fluid pt-3">
-            <div className="row bgLightGray no-gutters sticky-top">
-                <div className="col-2 border border-dark text-center"></div>
-                {classes.map(c => (
-                    <div key={c.id} className="col border border-dark text-center">
-                        <b>{c.name}</b>
-                    </div>
-                ))}
-            </div>
-
-            {/* Rows for each time slot */}
-            {lessons.map((time, lessonIndex) => (
-                <div key={lessonIndex} className="row bg-white">
-                    <LesonDesc time={time} number={lessonIndex + 1} />
-
-                    {/* Cells for each class */}
-                    {classes.map(c => {
-                        const lessonsForClass = scheduleItems.filter(item =>
-                            item.classesIds.includes(c.id.toString()) && item.lessonId - 1 === lessonIndex
-                        );
-                        return <Lesson lessons={lessonsForClass} showSubject={showSubject} showTeacher={showTeacher} showRoom={showRoom} showClass={showClass} key={c.id + '-' + lessonIndex} />;
-                    })}
-                </div>
-            ))}
-        </div>
-    );
-}
-
 function downloadTableExcel(fileName, sheetName, tableRef) {
     return (
         <DownloadTableExcel filename={fileName} sheet={sheetName} currentTableRef={tableRef.current}>
@@ -171,7 +45,8 @@ function downloadTableExcel(fileName, sheetName, tableRef) {
     )
 }
 
-function WeeklyTimetable_Table({ checkboxShowValue, lessons, scheduleItems }) {
+
+function WeeklyTimetable({ checkboxShowValue, lessons, scheduleItems }) {
 
     const { showSubject, showTeacher, showRoom, showClass } = checkboxShowValue;
     const tableRef = useRef(null);
@@ -179,29 +54,31 @@ function WeeklyTimetable_Table({ checkboxShowValue, lessons, scheduleItems }) {
     const currentDayIndex = new Date().getDay();
 
     const activeDaysSet = new Set(scheduleItems.map(item => item.weekDay));
+    const maxLessonId = Math.max(...scheduleItems.map(item => item.lessonId));
 
     return (
         <div className="container-fluid pt-3">
+            {downloadTableExcel("WeeklyTimetable", "sheetName", tableRef)}
             <table className="w-100" ref={tableRef}>
                 <thead>
-                    <tr className="bgLightGray">{/* "row bgLightGray no-gutters sticky-top" */}
-                        <th colSpan="2" className="border border-dark text-center"></th>
+                    <tr className="bgLightGray no-gutters sticky-top">
+                        <th colSpan="2" className="border border-dark border-2 text-center"></th>
                         {days.map((day, index) => (
                             activeDaysSet.has(index + 1) && (  // Only render if the day is in activeDaysSet
-                                <th key={index} className={`border border-dark text-center ${index === currentDayIndex ? 'bgToday' : ''}`}>
+                                <th key={index} className={`border border-dark border-2 text-center ${index === currentDayIndex ? 'bgToday' : ''}`}>
                                     <b>{day}</b>
                                 </th>)
                         ))}
                     </tr>
                 </thead>
                 <tbody>
-                    {lessons.map((time, lessonIndex) => (
+                    {lessons.slice(0, maxLessonId).map((time, lessonIndex) => (
                         <tr key={lessonIndex} className="bg-white">
-                            <LesonDesc_Td time={time} number={lessonIndex + 1} />
+                            <LessonDesc time={time} number={lessonIndex + 1} />
                             {days.map((_, dayIndex) => {
                                 if (activeDaysSet.has(dayIndex + 1)) {
                                     const lessonsForSlot = scheduleItems.filter(item => item.weekDay - 1 === dayIndex && item.lessonId - 1 === lessonIndex);
-                                    return <Lesson_Td lessons={lessonsForSlot} showSubject={showSubject} showTeacher={showTeacher} showRoom={showRoom} showClass={showClass} key={dayIndex + '-' + lessonIndex} />;
+                                    return <Lesson lessons={lessonsForSlot} showSubject={showSubject} showTeacher={showTeacher} showRoom={showRoom} showClass={showClass} key={dayIndex + '-' + lessonIndex} />;
                                 }
                             })}
                         </tr>
@@ -211,34 +88,37 @@ function WeeklyTimetable_Table({ checkboxShowValue, lessons, scheduleItems }) {
         </div>
     );
 }
-function DailyTimetable_Table({ checkboxShowValue, lessons, scheduleItems, classes }) {
+function DailyTimetable({ checkboxShowValue, lessons, scheduleItems, classes }) {
     const { showSubject, showTeacher, showRoom, showClass } = checkboxShowValue;
     const tableRef = useRef(null);
+
+    const filteredScheduleItems = scheduleItems.filter(item =>
+        classes.some(c => item.classesIds.includes(c.id.toString()))
+    );
+    const maxLessonId = Math.max(...filteredScheduleItems.map(item => item.lessonId));
     return (
         <div className="container-fluid pt-3">
-            {downloadTableExcel("מערכת שעות יומית", "sheetName", tableRef)}
+            {downloadTableExcel("DailyTimetable", "sheetName", tableRef)}
             <table className="w-100" ref={tableRef}>
                 <thead>
-                    <tr className="bgLightGray">
-                        <th colSpan="2" className="border border-dark text-center"></th>
+                    <tr className="bgLightGray no-gutters sticky-top">
+                        <th colSpan="2" className="border border-dark border-2 text-center"></th>
                         {classes.map(c => (
-                            <th key={c.id} className="border border-dark text-center">
+                            <th key={c.id} className="border border-dark border-2 text-center">
                                 <b>{c.name}</b>
                             </th>
                         ))}
                     </tr>
                 </thead>
                 <tbody>
-                    {/* Rows for each time slot */}
-                    {lessons.map((time, lessonIndex) => (
+                    {lessons.slice(0, maxLessonId).map((time, lessonIndex) => (
                         <tr key={lessonIndex} className="bg-white">
-                            <LesonDesc_Td time={time} number={lessonIndex + 1} />
-                            {/* Cells for each class */}
+                            <LessonDesc time={time} number={lessonIndex + 1} />
                             {classes.map(c => {
-                                const lessonsForClass = scheduleItems.filter(item =>
+                                const lessonsForSlot = filteredScheduleItems.filter(item =>
                                     item.classesIds.includes(c.id.toString()) && item.lessonId - 1 === lessonIndex
                                 );
-                                return <Lesson_Td lessons={lessonsForClass} showSubject={showSubject} showTeacher={showTeacher} showRoom={showRoom} showClass={showClass} key={c.id + '-' + lessonIndex} />;
+                                return <Lesson lessons={lessonsForSlot} showSubject={showSubject} showTeacher={showTeacher} showRoom={showRoom} showClass={showClass} key={c.id + '-' + lessonIndex} />;
                             })}
                         </tr>
                     ))}
@@ -289,8 +169,8 @@ export default function Schedule() {
 
         setFilertMore(!showFilertMore);
     }
-    function handleShowWeekly() {
-        handleShowClick(!showWeekly ? "class" : "grade");
+    function changeScheduleType(scheduleType) {
+        handleShowClick(scheduleType);
 
         setShowWeekly(!showWeekly);
     }
@@ -385,10 +265,10 @@ export default function Schedule() {
             const filterClasses = type === "grade" ?
                 classes.filter(c => c.gradeId == id) :
                 classes.filter(c => c.sectionId == id);
-            return <DailyTimetable_Table checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={filteredItems} classes={filterClasses} />;
+            return <DailyTimetable checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={filteredItems} classes={filterClasses} />;
         }
         else
-            return <WeeklyTimetable_Table checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={filteredItems} />;
+            return <WeeklyTimetable checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={filteredItems} />;
 
     }
 
@@ -429,8 +309,16 @@ export default function Schedule() {
         setLoading(false);
     }, []);
 
+    const controlDefinitions = [
+        { key: 'showSubject', label: 'מקצוע' },
+        { key: 'showTeacher', label: 'מורה' },
+        { key: 'showRoom', label: 'חדר' },
+        { key: 'showClass', label: 'כיתה' }
+    ];
+
     if (loading) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }
+
     return (
         <div className="py-3 w-lg-90 mx-auto">
             <Header header={pageHeader} />
@@ -457,10 +345,10 @@ export default function Schedule() {
                 <div className="row pt-3">
                     <div className="col col-4 text-start">
                         <div className="btn-group" role="group">
-                            <button type="button" className={`btn ${showWeekly ? 'btn-secondary' : 'btn-outline-secondary'}`} onClick={() => handleShowWeekly(true)}>
+                            <button type="button" className={`btn ${showWeekly ? 'btn-secondary' : 'btn-outline-secondary'}`} onClick={() => !showWeekly && changeScheduleType("class")}>
                                 מערכת שבועית
                             </button>
-                            <button type="button" className={`btn ${!showWeekly ? 'btn-secondary' : 'btn-outline-secondary'}`} onClick={() => handleShowWeekly(false)}                    >
+                            <button type="button" className={`btn ${!showWeekly ? 'btn-secondary' : 'btn-outline-secondary'}`} onClick={() => showWeekly && changeScheduleType("grade")}                    >
                                 מערכת יומית
                             </button>
                         </div>
@@ -487,7 +375,7 @@ export default function Schedule() {
                                     <SelectItems filterBy="section" preText="" items={sections} defaultText="בחירת חטיבה" selectedValue={selectedIds.section} onSelect={handleSelect} />
                                 }
                                 {(showSelects.grade || showSelects.section) && weekDays &&
-                                    <SelectItems filterBy="weekDay" preText="" items={weekDays} defaultText="בחירת יום בשבוע" selectedValue={selectedIds.weekDay} onSelect={handleSelect} moreCss="ms-2" />
+                                    <SelectItems filterBy="weekDay" preText="" items={weekDays} defaultText="בחירת יום בשבוע" selectedValue={selectedIds.weekDay} onSelect={handleSelect} moreCss="ms-2" isBbColorSelectedValue="true" />
                                 }
                             </>}
                         <FontAwesomeIcon className="my-auto ms-1" icon={showFilertMore ? "fas fa-circle-chevron-up" : "fas fa-circle-chevron-down"} onClick={() => handleFilertMoreClick()} />
@@ -499,7 +387,7 @@ export default function Schedule() {
                         {showFilertMore &&
                             <div className="d-flex ps-0">
                                 <b className="">הצגת:</b>
-                                <CheckboxControls controls={checkboxShowValue} setControls={setCheckboxShowValue} />
+                                <CheckboxControls controlDefinitions={controlDefinitions} controls={checkboxShowValue} setControls={setCheckboxShowValue} />
                                 <div className="form-check form-switch ms-3 me-0">
                                     <input type="checkbox" id="SwitchFilterSubject" className="form-check-input" checked={showShowAllSubjects} onChange={() => setShowAllSubjects(prev => !prev)}
                                     />

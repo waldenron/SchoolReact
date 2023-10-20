@@ -70,19 +70,45 @@ export const Header = ({ header, msg, divCss }) => {
     )
 };
 
-export function SelectItems({ filterBy, preText, items, defaultText, selectedValue, onSelect, moreCss, isChoosableDefault = false }) {
+export function SelectItems({ filterBy, preText, items, defaultText, selectedValue, onSelect, moreCss, isChoosableDefault = false, isBbColorSelectedValue = false }) {
     return (
         <>
             <b className="my-auto">{preText}</b>
             <select className={`form-select max-w-select${moreCss ? " " + moreCss : ""}`} value={selectedValue} onChange={e => onSelect(filterBy, Number(e.target.value))}>
                 <option value="-1" disabled={!isChoosableDefault}>{defaultText}</option>
                 {items.map(item => (
-                    <option key={item.id} value={item.id}>
+                    <option key={item.id} value={item.id} className={selectedValue && selectedValue === item.id && isBbColorSelectedValue ? "bgToday" : ""}>
                         {item.name}
                     </option>
                 ))}
             </select >
         </>
+    );
+}
+
+export function CheckboxControls({ controlDefinitions, controls, setControls }) {
+
+    const toggleControl = (key) => {
+        const updatedControls = { ...controls };
+        updatedControls[key] = !controls[key];
+        setControls(updatedControls);
+    }
+
+   return (
+        <div className="d-flex justify-content-center flex-wrap mb-3">
+            {controlDefinitions.map(({ key, label }) => (
+                <div key={key} className="form-check form-check-inline rtl-form-check-inline mx-0">
+                    <label htmlFor={`Checkbox${key}`} className="form-check-label mx-1">{label}</label>
+                    <input
+                        type="checkbox"
+                        id={`Checkbox${key}`}
+                        className="form-check-input"
+                        checked={controls[key]}
+                        onChange={() => toggleControl(key)}
+                    />
+                </div>
+            ))}
+        </div>
     );
 }
 
