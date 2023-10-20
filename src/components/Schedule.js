@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { DownloadTableExcel } from 'react-export-table-to-excel';
+// import html2canvas from 'html2canvas';
+// import { saveAs } from 'file-saver';
+// import * as XLSX from 'xlsx';
 
 import { fetchData } from '../utils/apiServices';
 import { IconButton, Header, SelectItems, LoadingSpinner, NotAllowed, getPageHeader } from './Common';
 import { getNameById } from '../utils/utilityFunctions';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 
 const days = ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי'];
 
@@ -16,6 +21,15 @@ function LesonDesc({ time, number }) {
             <br />
             <small>{time.start}-{time.end}</small>
         </div>
+    )
+}
+function LesonDesc_Td({ time, number }) {
+    return (
+        <td colSpan="2" className="text-center border border-dark bgLightGray px-0">
+            שיעור {number}
+            <br />
+            <small>{time.start}-{time.end}</small>
+        </td>
     )
 }
 
@@ -32,6 +46,21 @@ function Lesson({ lessons = [], showSubject, showTeacher, showRoom, showClass })
                 </div>
             ))}
         </div>
+    );
+}
+function Lesson_Td({ lessons = [], showSubject, showTeacher, showRoom, showClass }) {
+    return (
+        <td className="text-center border border-dark px-0">
+            {lessons.map(({ subject, teacher, room, classesNames }, index) => (
+                <div key={index} className="text-center bg-white" title="">
+                    {index > 0 && <hr className="my-1 mx-auto p-0 g-0 w-50" />}
+                    {showSubject && subject && <> {subject} <br /> </>}
+                    {showTeacher && teacher && <> {teacher} <br /> </>}
+                    {showClass && classesNames.length > 0 && <> {`{${classesNames}}`} <br /> </>}
+                    {showRoom && room && <> {`[${room}]`}  </>}
+                </div>
+            ))}
+        </td>
     );
 }
 
@@ -107,7 +136,6 @@ function DailyTimetable({ checkboxShowValue, lessons, scheduleItems, classes }) 
 
     return (
         <div className="container-fluid pt-3">
-            {/* Header row with class names */}
             <div className="row bgLightGray no-gutters sticky-top">
                 <div className="col-2 border border-dark text-center"></div>
                 {classes.map(c => (
@@ -135,6 +163,90 @@ function DailyTimetable({ checkboxShowValue, lessons, scheduleItems, classes }) 
     );
 }
 
+function downloadTableExcel(fileName, sheetName, tableRef) {
+    return (
+        <DownloadTableExcel filename={fileName} sheet={sheetName} currentTableRef={tableRef.current}>
+            <button className="btn btn-sm btn-primary mb-1">יצוא לאקסל</button>
+        </DownloadTableExcel>
+    )
+}
+
+function WeeklyTimetable_Table({ checkboxShowValue, lessons, scheduleItems }) {
+
+    const { showSubject, showTeacher, showRoom, showClass } = checkboxShowValue;
+    const tableRef = useRef(null);
+
+    const currentDayIndex = new Date().getDay();
+
+    const activeDaysSet = new Set(scheduleItems.map(item => item.weekDay));
+
+    return (
+        <div className="container-fluid pt-3">
+            <table className="w-100" ref={tableRef}>
+                <thead>
+                    <tr className="bgLightGray">{/* "row bgLightGray no-gutters sticky-top" */}
+                        <th colSpan="2" className="border border-dark text-center"></th>
+                        {days.map((day, index) => (
+                            activeDaysSet.has(index + 1) && (  // Only render if the day is in activeDaysSet
+                                <th key={index} className={`border border-dark text-center ${index === currentDayIndex ? 'bgToday' : ''}`}>
+                                    <b>{day}</b>
+                                </th>)
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {lessons.map((time, lessonIndex) => (
+                        <tr key={lessonIndex} className="bg-white">
+                            <LesonDesc_Td time={time} number={lessonIndex + 1} />
+                            {days.map((_, dayIndex) => {
+                                if (activeDaysSet.has(dayIndex + 1)) {
+                                    const lessonsForSlot = scheduleItems.filter(item => item.weekDay - 1 === dayIndex && item.lessonId - 1 === lessonIndex);
+                                    return <Lesson_Td lessons={lessonsForSlot} showSubject={showSubject} showTeacher={showTeacher} showRoom={showRoom} showClass={showClass} key={dayIndex + '-' + lessonIndex} />;
+                                }
+                            })}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+function DailyTimetable_Table({ checkboxShowValue, lessons, scheduleItems, classes }) {
+    const { showSubject, showTeacher, showRoom, showClass } = checkboxShowValue;
+    const tableRef = useRef(null);
+    return (
+        <div className="container-fluid pt-3">
+            {downloadTableExcel("מערכת שעות יומית", "sheetName", tableRef)}
+            <table className="w-100" ref={tableRef}>
+                <thead>
+                    <tr className="bgLightGray">
+                        <th colSpan="2" className="border border-dark text-center"></th>
+                        {classes.map(c => (
+                            <th key={c.id} className="border border-dark text-center">
+                                <b>{c.name}</b>
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {/* Rows for each time slot */}
+                    {lessons.map((time, lessonIndex) => (
+                        <tr key={lessonIndex} className="bg-white">
+                            <LesonDesc_Td time={time} number={lessonIndex + 1} />
+                            {/* Cells for each class */}
+                            {classes.map(c => {
+                                const lessonsForClass = scheduleItems.filter(item =>
+                                    item.classesIds.includes(c.id.toString()) && item.lessonId - 1 === lessonIndex
+                                );
+                                return <Lesson_Td lessons={lessonsForClass} showSubject={showSubject} showTeacher={showTeacher} showRoom={showRoom} showClass={showClass} key={c.id + '-' + lessonIndex} />;
+                            })}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
 export default function Schedule() {
     const [loading, setLoading] = useState(true);
     const [notAlowed, setNotAlowed] = useState(false);
@@ -273,10 +385,10 @@ export default function Schedule() {
             const filterClasses = type === "grade" ?
                 classes.filter(c => c.gradeId == id) :
                 classes.filter(c => c.sectionId == id);
-            return <DailyTimetable checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={filteredItems} classes={filterClasses} />;
+            return <DailyTimetable_Table checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={filteredItems} classes={filterClasses} />;
         }
         else
-            return <WeeklyTimetable checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={filteredItems} />;
+            return <WeeklyTimetable_Table checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={filteredItems} />;
 
     }
 
@@ -324,7 +436,7 @@ export default function Schedule() {
             <Header header={pageHeader} />
             <div className="w-md-75 mx-auto">
                 <div className="row">
-                    <div className="col col-3"></div>
+                    <div className="col 4"></div>
                     <div className="col">
                         <div className="d-flex justify-content-start flex-wrap">
                             {showWeekly &&
@@ -343,7 +455,7 @@ export default function Schedule() {
                     </div>
                 </div>
                 <div className="row pt-3">
-                    <div className="col col-3 text-start">
+                    <div className="col col-4 text-start">
                         <div className="btn-group" role="group">
                             <button type="button" className={`btn ${showWeekly ? 'btn-secondary' : 'btn-outline-secondary'}`} onClick={() => handleShowWeekly(true)}>
                                 מערכת שבועית
@@ -382,7 +494,7 @@ export default function Schedule() {
                     </div>
                 </div>
                 <div className="row pt-3">
-                    <div className="col col-3"></div>
+                    <div className="col col-4"></div>
                     <div className="col input-group">
                         {showFilertMore &&
                             <div className="d-flex ps-0">

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { fetchData } from '../utils/apiServices';
-import { cleanText, cssStringToObject, toPageTitle } from '../utils/utilityFunctions';
+import { cssStringToObject, toPageTitle } from '../utils/utilityFunctions';
 import { Link } from 'react-router-dom';
 
 
@@ -88,7 +88,7 @@ export function SelectItems({ filterBy, preText, items, defaultText, selectedVal
 
 export function IconButton({ show, icon, text, isChose, onClick }) {
     return (
-        <span className="my-auto ms-0 me-2 text-primary" role="button" onClick={() => onClick(show)}>
+        <span className="my-auto mx-2 text-primary" role="button" onClick={() => onClick(show)}>
             <FontAwesomeIcon icon={icon} className="mx-1" />
             <span className={`${isChose ? " primarySelected" : ""}`}>{text}</span>
         </span>
