@@ -1,0 +1,75 @@
+
+.spinner-container {
+  direction: ltr;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+.spinner {
+  border: 8px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 8px solid black;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+.slide-img {
+  transform: translateX(10%);
+  /* Slide out to the left by default */
+  opacity: 0;
+  /* Make it invisible by default */
+  transition: transform 1s, opacity 1s;
+}
+
+.slide-img.showing {
+  transform: translateX(0);
+  /* Slide in from left to its original position */
+  opacity: 1;
+  /* Make it visible */
+}
+
+
+.fade-img {
+  opacity: 0;
+  transition: opacity 1s;
+}
+
+.fade-img.showing {
+  opacity: 1;
+}
+
+/* Fading animation */
+.fade {
+  animation-name: fade;
+  animation-duration: 1.5s;
+}
+
+@keyframes fade {
+  from {
+    opacity: .4
+  }
+
+  to {
+    opacity: 1
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

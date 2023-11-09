@@ -1,0 +1,56 @@
+/* Gallery.css */
+
+.card {
+    overflow: hidden;
+    border: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+}
+
+.card-img-top {
+    transition: transform .2s;
+    max-width: 100%;
+    max-height: 100%;
+    transform: scale(1);
+}
+
+.card-img-top:hover {
+    transform: scale(1.1);
+}
+
+.card-body {
+    background-color: rgba(255, 255, 255, 0.7);
+    /* semi-transparent white */
+}
+
+.card-text {
+    text-align: center;
+}
+
+
+.modal-content {
+    background-color: transparent;
+    border: none;
+}
+
+.modal-dialog-centered .modal-content .modal-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-close.btn-lg {
+    width: 2.5rem;
+    height: 2.5rem;
+    background-color: white;
+    background-size: 1.5rem 1.5rem;
+}
+
+.album-color {
+    color: #e47792
+}
+
+.selected-album {
+    font-weight: 900;
+    border-bottom: 2px solid #e47792;
+}

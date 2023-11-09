@@ -1,0 +1,28 @@
+﻿.coursesTable  {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.courses tr:hover {
+    background-color: lightgray !important;
+}
+
+.courses th,
+td {
+    padding: 10px;
+}
+
+
+.courses a {
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14pt;
+}
+
+.icon {
+    font-size: 24px;
+    color: #333;
+}
