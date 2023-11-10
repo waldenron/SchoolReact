@@ -67,10 +67,10 @@ const InstFiles = ({ homePageUrl }) => {
 
       setCurrentGA(fetchedData.currentGA);
     }
-   
+
     loadInstFiles();
   }, [homePageUrl]);
-  
+
   // Initialize Google Analytics with the ID from fetchedData
   useGoogleAnalytics(currentGA);
 
@@ -196,7 +196,7 @@ export default function App() {
             <Route path="*" element={instDetails && <NotFound homePageUrl={instDetails.homePageUrl} />} />
           </Routes>
 
-          <NonHomePageFooter />
+          <InstContactInfoFooter />
         </>
       }
     </div>

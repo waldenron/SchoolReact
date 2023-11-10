@@ -1,10 +1,26 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { fetchData } from '../utils/apiServices';
 import { cssStringToObject, toDate, toPageTitle } from '../utils/utilityFunctions';
 import { Link } from 'react-router-dom';
 
+export const getCssClass = (type) => {
+    switch (type) {
+        case "ok": return "alert alert-success";
+        case "error": return "alert alert-danger";
+        case "warning": return "alert alert-warning";
+        case "info": return "alert alert-info";
+        default: return "";
+    }
+};
+
+export const useMessage = () => {
+    const [message, setMessage] = useState({ text: "", css: "" });
+    const showMessage = ({ text, type }) => { setMessage({ text, css: getCssClass(type) }); };
+
+    return { message, showMessage };
+};
 
 export const ItemIcon = ({ itemIcon, homePageUrl }) => {
     if (itemIcon.type === "fa") {

@@ -16,7 +16,7 @@ const RowDetails = ({ id, rowItems, homePageUrl }) => {
 
   return (
     rowItem && homePageUrl &&
-    <div className="container py-3">
+    <div className="container py-md-3">
       <h3 dangerouslySetInnerHTML={{ __html: header }} />
 
       <img className="img-fluid w-md-75" src={`${homePageUrl}/${rowItem.pic}`} alt={`תמונה בנושא ${rowItems.name}`} />
@@ -31,7 +31,7 @@ const RowItem = ({ rowItem, homePageUrl, rowIndex }) => {
 
   return (
     rowItem && homePageUrl &&
-    <div className="row pt-5 mt-3">
+    <div className="row pb-5 mt-3">
       <div className={`col-md-9 ${rowIndex % 2 === 0 ? "order-md-1" : "order-md-2"}`}>
         <img className="img-fluid" src={`${homePageUrl}/${rowItem.pic}`} alt={`תמונה בנושא ${rowItem.name}`} />
       </div>
@@ -74,7 +74,7 @@ export function Row() {
 
   //if (loading) { return <LoadingSpinner />; }
   return (
-    <div className="py-3 w-md-75 mx-auto">
+    <div className="w-md-75 mx-auto">
       {!id && rowItems.length > 0 && <RowItems rowItems={rowItems} homePageUrl={homePageUrl} />}
       {id && rowItems.length > 0 &&
         <>

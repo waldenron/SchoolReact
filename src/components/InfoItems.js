@@ -137,7 +137,7 @@ export default function InfoItemsPage() {
             <div className="d-flex flex-wrap btn-group justify-content-end">
                 <InfoNav homePageUrl={homePageUrl} />
             </div>
-            {grades && <div className="d-flex w-md-50">
+            {grades && <div className="d-flex w-md-50 pt-3">
                 <SelectItems filterBy="grade" preText="הצגת מידע הנוגע לשכבה - " items={grades} defaultText="כל השכבות" selectedValue={selectedGrade} onSelect={(_, value) => setSelectedGrade(value)} isChoosableDefault="true" />
             </div>
             }

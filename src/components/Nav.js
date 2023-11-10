@@ -16,11 +16,9 @@ export const NavItem = ({ navType, navItem, homePageUrl }) => {
     )
   else //if (navType === "Buttons")
     return (
-      <ToLink to={link} className="px-md-3 px-2 text-dark text-decoration-none text-center" data-bs-toggle="tooltip" title={navItem.text} target={navItem.isLinkNewTab ? '_blank' : '_self'}>
-        <h5 className="d-inline">
+      <ToLink to={link} className="px-md-3 px-2 text-dark text-decoration-none text-center text-responsive" data-bs-toggle="tooltip" title={navItem.text} target={navItem.isLinkNewTab ? '_blank' : '_self'}>
           {<ItemIcon itemIcon={navItem.itemIcon} homePageUrl={homePageUrl} />}
           {navItem.name && (<span className="mx-1 text-decoration-underline">{navItem.name}</span>)}
-        </h5>
       </ToLink>
     )
 };
@@ -54,7 +52,7 @@ export default function Nav() {
   return (
     <>
       {navType === "Buttons" &&
-        <div className="d-flex flex-wrap btn-group justify-content-center">
+        <div className="d-flex flex-wrap justify-content-center">
           {navItems.map((navItem, index) => (
             <NavItem navType={navType} navItem={navItem} homePageUrl={homePageUrl} key={index} />
           ))}

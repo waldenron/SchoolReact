@@ -1,3 +1,6 @@
+.text-responsive {
+  font-size: clamp(1rem, 2vw, 1.3rem);
+}
 
 .spinner-container {
   direction: ltr;

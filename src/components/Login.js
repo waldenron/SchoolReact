@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchData, getHomePageUrl } from '../utils/apiServices';
 import { setWithExpiry, toPageTitle } from '../utils/utilityFunctions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { LoadingSpinner, ToLink } from './Common';
+import { LoadingSpinner, ToLink, useMessage } from './Common';
 
 export default function Login() {
     const [loading, setLoading] = useState(false);
@@ -16,9 +16,12 @@ export default function Login() {
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
 
-    const [message, setMessage] = useState({ text: "", css: "" });
-    
-    
+
+
+
+    const { message, showMessage } = useMessage();
+
+
     const navigate = useNavigate();
     const timeToStayLoginMinutes = 10;
     const handleLogin = async () => {
@@ -31,7 +34,7 @@ export default function Login() {
             setWithExpiry("token", response.data.token, timeToStayLoginMinutes);
             navigate('/InfoItems');
         }
-        else setMessage({ text: response.error, css: "alert alert-alert" });
+        else showMessage({ text: response.error, type: "error" });
 
         setLoading(false);
     };
@@ -41,8 +44,8 @@ export default function Login() {
         const bodyItems = { UserName: email };
         const response = await fetchData(toStage("forgotPassword").api, null, null, [], bodyItems, "POST");
 
-        if (!response.error) setMessage({ text: response.data, css: "alert alert-success" });
-        else setMessage({ text: response.error, css: "alert alert-alert" });
+        if (!response.error) showMessage({ text: response.data, type: "ok" });
+        else showMessage({ text: response.error, type: "error" });
 
         setLoading(false);
     };
@@ -53,10 +56,10 @@ export default function Login() {
         const response = await fetchData(toStage("reg1_SendCode").api, null, null, [], bodyItems, "POST");
 
         if (!response.error) {
-            setMessage({ text: response.data, css: "alert alert-success" });
+            showMessage({ text: response.data, type: "ok" });
             setCurrentStage(toStage("reg2_ApproveCode"));
         }
-        else setMessage({ text: response.error, css: "alert alert-alert" });
+        else showMessage({ text: response.error, type: "error" });
 
         setLoading(false);
     };
@@ -67,10 +70,10 @@ export default function Login() {
         const response = await fetchData(currentStage.api, null, null, [], bodyItems, "POST");
 
         if (!response.error) {
-            setMessage({ text: response.data, css: "alert alert-success" });
+            showMessage({ text: response.data, type: "ok" });
             setCurrentStage(toStage("reg3_Details"));
         }
-        else setMessage({ text: response.error, css: "alert alert-alert" });
+        else showMessage({ text: response.error, type: "error" });
 
         setLoading(false);
     };
@@ -83,10 +86,10 @@ export default function Login() {
         const response = await fetchData(currentStage.api, null, null, [], bodyItems, "POST");
 
         if (!response.error) {
-            setMessage({ text: response.data, css: "alert alert-success" });
+            showMessage({ text: response.data, type: "ok" });
             setCurrentStage(toStage("reg4_Done"));
         }
-        else setMessage({ text: response.error, css: "alert alert-alert" });
+        else showMessage({ text: response.error, type: "error" });
 
         setLoading(false);
     };
