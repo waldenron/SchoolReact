@@ -6,43 +6,59 @@ import { fetchData, getPageHeader } from '../utils/apiServices';
 import { LoadingSpinner, NotAllowed } from "./Common"
 import { ItemsList } from './ItemsList';
 
+export function InstContactInfoFooter({ instDetails }) {
+
+    return (
+        <div className="text-center pb-3 no-print">
+            <hr className="hrFooter mb-2" />
+            <p className="h3">{instDetails.description}</p>
+            <h6>
+                <span className="text-nowrap">
+                    <FontAwesomeIcon icon="fas fa-location-dot" />&nbsp;
+                    <a href={instDetails.googleMap} target="_blank" rel="noopener noreferrer">{instDetails.address}</a>
+                </span>
+                <span className="mx-1">|</span>
+                <span className="text-nowrap">
+                    <FontAwesomeIcon icon="fas fa-phone-square" />&nbsp;
+                    <a href={`tel:${instDetails.phones}`}>{instDetails.phones}</a>
+                </span>
+                <span className="mx-1">|</span>
+                <span className="text-nowrap">
+                    <FontAwesomeIcon icon="fas fa-envelope" />&nbsp;
+                    <a href={`mailto:${instDetails.email}`}>{instDetails.email}</a>
+                </span>
+            </h6>
+        </div>
+    )
+};
 
 //InstContactInfo
-const InstContactInfo = () => {
-    const [instContactInfo, setInstContactInfo] = useState();
+const InstContactInfo = ({ instDetails }) => {
 
-    useEffect(() => {
-        (async () => {
-            const { data: fetchedData, error } = await fetchData('/api/InstContactInfo');
-            setInstContactInfo(fetchedData);
-        })();
-    }, []);
-
-    if (!instContactInfo) return null;  // This will prevent rendering until the data is loaded
     return (
         <div className="text-center">
             <h4>
                 <span className="text-nowrap">
                     <FontAwesomeIcon icon="fas fa-location-dot" />
                     &nbsp;
-                    <a href={instContactInfo.googleMap} target="_blank" rel="noopener noreferrer">
-                        {instContactInfo.address}
+                    <a href={instDetails.googleMap} target="_blank" rel="noopener noreferrer">
+                        {instDetails.address}
                     </a>
                 </span>
                 <span className="mx-1">|</span>
                 <span className="text-nowrap">
                     <FontAwesomeIcon icon="fas fa-phone-square" />
                     &nbsp;
-                    <a href={`tel:${instContactInfo.phones}`}>
-                        {instContactInfo.phones}
+                    <a href={`tel:${instDetails.phones}`}>
+                        {instDetails.phones}
                     </a>
                 </span>
                 <span className="mx-1">|</span>
                 <span className="text-nowrap">
                     <FontAwesomeIcon icon="fas fa-envelope" />
                     &nbsp;
-                    <a href={`mailto:${instContactInfo.email}`}>
-                        {instContactInfo.email}
+                    <a href={`mailto:${instDetails.email}`}>
+                        {instDetails.email}
                     </a>
                 </span>
             </h4>
@@ -67,7 +83,7 @@ const toHtmlElements = (contacts) => {
 
 
 
-export default function ContactPage() {
+export default function ContactPage({ instDetails }) {
     const [loading, setLoading] = useState(true);
     const [notAlowed, setNotAlowed] = useState(false);
 
@@ -88,7 +104,7 @@ export default function ContactPage() {
         })();
     }, []);
 
-    const msg = <InstContactInfo />;
+    const msg = <InstContactInfo instDetails={instDetails} />;
     const header = pageHeader;
 
     if (loading) { return <LoadingSpinner />; }
@@ -98,41 +114,3 @@ export default function ContactPage() {
     )
 };
 
-export function InstContactInfoFooter() {
-    const [instDetails, setInstDetails] = useState();
-    const [instContactInfo, setInstContactInfo] = useState();
-
-    useEffect(() => {
-        (async () => {
-            const { data: fetchedDataDetails } = await fetchData('/api/InstDetails');
-            setInstDetails(fetchedDataDetails);
-
-            const { data: fetchedData, error } = await fetchData('/api/InstContactInfo');
-            setInstContactInfo(fetchedData);
-        })();
-    }, []);
-
-    if (!instContactInfo) return null;
-    return (
-        <div className="text-center pb-3 no-print">
-            <hr className="hrFooter mb-2" />
-            <p className="h3">{instDetails.description}</p>
-            <h6>
-                <span className="text-nowrap">
-                    <FontAwesomeIcon icon="fas fa-location-dot" />&nbsp;
-                    <a href={instContactInfo.googleMap} target="_blank" rel="noopener noreferrer">{instContactInfo.address}</a>
-                </span>
-                <span className="mx-1">|</span>
-                <span className="text-nowrap">
-                    <FontAwesomeIcon icon="fas fa-phone-square" />&nbsp;
-                    <a href={`tel:${instContactInfo.phones}`}>{instContactInfo.phones}</a>
-                </span>
-                <span className="mx-1">|</span>
-                <span className="text-nowrap">
-                    <FontAwesomeIcon icon="fas fa-envelope" />&nbsp;
-                    <a href={`mailto:${instContactInfo.email}`}>{instContactInfo.email}</a>
-                </span>
-            </h6>
-        </div>
-    )
-};

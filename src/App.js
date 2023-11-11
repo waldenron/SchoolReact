@@ -78,7 +78,6 @@ const InstFiles = ({ homePageUrl }) => {
 };
 
 function NonHomePageHeader() {
-  const location = useLocation();
   const [isShowNav, setIsShowNav] = useState(null);
   const [navLocation, setNavLocation] = useState(null);
 
@@ -90,15 +89,11 @@ function NonHomePageHeader() {
     })();
   }, []);
 
-  if (location.pathname !== "/") {
-    return <>
-      {isShowNav && navLocation === "top" && <div><Nav /></div>}
-      <div><Logo /></div>
-      {isShowNav && navLocation === "middle" && <div className="py-3 w-md-75 mx-auto"><Nav /></div>}
-    </>;
-  }
-
-  return null;
+  return <>
+    {isShowNav && navLocation === "top" && <div><Nav /></div>}
+    <div><Logo /></div>
+    {isShowNav && navLocation === "middle" && <div className="py-3 w-md-75 mx-auto"><Nav /></div>}
+  </>;
 }
 
 function NonHomePageFooter() {
@@ -155,6 +150,7 @@ function Home({ instDescription }) {
 }
 
 export default function App() {
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
 
   const [instDetails, setInstDetails] = useState(null);
@@ -172,10 +168,10 @@ export default function App() {
   if (loading) { return <LoadingSpinner />; }
   return (
     <div className="container-fluid rounded mx-auto">
-      {instDetails && <InstFiles homePageUrl={instDetails.homePageUrl} />}
       {instDetails &&
         <>
-          <NonHomePageHeader />
+          <InstFiles homePageUrl={instDetails.homePageUrl} />
+          {location.pathname !== "/" && <NonHomePageHeader />}
 
           <Routes>
             <Route path="/" element={<Home instDescription={instDetails.description} />} />
@@ -188,15 +184,15 @@ export default function App() {
             <Route path="/Calendars/:id" element={<Calendar />} />
             <Route path="/InfoItems" element={<InfoItems />} />
             <Route path="/InfoItems/:id" element={<InfoItems />} />
-            <Route path="/Contacts" element={<ContactPage />} />
+            <Route path="/Contacts" element={<ContactPage instDetails={instDetails} />} />
             <Route path="/Schedule" element={<Schedule />} />
             <Route path="/PicGallery" element={<PicGallery />} />
             <Route path="/PicGallery/:name" element={<PicGalleryForDir />} />
             <Route path="/Login" element={<Login />} />
-            <Route path="*" element={instDetails && <NotFound homePageUrl={instDetails.homePageUrl} />} />
+            <Route path="*" element={<NotFound homePageUrl={instDetails.homePageUrl} />} />
           </Routes>
 
-          <InstContactInfoFooter />
+          <InstContactInfoFooter instDetails={instDetails} />
         </>
       }
     </div>

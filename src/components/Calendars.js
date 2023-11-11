@@ -18,7 +18,7 @@ export default function Calendar() {
     useEffect(() => {
         (async () => {
             const { data: fetchedData, error } = await fetchData('/api/Calendars');
-            if (error.message === "Resource not found") setNotAlowed(true);
+            if (error && error.message === "Resource not found") setNotAlowed(true);
             else setCalendarItems(fetchedData);
 
             setLoading(false);
