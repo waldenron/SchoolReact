@@ -28,16 +28,19 @@ const SearchBar = ({ onSearch }) => {
 };
 
 const FilterButton = ({ item, isActive, handleOnClick }) => {
+    const buttonStyle = item.color ? { backgroundColor: item.color.includes('#') ? item.color : `#${item.color}` } : {};
     return (
         <span
             className={`btn btn-${isActive ? 'primary active' : 'secondary'} btn-sm m-1`}
+            style={buttonStyle}
             onClick={() => handleOnClick(item.id)}
         >
             {item.itemIcon && item.itemIcon.type === 'fa' && <FontAwesomeIcon icon={item.itemIcon.cssClass} className="mx-1" />}
             {item.name}
         </span>
     );
-}
+};
+
 
 export function FilterSelect({ optionsItems, onFilterChange }) {
     const [activeItem, setActiveItem] = useState(null);

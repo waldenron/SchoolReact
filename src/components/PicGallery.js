@@ -60,7 +60,7 @@ const PicModal = ({ images, img, handleOnClickX }) => {
 
 function PicAlbums({ albums, selectedAlbum, handleOnClickAlbum }) {
     return (
-        <div className="d-flex text-center border-top border-dark border-4">
+        <div className="d-flex text-center border-top border-dark border-4" role="button">
             {albums.map((album, index) => (
                 <figure className={`mx-2 ${selectedAlbum && selectedAlbum.id === album.id ? 'selected-album' : ''}`}
                     onClick={() => handleOnClickAlbum(album)} key={index}>

@@ -171,6 +171,8 @@ export default function App() {
       {instDetails &&
         <>
           <InstFiles homePageUrl={instDetails.homePageUrl} />
+
+
           {location.pathname !== "/" && <NonHomePageHeader />}
 
           <Routes>

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
-import {  LoadingSpinner, NotAllowed, SelectItems } from "./Common"
+import { LoadingSpinner, NotAllowed, SelectItems } from "./Common"
 import { ItemsList } from './ItemsList';
 import { NavItem } from './Nav';
 
 import { getWithExpiry, toArchiveText, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
-import { fetchData,getHomePageUrl, getPageHeader } from '../utils/apiServices';
+import { fetchData, getHomePageUrl, getPageHeader } from '../utils/apiServices';
 import { useParams } from 'react-router-dom';
 
 
@@ -13,11 +13,15 @@ import { useParams } from 'react-router-dom';
 const infoNavSortFunction = (a, b) => a.priority - b.priority;
 
 function InfoNav({ homePageUrl }) {
+    const token = getWithExpiry("token");
+
     const [navItems, setNavItems] = useState([]);
 
     useEffect(() => {
         (async () => {
-            const { data: fetchedData, error } = await fetchData('/api/InfoLinksItems', null, infoNavSortFunction);
+            const additionalHeaders = token ? [{ name: 'token', value: token }] : [];
+
+            const { data: fetchedData, error } = await fetchData('/api/InfoLinksItems', null, infoNavSortFunction, additionalHeaders);
             setNavItems(fetchedData);
         })();
     }, []);
@@ -89,7 +93,7 @@ const toHtmlElements = (data, homePageUrl) => {
     ));
 };
 
-export default function InfoItemsPage() {
+export default function InfoItems() {
     const { id } = useParams();
     const token = getWithExpiry("token");
 
@@ -143,7 +147,7 @@ export default function InfoItemsPage() {
             }
         </>
     const infoItemCategoryName = infoItemCategories && infoItemCategories.length > 0 ? infoItemCategories.find(item => item.id == id)?.name : "";
-    const header = pageHeader && (pageHeader + (id && infoItemCategoryName ? " - <span class='fw-bolder'>" + infoItemCategoryName + "</span>" : ""));
+    const header = token ? "אזור מורים" : pageHeader && (pageHeader + (id && infoItemCategoryName ? " - <span class='fw-bolder'>" + infoItemCategoryName + "</span>" : ""));
     const filterCategories = infoItemCategories.filter(item => item.isShowOnInfoItemsPage === true);
     let infoItemsToShow = !id ?
         infoItems.filter(item => item.isShowOnInfoItemsPage == true)

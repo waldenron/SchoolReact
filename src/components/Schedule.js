@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DownloadTableExcel } from 'react-export-table-to-excel';
 
 import { fetchData, getPageHeader } from '../utils/apiServices';
-import { IconButton, Header, SelectItems, CheckboxControls, LoadingSpinner, NotAllowed, PrintButton, AddToCalendarLink, AddToCalendarIcon } from './Common';
+import { IconButton, Header, SelectItems, CheckboxControls, LoadingSpinner, NotAllowed, PrintButton, AddToCalendarLink, AddToCalendarIcon, MobileRotateAdvice } from './Common';
 import { addTimeToDate, getNameById, getNextDateForWeekDay, toDate } from '../utils/utilityFunctions';
 
 const days = ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי'];
@@ -212,6 +212,7 @@ export default function Schedule() {
     const [lastUpdate, setLastUpdate] = useState(null);
     const [isWithRooms, setIsWithRooms] = useState(false);
     const [isShowFilterAllSubject, setIsShowFilterAllSubject] = useState(false);
+    const [name, setName] = useState(null);
     const [note, setNote] = useState(null);
 
     const [lessons, setLessons] = useState([]);
@@ -402,7 +403,8 @@ export default function Schedule() {
             setStudyYear(fetchedScheduleInfo.studyYear);
             setIsWithRooms(fetchedScheduleInfo.isWithRooms);
             setIsShowFilterAllSubject(fetchedScheduleInfo.isShowFilterAllSubject);
-            setNote(fetchedScheduleInfo.note);
+            setName(fetchedScheduleInfo.name?.trim());
+            setNote(fetchedScheduleInfo.note?.trim());
 
 
             handleShowClick("class");
@@ -424,12 +426,16 @@ export default function Schedule() {
 
     if (loading) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }
-    const header = pageHeader && `${pageHeader} - ${studyYear}${note ? ` ${note.trim()}` : ''}`;
+    const header = pageHeader && `${pageHeader} - ${studyYear}${name ? ` - ${name}` : ''}`;
     return (
         <div className="py-3 w-lg-90 mx-auto">
-            <div className="d-flex align-items-center">
+            <div className={note ? "" : "d-flex align-items-center"}>
+                <MobileRotateAdvice />
                 <Header header={header} />
-                {lastUpdate && <sub className="mx-1">עודכן {toDate(lastUpdate, "dd/mm")}</sub>}
+                <div >
+                    {note && <span className=""> {note}</span>}
+                    {lastUpdate && <sub className="mx-1">עודכן {toDate(lastUpdate, "dd/MM")}</sub>}
+                </div>
             </div>
             <div className="w-md-75 mx-auto no-print">
                 <div className="row">

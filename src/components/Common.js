@@ -144,6 +144,44 @@ export function LoadingSpinner() {
     );
 }
 
+export const MobileRotateAdvice = () => {
+    const [isMobile, setIsMobile] = useState(false);
+    const [isPortrait, setIsPortrait] = useState(false);
+    const [showMessage, setShowMessage] = useState(true); // State to control message visibility
+
+    const checkOrientation = () => {
+        setIsPortrait(window.innerWidth <= window.innerHeight);
+    };
+
+    useEffect(() => {
+        const userAgent = navigator.userAgent.toLowerCase();
+        const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/;
+        setIsMobile(mobileRegex.test(userAgent));
+
+        window.addEventListener('resize', checkOrientation);
+        checkOrientation();
+
+        return () => window.removeEventListener('resize', checkOrientation);
+    }, []);
+
+    const handleClose = () => {
+        setShowMessage(false); // Hide the message when close button is clicked
+    };
+
+    if (isMobile && isPortrait && showMessage) {
+        return (
+            <div className="d-flex justify-content-between align-items-center p-2 bg-warning">
+                <FontAwesomeIcon icon="fas fa-mobile-alt" rotation={90} size="2x" className="me-2" />
+                <span>הצפייה בסלולרי מומלצת במצב אופקי.</span>
+                <button onClick={handleClose} className="btn btn-close" aria-label="סגור"></button>
+            </div>
+        );
+    }
+
+    return null; // Render nothing if not mobile or not in portrait mode
+};
+
+
 export function NotFound({ homePageUrl }) {
     return (
         <div>

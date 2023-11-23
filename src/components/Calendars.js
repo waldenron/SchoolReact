@@ -4,10 +4,12 @@ import { useParams } from 'react-router-dom'
 import { fetchData } from '../utils/apiServices';
 import { Header, LoadingSpinner, NotAllowed } from './Common';
 import { FilterCategories } from './ItemsList';
+import { getWithExpiry } from '../utils/utilityFunctions';
 
 
 export default function Calendar() {
     const { id } = useParams();
+    const token = getWithExpiry("token");
 
     const [loading, setLoading] = useState(true);
     const [notAlowed, setNotAlowed] = useState(false);
@@ -17,7 +19,9 @@ export default function Calendar() {
 
     useEffect(() => {
         (async () => {
-            const { data: fetchedData, error } = await fetchData('/api/Calendars');
+            const additionalHeaders = token ? [{ name: 'token', value: token }] : [];
+
+            const { data: fetchedData, error } = await fetchData('/api/Calendars', null, null, additionalHeaders);
             if (error && error.message === "Resource not found") setNotAlowed(true);
             else setCalendarItems(fetchedData);
 
@@ -35,6 +39,8 @@ export default function Calendar() {
 
     if (loading) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }
+    //delete calendarItems color if not token
+    if (!token) { calendarItems.forEach(item => { item.color = null; }); }
     return (
         <div className="py-3 w-md-75 mx-auto">
             <Header header="יומנים" />
