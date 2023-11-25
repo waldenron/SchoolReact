@@ -1,0 +1,33 @@
+.rbc-calendar {
+    direction: rtl;
+    /* Any additional styles... */
+}
+
+.rbc-calendar {
+    direction: rtl;
+    /* Any additional styles... */
+}
+
+.rbc-event,
+.rbc-day-slot .rbc-background-event {
+    text-align: right !important;
+}
+
+/* Adjust cell height in Month view */
+.rbc-month-view .rbc-row-content {
+    min-height: 100px !important;
+    /* Adjust this value as needed */
+}
+
+.rbc-button-link {
+    color: transparent; /* Hide the original text (day) inside the button  */
+    
+}
+
+.rbc-today{
+    background-color: #B0926A !important;
+}
+
+.bgDate{
+    background-color: #ECE3CE !important;
+}

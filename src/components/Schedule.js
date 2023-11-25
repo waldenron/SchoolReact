@@ -437,7 +437,7 @@ export default function Schedule() {
                     {lastUpdate && <sub className="mx-1">עודכן {toDate(lastUpdate, "dd/MM")}</sub>}
                 </div>
             </div>
-            <div className="w-md-75 mx-auto no-print">
+            {classes && <div className="w-md-75 mx-auto no-print">
                 <div className="row">
                     <div className="col-4"></div>
                     <div className="col">
@@ -518,7 +518,7 @@ export default function Schedule() {
                         }
                     </div>
                 </div>
-            </div>
+            </div>}
             {renderTimetable(selectedIds.class, "class", null, classes.find(c => c.id == selectedIds.class)?.name)}
             {renderTimetable(selectedIds.teacher, "teacher", null, teachers.find(t => t.id == selectedIds.teacher)?.name)}
             {renderTimetable(selectedIds.room, "room", null, rooms.find(r => r.id == selectedIds.room)?.name)}

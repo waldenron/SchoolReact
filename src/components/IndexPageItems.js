@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom'
 
 import { fetchData, getHomePageUrl } from '../utils/apiServices';
-import { toPageTitle, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
+import { getWithExpiry, setWithExpiry, toPageTitle, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
 import { LoadingSpinner, ToLink } from './Common';
 
 
@@ -84,6 +84,69 @@ export function Row() {
     </div>
   );
 }
+
+
+export const SpecialMsgModal = () => {
+  const [show, setShow] = useState(false);
+
+  const [homePageUrl, setHomePageUrl] = useState(null);
+  const [pic, setPic] = useState(null);
+  const [link, setLink] = useState(null);
+  const [linkText, setLinkText] = useState(null);
+  const [isLinkNewTab, setIsLinkNewTab] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const fetchedUrl = await getHomePageUrl();
+      setHomePageUrl(fetchedUrl);
+
+      const { data: fetchedData, error } = await fetchData('/api/IndexSpecialMsg');
+      setPic(fetchedData.pic);
+      setLink(fetchedData.link);
+      setLinkText(fetchedData.linkText);
+      setIsLinkNewTab(fetchedData.isLinkNewTab);
+    })();
+  }, []);
+
+  useEffect(() => {
+    const hasShown = getWithExpiry("hasShownSpecialMsgModal");
+    if (!hasShown) {
+      setShow(true); 
+      setWithExpiry("hasShownSpecialMsgModal", true, 1);
+    }
+  }, []);
+
+  const handleClose = () => {
+    setShow(false);
+    //if (onClose) onClose();
+  };
+
+  if (!show) return null;
+  const picLink = pic ? pic.replace("../../", homePageUrl) : "";
+  return (
+    <div className="modal fade show" id="SpecialMsg" style={{ display: 'block', paddingLeft: 0 }} aria-modal="true" role="dialog">
+      <div className="modal-dialog modal-lg">
+        <div className="modal-content border-3 border-dark">
+          <div className="modal-header p-0 border-0">
+            <button type="button" className="close border-0 fs-4 fw-bold py-0" onClick={() => setShow(false)}>×</button>
+          </div>
+          <div className="modal-body p-2">
+            <img src={picLink} className="img-fluid my-0" alt="Special Message" />
+          </div>
+          <div className="modal-footer p-0 border-0">
+            {link && (
+              <a href={link} className="btn btn-light" target={isLinkNewTab ? "_blank" : "_self"} rel="noopener noreferrer">
+                {linkText}
+              </a>
+            )}
+            <button className="btn btn-dark" type="button" onClick={handleClose}>סגירה</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 export function PictureSlider() {
   const [loading, setLoading] = useState(true);
@@ -274,6 +337,7 @@ export default function IndexPageItems() {
 
   return (
     <>
+      {hasSpecialMsg && <SpecialMsgModal />}
       {hasRows && <Row />}
       {hasPics && <PictureSlider />}
       {hasPics && hasNavPics && <hr className="hrIndex w-md-75 mx-auto" />}

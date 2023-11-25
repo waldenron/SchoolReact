@@ -8,7 +8,7 @@ import './App.css';
 import './css/StyleSheet.css';
 
 
-import { fetchData, getInst, getHomePageUrl, getInstUtilsParams, getInstParams } from './utils/apiServices';
+import { fetchData, getInstParams } from './utils/apiServices';
 
 import { LoadingSpinner, Logo, NotFound } from './components/Common';
 import Nav from "./components/Nav";
@@ -20,7 +20,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { toPageTitle } from './utils/utilityFunctions';
 import CoursePage from './components/Courses';
-import Calendar from './components/Calendars';
+import Calendar, { MyCalendar } from './components/Calendars';
 import Schedule from './components/Schedule';
 import PicGallery, { PicGalleryForDir } from './components/PicGallery';
 import Login from './components/Login';
@@ -182,6 +182,7 @@ export default function App() {
 
             <Route path="/Courses" element={<CoursePage />} />
             <Route path="/Courses/:id" element={<CoursePage />} />
+            <Route path="/MyCalendar" element={<MyCalendar />} />
             <Route path="/Calendars" element={<Calendar />} />
             <Route path="/Calendars/:id" element={<Calendar />} />
             <Route path="/InfoItems" element={<InfoItems />} />

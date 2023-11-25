@@ -147,7 +147,7 @@ export function LoadingSpinner() {
 export const MobileRotateAdvice = () => {
     const [isMobile, setIsMobile] = useState(false);
     const [isPortrait, setIsPortrait] = useState(false);
-    const [showMessage, setShowMessage] = useState(true); // State to control message visibility
+    const [showMessage, setShowMessage] = useState(true); 
 
     const checkOrientation = () => {
         setIsPortrait(window.innerWidth <= window.innerHeight);
@@ -164,16 +164,13 @@ export const MobileRotateAdvice = () => {
         return () => window.removeEventListener('resize', checkOrientation);
     }, []);
 
-    const handleClose = () => {
-        setShowMessage(false); // Hide the message when close button is clicked
-    };
 
     if (isMobile && isPortrait && showMessage) {
         return (
             <div className="d-flex justify-content-between align-items-center p-2 bg-warning">
                 <FontAwesomeIcon icon="fas fa-mobile-alt" rotation={90} size="2x" className="me-2" />
                 <span>הצפייה בסלולרי מומלצת במצב אופקי.</span>
-                <button onClick={handleClose} className="btn btn-close" aria-label="סגור"></button>
+                <button onClick={() => setShowMessage(false)} className="btn btn-close" aria-label="סגור"></button>
             </div>
         );
     }
@@ -197,6 +194,7 @@ export function NotAllowed() {
         </div>
     );
 }
+
 
 export const AddToCalendarIcon = () => (<FontAwesomeIcon icon="fa-calendar-plus" className="text-primary no-print" title="Add to Google Calendar" />);
 export const AddToCalendarLink = ({ title, startTime, endTime, description = '', location = '' }) => {
