@@ -19,9 +19,9 @@ export const getHebrewMonthsForRange = (month, year) => {
 export const getHebrewDay = (date) => {
     const hebrewLetters = [
         'א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'ז\'', 'ח\'', 'ט\'',
-        'י', 'י"א', 'י"ב', 'י"ג', 'י"ד', 'ט"ו', 'ט"ז', 'י"ז', 'י"ח', 'י"ט',
-        'כ', 'כ"א', 'כ"ב', 'כ"ג', 'כ"ד', 'כ"ה', 'כ"ו', 'כ"ז', 'כ"ח', 'כ"ט',
-        'ל'
+        'י\'', 'י"א', 'י"ב', 'י"ג', 'י"ד', 'ט"ו', 'ט"ז', 'י"ז', 'י"ח', 'י"ט',
+        'כ\'', 'כ"א', 'כ"ב', 'כ"ג', 'כ"ד', 'כ"ה', 'כ"ו', 'כ"ז', 'כ"ח', 'כ"ט',
+        'ל\''
     ];
     const hebrewDate = new HDate(date);
     // const formattedHebrewDate = hebrewDate.toString('h'); // Format as per your preference
@@ -52,17 +52,17 @@ const getHebrewYearLetters = (year) => {
 
     // Hundreds
     while (year >= 100) {
-        let value = Math.floor(year / 100) * 100; 
+        let value = Math.floor(year / 100) * 100;
         if (value >= 400) value = 400;
         else if (value >= 300) value = 300;
         else if (value >= 200) value = 200;
-        
+
         hebrewYear += findHebrewLetter(value);
         year -= value;
     }
     // Tens
     if (year >= 10) {
-        const value = Math.floor(year / 10) * 10; 
+        const value = Math.floor(year / 10) * 10;
         hebrewYear += findHebrewLetter(value);
         year -= value;
     }
@@ -97,3 +97,17 @@ const monthMapping = {
 export const getHebrewGregorianMonth = (monthName) => {
     return monthMapping[monthName]; // Get the month number from the mapping
 }
+
+export const dayNameMapping = {
+    'Sunday': 'ראשון', 'א': 'ראשון', '1': 'ראשון',
+    'Monday': 'שני', 'ב': 'שני', '2': 'שני',
+    'Tuesday': 'שלישי', 'ג': 'שלישי', '3': 'שלישי',
+    'Wednesday': 'רביעי', 'ד': 'רביעי', '4': 'רביעי',
+    'Thursday': 'חמישי', 'ה': 'חמישי', '5': 'חמישי',
+    'Friday': 'שישי', 'ו': 'שישי', '6': 'שישי',
+    'Saturday': 'שבת', 'ש': 'שבת', '7': 'שבת'
+};
+export const getHebrewLongDayName = (dayName) => {
+    dayName = dayName.replace(/'/g, "").replace(/׳/g, ""); // Remove the apostrophe
+    return dayNameMapping[dayName]; // Get the day name from the mapping
+}  

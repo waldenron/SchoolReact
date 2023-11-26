@@ -37,7 +37,6 @@ const FilterButton = ({ item, isActive, handleOnClick }) => {
         >
             {item.itemIcon && item.itemIcon.type === 'fa' && <FontAwesomeIcon icon={item.itemIcon.cssClass} className="mx-1" />}
             {item.name}
-            {item.registerLink && <ToLink to={item.registerLink} ><FontAwesomeIcon icon="fa-solid fa-plus fa-xs" className="ms-1 text-white" title="רישום ליומן" /></ToLink> }
         </span>
     );
 };

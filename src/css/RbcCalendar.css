@@ -20,14 +20,20 @@
 }
 
 .rbc-button-link {
-    color: transparent; /* Hide the original text (day) inside the button  */
-    
+    color: transparent;
+    /* Hide the original text (day) inside the button  */
+
 }
 
-.rbc-today{
+.rbc-today {
     background-color: #B0926A !important;
 }
 
-.bgDate{
+.bgDate {
     background-color: #ECE3CE !important;
+}
+
+/*hide Sat*/
+.rbc-month-view .rbc-header:nth-child(7) {
+    display: none;
 }

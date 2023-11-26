@@ -6,7 +6,7 @@ import { fetchData } from '../utils/apiServices';
 import { Header, LoadingSpinner, MobileRotateAdvice, NotAllowed, ToLink } from './Common';
 import { FilterCategories } from './ItemsList';
 import { getWithExpiry, toDate } from '../utils/utilityFunctions';
-import { getHebrewDay, getHebrewGregorianMonth, getHebrewJewishMonth, getHebrewJewishYear, getHebrewMonthsForRange } from '../utils/jewishDates';
+import { getHebrewDay, getHebrewGregorianMonth, getHebrewJewishMonth, getHebrewJewishYear, getHebrewLongDayName, getHebrewMonthsForRange } from '../utils/jewishDates';
 
 
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
@@ -15,6 +15,8 @@ import 'moment/locale/he'; // Import Hebrew locale
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '../css/RbcCalendar.css';
 
+
+const CustomDayLabel = ({ label }) => { return (<>{getHebrewLongDayName(label)}</>); };
 
 const CalendarButton = ({ item, isActive, handleOnClick }) => {
     const buttonStyle = item.color ? { backgroundColor: item.color.includes('#') ? item.color : `#${item.color}` } : {};
@@ -25,7 +27,6 @@ const CalendarButton = ({ item, isActive, handleOnClick }) => {
         </div>
     );
 };
-
 export function CalendarButtons({ calendarItems, onClick }) {
     const [activeCalendarId, setActiveCalendarId] = useState(null);
 
@@ -43,12 +44,13 @@ export function CalendarButtons({ calendarItems, onClick }) {
 }
 
 const CustomToolbar = ({ label, onNavigate, onView }) => {
+    const isSmallScreen = window.innerWidth < 900;
     const dateParts = label.split(' ');
-    const year = dateParts[1];
-    const monthName = dateParts[0];
-    const month = getHebrewGregorianMonth(monthName);
-
-    const combinedLabel = `${label} / ${getHebrewMonthsForRange(month, year)}`;
+    let year = dateParts[1];
+    let monthName = dateParts[0];
+    let hebMonths = getHebrewMonthsForRange(getHebrewGregorianMonth(monthName), year);
+    if (isSmallScreen) { monthName = monthName.substring(0, 3) + "'"; year = year.substring(2, 4); hebMonths = hebMonths.replace(/ /g, "") }
+    const combinedLabel = `${monthName} ${year} / ${hebMonths}`;
     return (
         <div className="rbc-toolbar">
             <span className="rbc-btn-group">
@@ -64,11 +66,11 @@ const CustomToolbar = ({ label, onNavigate, onView }) => {
             </span>
             <span className="rbc-toolbar-label h3 text-end">{combinedLabel}</span>
             <span className="rbc-btn-group">
-                <span className="h6">תצוגה: </span>
+                <span className={isSmallScreen ? "small" : ""}>תצוגה: </span>
                 <button type="button" onClick={() => onView('month')}>חודש</button>
                 <button type="button" onClick={() => onView('week')}>שבוע</button>
                 <button type="button" onClick={() => onView('day')}>יום</button>
-                <button type="button" onClick={() => onView('agenda')}>לוח זמנים</button>
+                <button type="button" onClick={() => onView('agenda')}>{isSmallScreen ? 'לו"ז' : 'לוח זמנים'}</button>
             </span>
         </div>
     );
@@ -76,12 +78,13 @@ const CustomToolbar = ({ label, onNavigate, onView }) => {
 
 
 const CustomDateCell = ({ date }) => {
-
-    const formattedHebrewDate = `${getHebrewDay(date)} ${getHebrewJewishMonth(date)}`;
+    const isSmallScreen = window.innerWidth < 900;
+    const formattedHebrewDate = isSmallScreen ?
+        `${getHebrewDay(date)}` : `${getHebrewDay(date)} ${getHebrewJewishMonth(date)}`;
     return (
         <div className="d-flex justify-content-between bgDate">
-            <div className="ms-1">{toDate(date, "dd/MM")}</div> {/* Gregorian Date */}
-            <div className="me-1">{formattedHebrewDate}</div> {/* Hebrew Date */}
+            <div className="ms-1">{toDate(date, "dd/MM")}</div>
+            <div className="me-1">{formattedHebrewDate}</div>
         </div>
     );
 };
@@ -95,7 +98,7 @@ const CustomEvent = ({ event }) => {
                 <strong>{event.title}</strong>
                 {event.attachments &&
                     <div>
-                        {event.attachments.map((attachment) => (<ToLink to={attachment.link}> <FontAwesomeIcon icon="fa-paperclip" className="text-white ms-1" /></ToLink>))}
+                        {event.attachments.map((attachment, index) => (<ToLink to={attachment.link} key={index}> <FontAwesomeIcon icon="fa-paperclip" className="text-white ms-1" /></ToLink>))}
                     </div>
                 }
             </div>
@@ -132,7 +135,6 @@ export const CustomBigCalendar = ({ events }) => {
     moment.locale('he'); // Set moment to use the Hebrew locale
     const localizer = momentLocalizer(moment);
     const calendarEvents = events && transformEventsToCalendarFormat(events);
-    //const calendarEvents = events && events.length > 0 && transformEventsToCalendarFormat(events);
     return (
         <>
             {calendarEvents && <BigCalendar
@@ -142,8 +144,11 @@ export const CustomBigCalendar = ({ events }) => {
                 startAccessor="start"
                 endAccessor="end"
                 min={minTime} // Set the minimum time
-                style={{ height: 500 }}
+                style={{ height: 680 }}
                 components={{
+                    month: {
+                        header: CustomDayLabel // Use your custom header component
+                    },
                     toolbar: CustomToolbar,
                     dateCellWrapper: ({ children, value }) => {
                         // Extract the button from children (assuming it's always the first child)

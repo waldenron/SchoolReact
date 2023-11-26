@@ -4,13 +4,15 @@
 
 .sticky-top {
     z-index: 1;
-    
+
 }
+
 .requiredField::after {
     content: "🟥";
     font-size: 7pt;
     margin-right: 0.3rem;
 }
+
 .bullet::before {
     content: "▪️";
 }
@@ -93,7 +95,7 @@ ul.list-group li:hover {
     justify-content: flex-end;
 }
 
-@media screen and (min-width: 900px) {
+@media screen and (min-width: 1400px) {
     .w-lg-25 {
         width: 25% !important;
     }
@@ -116,6 +118,10 @@ ul.list-group li:hover {
 }
 
 @media screen and (min-width: 576px) {
+    .hideOnLargeScreen {
+        display: none;
+    }
+
     .before {
         flex: 0 0 15%;
     }
@@ -155,10 +161,11 @@ ul.list-group li:hover {
     .w-md-90 {
         width: 90% !important;
     }
+
     .max-w-select {
         max-width: 40%;
     }
-    
+
     .width-third {
         flex: 0 0 calc(33.333% - 1rem);
     }
@@ -166,12 +173,9 @@ ul.list-group li:hover {
     .width-quater {
         flex: 0 0 calc(25.0% - 1rem);
     }
+
     .width-fifth {
         flex: 0 0 calc(20.0% - 1rem);
-    }
-
-    .hideOnLargeScreen {
-        display: none;
     }
 }
 
