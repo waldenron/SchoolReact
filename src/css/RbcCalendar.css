@@ -1,28 +1,20 @@
 .rbc-calendar {
     direction: rtl;
-    /* Any additional styles... */
-}
-
-.rbc-calendar {
-    direction: rtl;
-    /* Any additional styles... */
 }
 
 .rbc-event,
+.rbc-header,
 .rbc-day-slot .rbc-background-event {
     text-align: right !important;
 }
 
-/* Adjust cell height in Month view */
-.rbc-month-view .rbc-row-content {
-    min-height: 100px !important;
-    /* Adjust this value as needed */
-}
-
+/* Hide the original text (day) inside the button  */
 .rbc-button-link {
     color: transparent;
-    /* Hide the original text (day) inside the button  */
-
+}
+/*hide Saturday */
+.rbc-month-view .rbc-header:nth-child(7) {
+    display: none;
 }
 
 .rbc-today {
@@ -31,9 +23,4 @@
 
 .bgDate {
     background-color: #ECE3CE !important;
-}
-
-/*hide Sat*/
-.rbc-month-view .rbc-header:nth-child(7) {
-    display: none;
 }

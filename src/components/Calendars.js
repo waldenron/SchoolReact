@@ -19,10 +19,12 @@ import '../css/RbcCalendar.css';
 const CustomDayLabel = ({ label }) => { return (<>{getHebrewLongDayName(label)}</>); };
 
 const CalendarButton = ({ item, isActive, handleOnClick }) => {
+    const isSmallScreen = window.innerWidth < 900;
+    const text = isSmallScreen ? item.name.replace("יומן ", "") : item.name;
     const buttonStyle = item.color ? { backgroundColor: item.color.includes('#') ? item.color : `#${item.color}` } : {};
     return (
-        <div className={`d-flex justify-content-between btn btn-${isActive ? 'primary active' : 'secondary'} btn-sm m-1`} style={buttonStyle}>
-            <span onClick={() => handleOnClick(item.id)} className="flex-grow-1 text-end">{item.name}</span>
+        <div className={`d-flex justify-content-between btn btn-sm btn-${isActive ? 'primary active' : 'secondary'} m-1`} style={buttonStyle}>
+            <span onClick={() => handleOnClick(item.id)} className="flex-grow-1 text-end">{text}</span>
             {item.registerLink && <ToLink to={item.registerLink} ><FontAwesomeIcon icon="fa-solid fa-plus fa-xs" className="ms-1 text-white" title="רישום ליומן" /></ToLink>}
         </div>
     );
@@ -55,13 +57,13 @@ const CustomToolbar = ({ label, onNavigate, onView }) => {
         <div className="rbc-toolbar">
             <span className="rbc-btn-group">
                 <button type="button" onClick={() => onNavigate('PREV')}>
-                    <FontAwesomeIcon icon="fa-arrow-right" /> הקודם
+                    <FontAwesomeIcon icon="fa-arrow-right" />{isSmallScreen ? "" : "הקודם "}
                 </button>
                 <button type="button" onClick={() => onNavigate('TODAY')}>
                     <FontAwesomeIcon icon="fa-calendar-day" /> היום
                 </button>
                 <button type="button" onClick={() => onNavigate('NEXT')}>
-                    הבא <FontAwesomeIcon icon="fa-arrow-left" />
+                    {isSmallScreen ? "" : "הבא "}<FontAwesomeIcon icon="fa-arrow-left" />
                 </button>
             </span>
             <span className="rbc-toolbar-label h3 text-end">{combinedLabel}</span>
