@@ -104,7 +104,7 @@ export const ItemsList = ({ header, msg, items, toHtml, filterCategories, noItem
     const hasItems = filteredItems.length > 0;
     const showNoItem = items.length === 0 && noItemShow;
     return (
-        <div className="py-3 w-md-75 mx-auto">
+        <div className="py-3 w-md-90 mx-auto">
             <Header header={header} msg={msg} />
             {!showNoItem && <SearchBar onSearch={setSearchInput} />}
             {filterCategories && <FilterCategories filterCategories={filterCategories} onFilterChange={setActiveFilter} />}

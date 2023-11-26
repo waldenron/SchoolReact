@@ -1,19 +1,21 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { fetchData } from '../utils/apiServices';
-import { Header, LoadingSpinner, MobileRotateAdvice, NotAllowed, ToLink } from './Common';
+import { AddToCalendarLink, Header, LoadingSpinner, MobileRotateAdvice, NotAllowed, ToLink } from './Common';
 import { FilterCategories } from './ItemsList';
 import { getWithExpiry, toDate } from '../utils/utilityFunctions';
-import { getHebrewDay, getHebrewGregorianMonth, getHebrewJewishMonth, getHebrewJewishYear, getHebrewLongDayName, getHebrewMonthsForRange } from '../utils/jewishDates';
+import { getHebrewLongDayName, toHebrewDate } from '../utils/jewishDates';
 
 
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'moment/locale/he'; // Import Hebrew locale
+
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '../css/RbcCalendar.css';
+import { Modal, Button } from 'react-bootstrap';
+
 
 
 const CustomDayLabel = ({ label }) => { return (<>{getHebrewLongDayName(label)}</>); };
@@ -32,10 +34,7 @@ const CalendarButton = ({ item, isActive, handleOnClick }) => {
 export function CalendarButtons({ calendarItems, onClick }) {
     const [activeCalendarId, setActiveCalendarId] = useState(null);
 
-    const handleOnClick = (calendarId) => {
-        setActiveCalendarId(calendarId);
-        onClick(calendarId);
-    };
+    const handleOnClick = (calendarId) => { setActiveCalendarId(calendarId); onClick(calendarId); };
 
     return (
         <div className="d-flex flex-wrap btn-group justify-content-center my-1">
@@ -45,35 +44,79 @@ export function CalendarButtons({ calendarItems, onClick }) {
     );
 }
 
-const CustomToolbar = ({ label, onNavigate, onView }) => {
-    const isSmallScreen = window.innerWidth < 900;
-    const dateParts = label.split(' ');
-    let year = dateParts[1];
-    let monthName = dateParts[0];
-    let hebMonths = getHebrewMonthsForRange(getHebrewGregorianMonth(monthName), year);
-    if (isSmallScreen) { monthName = monthName.substring(0, 3) + "'"; year = year.substring(2, 4); hebMonths = hebMonths.replace(/ /g, "") }
-    const combinedLabel = `${monthName} ${year} / ${hebMonths}`;
+const calculateCurrentDateRange = (toolbar, view) => {
+    const currentDate = toolbar.date; // This is the current date in focus
+    let startDate, endDate;
+
+    switch (view) {
+        case 'month':
+            startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            break;
+        case 'week':
+            startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - currentDate.getDay());
+            endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + 6);
+            break;
+        case 'day':
+            startDate = endDate = new Date(currentDate);
+            break;
+        case 'agenda':
+            startDate = new Date(currentDate);
+            endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + 30);
+            break;
+    }
+
+    return { startDate, endDate };
+};
+
+const getLabel = (startDate, endDate, view) => {
+    const hebMonths = toHebrewDate(startDate, "MMMM", true);
+    const monthName = toHebrewDate(startDate, "MMMM", false);
+    const year = startDate.getFullYear();
+
+    switch (view) {
+        case 'month':
+            return `${monthName} ${year} / ${hebMonths}`;
+        case 'week':
+            return `${toDate(startDate, "dd/MM")}-${toDate(endDate, "dd/MM")}-${year}, ${toHebrewDate(startDate, "dd MM")}-${toHebrewDate(endDate, "dd MM")}`;
+        case 'day':
+            return `יום ${toHebrewDate(startDate, "dddd")} - ${toDate(startDate, "dd/MM/yyyy")}, ${toHebrewDate(startDate, "dd MM yyyy")}`;
+        case 'agenda':
+            return `${toDate(startDate, "dd/MM")}-${toDate(endDate, "dd/MM")}, ${toHebrewDate(startDate, "dd MM")}-${toHebrewDate(endDate, "dd MM")}`;
+    }
+
+    return "";
+};
+const CustomToolbar = (toolbar) => {
+    const { label, onNavigate, onView, view } = toolbar;
+    const isSmallScreen = false;// window.innerWidth < 900;
+    const { startDate, endDate } = calculateCurrentDateRange(toolbar, view);
+
+    const combinedLabel = getLabel(startDate, endDate, view);
+    const btnCss = "btn bgBtn ms-1 me-0";
     return (
         <div className="rbc-toolbar">
-            <span className="rbc-btn-group">
-                <button type="button" onClick={() => onNavigate('PREV')}>
-                    <FontAwesomeIcon icon="fa-arrow-right" />{isSmallScreen ? "" : "הקודם "}
-                </button>
-                <button type="button" onClick={() => onNavigate('TODAY')}>
-                    <FontAwesomeIcon icon="fa-calendar-day" /> היום
-                </button>
-                <button type="button" onClick={() => onNavigate('NEXT')}>
-                    {isSmallScreen ? "" : "הבא "}<FontAwesomeIcon icon="fa-arrow-left" />
-                </button>
-            </span>
-            <span className="rbc-toolbar-label h3 text-end">{combinedLabel}</span>
-            <span className="rbc-btn-group">
-                <span className={isSmallScreen ? "small" : ""}>תצוגה: </span>
-                <button type="button" onClick={() => onView('month')}>חודש</button>
-                <button type="button" onClick={() => onView('week')}>שבוע</button>
-                <button type="button" onClick={() => onView('day')}>יום</button>
-                <button type="button" onClick={() => onView('agenda')}>{isSmallScreen ? 'לו"ז' : 'לוח זמנים'}</button>
-            </span>
+            <div className="d-flex justify-content-between mt-2 w-100">
+                <span className="rbc-btn-group">
+                    <div className="btn-group">
+                        <span className={btnCss} onClick={() => onNavigate('PREV')}><FontAwesomeIcon icon="fa-arrow-right" />הקודם </span>
+                        <span className={btnCss} onClick={() => onNavigate('TODAY')}><FontAwesomeIcon icon="fa-calendar-day" /> היום</span>
+                        <span className={btnCss} onClick={() => onNavigate('NEXT')}>הבא <FontAwesomeIcon icon="fa-arrow-left" /></span>
+                    </div>
+                </span>
+                <span className="rbc-btn-group">
+                    <b>תצוגה: </b>
+                    <div className="btn-group">
+                        <span className={btnCss} onClick={() => onView('month')}>חודש</span>
+                        <span className={btnCss} onClick={() => onView('week')}>שבוע</span>
+                        <span className={btnCss} onClick={() => onView('day')}>יום</span>
+                        <span className={btnCss} onClick={() => onView('agenda')}>לוח זמנים</span>
+                    </div>
+                </span>
+            </div>
+            <div className="mt-3"><span className="rbc-toolbar-label h3">{combinedLabel}</span></div>
         </div>
     );
 };
@@ -81,8 +124,7 @@ const CustomToolbar = ({ label, onNavigate, onView }) => {
 
 const CustomDateCell = ({ date }) => {
     const isSmallScreen = window.innerWidth < 900;
-    const formattedHebrewDate = isSmallScreen ?
-        `${getHebrewDay(date)}` : `${getHebrewDay(date)} ${getHebrewJewishMonth(date)}`;
+    const formattedHebrewDate = toHebrewDate(date, isSmallScreen ? "dd" : "dd MM");
     return (
         <div className="d-flex justify-content-between bgDate">
             <div className="ms-1">{toDate(date, "dd/MM")}</div>
@@ -90,22 +132,73 @@ const CustomDateCell = ({ date }) => {
         </div>
     );
 };
-
-const CustomEvent = ({ event }) => {
-    let tooltip = `${event.title}`;
-    if (event.desc) tooltip += ` - ${event.desc}`;
+const CustomDateHeader = ({ date, label }) => {
+    // Custom formatting or logic for the date
+    // For example, adding custom text or icons
     return (
-        <div data-bs-toggle="tooltip" title={tooltip}>
-            <div className="d-flex justify-content-between">
-                <strong>{event.title}</strong>
-                {event.attachments &&
-                    <div>
-                        {event.attachments.map((attachment, index) => (<ToLink to={attachment.link} key={index}> <FontAwesomeIcon icon="fa-paperclip" className="text-white ms-1" /></ToLink>))}
-                    </div>
-                }
-            </div>
-            {event.desc && <div><small>{event.desc}</small></div>}
+        <div>
+            <span>**{label}</span> {/* label contains the date */}
+            {/* Additional custom content */}
         </div>
+    );
+};
+
+const EventDetailsModal = ({ show, onHide, event }) => {
+    const dateText = `${toDate(event.start)}, ${toHebrewDate(event.start, "dd MM")}`;
+    let timeText = "";
+    if (event.end.getHours() >= 6) timeText += toDate(event.end, "HH:mm") + " - ";
+    if (event.start.getHours() >= 6) timeText += toDate(event.start, "HH:mm"); else timeText = null;
+
+    return (
+        <Modal show={show} onHide={onHide}>
+            <Modal.Header className="d-flex justify-content-start text-white">
+                <Modal.Title className="">פרטים</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="bg-dark text-white">
+                <h3>{event.title}</h3>
+                <h5>{dateText}</h5>
+                {timeText && <h6>{timeText}</h6>}
+                {event.desc && <div>{event.desc}</div>}
+                {event.attachments && event.attachments.map((attachment, index) => (
+                    <div className="mt-3" key={index}>
+                        <FontAwesomeIcon icon="fa-paperclip" className="text-white ms-1" />
+                        <ToLink to={attachment.link}>{attachment.title}</ToLink>
+                    </div>
+                ))}
+                <div className="mt-3">
+                    <AddToCalendarLink title={event.title} startTime={event.start} endTime={event.end} isAllday={event.allDay} text="הוספה ליומן שלי" description={event.desc} />
+                </div>
+            </Modal.Body>
+            <Modal.Footer className="p-0 border-0">
+                <Button className="btn btn-dark" onClick={onHide}>סגירה</Button>
+            </Modal.Footer>
+        </Modal>
+    );
+};
+const CustomEvent = ({ event }) => {
+    const [showModal, setShowModal] = useState(false);
+
+    const handleEventClick = () => { setShowModal(true); };
+    return (
+        <>
+            <div onClick={handleEventClick} className="event-container">
+                <div className="d-flex justify-content-between">
+                    <strong>{event.title}</strong>
+                    {event.attachments && (
+                        <div>
+                            {event.attachments.map((attachment, index) => (
+                                <ToLink to={attachment.link} key={index}>
+                                    <FontAwesomeIcon icon="fa-paperclip" className="text-white ms-1" />
+                                </ToLink>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                {event.desc && <div><small>{event.desc}</small></div>}
+            </div>
+
+            <EventDetailsModal show={showModal} onHide={() => setShowModal(false)} event={event} />
+        </>
     );
 };
 
@@ -116,9 +209,8 @@ const messages = {
 };
 function transformEventsToCalendarFormat(events) {
     return events.map(event => {
-        const startDateTime = event.allDayEvent ? new Date(event.date) : new Date(`${event.date}T${event.time}`);
-        const endDateTime = new Date(startDateTime.getTime());
-        endDateTime.setHours(endDateTime.getHours() + 1); // Assuming the event duration is 1 hour
+        const startDateTime = new Date(event.start);
+        const endDateTime = new Date(event.end);
 
         return {
             title: event.subject,
@@ -151,6 +243,11 @@ export const CustomBigCalendar = ({ events }) => {
                     month: {
                         header: CustomDayLabel // Use your custom header component
                     },
+                    //doesn't work
+                    // week: {
+                    //     dayHeader: CustomDateHeader, // Custom component for week view
+                    // },
+                    // dateHeader: CustomDateHeader,
                     toolbar: CustomToolbar,
                     dateCellWrapper: ({ children, value }) => {
                         // Extract the button from children (assuming it's always the first child)
@@ -196,7 +293,7 @@ export const MyCalendar = () => {
     useEffect(() => {
         if (!activeCalendar || !calendarItems || calendarItems.length === 0) return;
         (async () => {
-            //setLoading(true);
+            setLoading(true);
             const calendarId = calendarItems.find(item => item.id === activeCalendar).link;
             const additionalHeaders = [{ name: 'calendarId', value: calendarId }];
             const { data: fetchedData, error } = await fetchData('/api/Events', null, null, additionalHeaders);
@@ -207,7 +304,7 @@ export const MyCalendar = () => {
         })();
     }, [calendarItems, activeCalendar]);
 
-    if (loading) { return <LoadingSpinner />; }
+    //if (loading) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }
     //delete calendarItems color if not token
     if (!token && calendarItems) { calendarItems.forEach(item => { item.color = null; }); }
@@ -217,7 +314,8 @@ export const MyCalendar = () => {
             <Header header="יומנים" />
             {calendarItems.length > 0 && <CalendarButtons calendarItems={calendarItems} onClick={setActiveCalendar} />}
             <br />
-            {(activeCalendar && calendarItems && calendarItems.length > 0) && events && <CustomBigCalendar events={events} />}
+            {loading ? <LoadingSpinner /> : activeCalendar && <CustomBigCalendar events={events} />}
+            {/* {(loading ? <LoadingSpinner /> : activeCalendar && calendarItems && calendarItems.length > 0) && events && <CustomBigCalendar events={events} />} */}
         </div>
     );
 };

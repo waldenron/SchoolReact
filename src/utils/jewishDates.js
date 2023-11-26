@@ -6,7 +6,7 @@ const getGregorianMonthRange = (month, year) => {
     return { startDate, endDate };
 };
 
-export const getHebrewMonthsForRange = (month, year) => {
+const getHebrewMonthsForRange = (month, year) => {
 
     const { startDate, endDate } = getGregorianMonthRange(month, year);
 
@@ -16,7 +16,7 @@ export const getHebrewMonthsForRange = (month, year) => {
     return startHebrewMonth === endHebrewMonth ? startHebrewMonth : `${startHebrewMonth} - ${endHebrewMonth}`;
 };
 
-export const getHebrewDay = (date) => {
+const getHebrewDay = (date) => {
     const hebrewLetters = [
         'א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'ז\'', 'ח\'', 'ט\'',
         'י\'', 'י"א', 'י"ב', 'י"ג', 'י"ד', 'ט"ו', 'ט"ז', 'י"ז', 'י"ח', 'י"ט',
@@ -28,7 +28,7 @@ export const getHebrewDay = (date) => {
     return `${hebrewLetters[hebrewDate.getDate() - 1]}`; // Day of the Hebrew month
 }
 
-export const getHebrewJewishMonth = (date) => {
+const getHebrewJewishMonth = (date) => {
 
     const hebrewDate = new HDate(date);
     return hebrewDate.getMonthName('h'); // Hebrew month name
@@ -84,7 +84,7 @@ const getHebrewYearLetters = (year) => {
     return hebrewYear;
 };
 
-export const getHebrewJewishYear = (date) => {
+const getHebrewJewishYear = (date) => {
     const hebrewDate = new HDate(date);
     const year = hebrewDate.getFullYear();
     return getHebrewYearLetters(year);
@@ -94,20 +94,55 @@ const monthMapping = {
     'ינואר': 1, 'פברואר': 2, 'מרץ': 3, 'אפריל': 4, 'מאי': 5, 'יוני': 6,
     'יולי': 7, 'אוגוסט': 8, 'ספטמבר': 9, 'אוקטובר': 10, 'נובמבר': 11, 'דצמבר': 12
 };
-export const getHebrewGregorianMonth = (monthName) => {
-    return monthMapping[monthName]; // Get the month number from the mapping
+
+const getHebrewDayOfWeek = (date) => {
+    const dayOfWeekMapping = {
+        1: 'ראשון', 2: 'שני', 3: 'שלישי', 4: 'רביעי', 5: 'חמישי', 6: 'שישי', 7: 'שבת',
+        Sunday: 'ראשון', Monday: 'שני', Tuesday: 'שלישי', Wednesday: 'רביעי', Thursday: 'חמישי', Friday: 'שישי', Saturday: 'שבת'
+    };
+    return dayOfWeekMapping[date.getDay() - 1];
 }
 
-export const dayNameMapping = {
-    'Sunday': 'ראשון', 'א': 'ראשון', '1': 'ראשון',
-    'Monday': 'שני', 'ב': 'שני', '2': 'שני',
-    'Tuesday': 'שלישי', 'ג': 'שלישי', '3': 'שלישי',
-    'Wednesday': 'רביעי', 'ד': 'רביעי', '4': 'רביעי',
-    'Thursday': 'חמישי', 'ה': 'חמישי', '5': 'חמישי',
-    'Friday': 'שישי', 'ו': 'שישי', '6': 'שישי',
-    'Saturday': 'שבת', 'ש': 'שבת', '7': 'שבת'
+const getHebrewGregorianMonth = (monthName) => {
+    return monthMapping[monthName]; // Get the month number from the mapping
+}
+const getHebrewGregorianMonthByNum = (monthNum) => {
+    // Find the Hebrew month name by searching through the mapping
+    for (const [key, value] of Object.entries(monthMapping)) {
+        if (value === monthNum) {
+            return key;
+        }
+    }
+    return null; // Return null if the month number is not found
 };
+
 export const getHebrewLongDayName = (dayName) => {
+    const dayNameMapping = {
+        'Sunday': 'ראשון', 'א': 'ראשון', '1': 'ראשון',
+        'Monday': 'שני', 'ב': 'שני', '2': 'שני',
+        'Tuesday': 'שלישי', 'ג': 'שלישי', '3': 'שלישי',
+        'Wednesday': 'רביעי', 'ד': 'רביעי', '4': 'רביעי',
+        'Thursday': 'חמישי', 'ה': 'חמישי', '5': 'חמישי',
+        'Friday': 'שישי', 'ו': 'שישי', '6': 'שישי',
+        'Saturday': 'שבת', 'ש': 'שבת', '7': 'שבת'
+    };
     dayName = dayName.replace(/'/g, "").replace(/׳/g, ""); // Remove the apostrophe
     return dayNameMapping[dayName]; // Get the day name from the mapping
-}  
+}
+
+export function toHebrewDate(date, format = "dd MM yyyy", isHeb = true) {
+    if (typeof date === "string") date = new Date(date);
+
+    let formattedDate = format;
+    if (format.includes('dddd')) formattedDate = formattedDate.replace('dddd', getHebrewDayOfWeek(date));
+    else if (format.includes('dd')) formattedDate = formattedDate.replace('dd', getHebrewDay(date));
+
+    if (format.includes('MMMM')) formattedDate = formattedDate.replace('MMMM',
+        isHeb ? getHebrewMonthsForRange(date.getMonth() + 1, date.getFullYear()) : getHebrewGregorianMonthByNum(date.getMonth() + 1));
+    if (format.includes('MM')) formattedDate = formattedDate.replace('MM', getHebrewJewishMonth(date));
+
+    if (format.includes('yyyy')) formattedDate = formattedDate.replace('yyyy', getHebrewJewishYear(date));
+    else if (format.includes('yy')) formattedDate = formattedDate.replace('yy', getHebrewJewishYear(date).slice(-2)); // last two digits of the year
+
+    return formattedDate;
+}

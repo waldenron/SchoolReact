@@ -83,7 +83,6 @@ export function getWithExpiry(key) {
     return item.value;
 }
 export function toDate(date, format = "dd/MM/yyyy") {
-
     if (typeof date === "string") date = new Date(date);
 
     const day = date.getDate();
@@ -104,12 +103,11 @@ export function toDate(date, format = "dd/MM/yyyy") {
     if (format.includes('yyyy')) formattedDate = formattedDate.replace('yyyy', year.toString());
     else if (format.includes('yy')) formattedDate = formattedDate.replace('yy', year.toString().slice(-2)); // last two digits of the year
 
-    if (format.includes('HH')) formattedDate = formattedDate.replace('HH', twoDigit(hours));
-    else if (format.includes('H')) formattedDate = formattedDate.replace('H', hours);
-
     if (format.includes('mm')) formattedDate = formattedDate.replace('mm', twoDigit(minutes));
     else if (format.includes('m')) formattedDate = formattedDate.replace('m', minutes);
-
+    
+    if (format.includes('HH')) formattedDate = formattedDate.replace('HH', twoDigit(hours));
+    else if (format.includes('H')) formattedDate = formattedDate.replace('H', hours);
 
     return formattedDate;
 }

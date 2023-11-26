@@ -29,7 +29,7 @@ function InfoNav({ homePageUrl }) {
     return (
         <div className="d-flex flex-wrap btn-group justify-content-center">
             {navItems.map((navItem, index) => (
-                <NavItem navItem={navItem} homePageUrl={homePageUrl} key={index} />
+                <NavItem navItem={navItem} homePageUrl={homePageUrl} isTextResponsive={false} key={index} />
             ))}
         </div>
     );

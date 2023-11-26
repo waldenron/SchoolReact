@@ -147,7 +147,7 @@ export function LoadingSpinner() {
 export const MobileRotateAdvice = () => {
     const [isMobile, setIsMobile] = useState(false);
     const [isPortrait, setIsPortrait] = useState(false);
-    const [showMessage, setShowMessage] = useState(true); 
+    const [showMessage, setShowMessage] = useState(true);
 
     const checkOrientation = () => {
         setIsPortrait(window.innerWidth <= window.innerHeight);
@@ -197,21 +197,19 @@ export function NotAllowed() {
 
 
 export const AddToCalendarIcon = () => (<FontAwesomeIcon icon="fa-calendar-plus" className="text-primary no-print" title="Add to Google Calendar" />);
-export const AddToCalendarLink = ({ title, startTime, endTime, description = '', location = '' }) => {
+export const AddToCalendarLink = ({ title, startTime, endTime, isAllday = false, text = '', description = '', location = '' }) => {
     //Temp? fix problem with the google calendar time + 5 minutes
     const fixGoogleTimeProblem = (dateTime) => new Date(dateTime.getTime() - 5 * 60000);
-    startTime = fixGoogleTimeProblem(startTime);
-    endTime = fixGoogleTimeProblem(endTime);
 
-    const start = toDate(startTime, "yyyyMMddTHHmmz"); // Added 'Z' to indicate UTC time
-    const end = toDate(endTime, "yyyyMMddTHHmmz");     // Added 'Z' to indicate UTC time
-
-    // Construct the Google Calendar link with only the necessary parameters
-    let eventLink = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title.trim())}&dates=${start}/${end}&ctz=Asia/Jerusalem`;
+    // Construct the Google Calendar link
+    let eventLink = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title.trim())}`;
+    if (isAllday) eventLink += `&dates=${toDate(startTime, "yyyyMMdd")}/${toDate(endTime,"yyyyMMdd")}`
+    else eventLink += `&dates=${toDate(fixGoogleTimeProblem(startTime), "yyyyMMddTHHmmz")}/${toDate(fixGoogleTimeProblem(endTime), "yyyyMMddTHHmmz")}&ctz=Asia/Jerusalem`;
 
     // Append description and location if they are provided
     if (description) eventLink += `&details=${encodeURIComponent(description.trim())}`;
     if (location) eventLink += `&location=${encodeURIComponent(location)}`;
 
-    return <a href={eventLink} target="_blank" rel="noopener noreferrer" ><AddToCalendarIcon /></a>;
+    return <a href={eventLink} className="text-decoration-none" target="_blank" rel="noopener noreferrer" ><AddToCalendarIcon />{text && <span className="ms-1">{text}</span>
+    }</a>;
 };

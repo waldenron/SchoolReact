@@ -5,7 +5,7 @@ import { ItemIcon, LoadingSpinner, ToLink } from './Common';
 
 import './Nav.module.css';
 
-export const NavItem = ({ navType, navItem, homePageUrl }) => {
+export const NavItem = ({ navType, navItem, homePageUrl, isTextResponsive = true }) => {
   const link = navItem.link;
   if (navType === "Line")
     return (
@@ -16,14 +16,14 @@ export const NavItem = ({ navType, navItem, homePageUrl }) => {
     )
   else //if (navType === "Buttons")
     return (
-      <ToLink to={link} className="px-md-3 px-2 text-dark text-decoration-none text-center text-responsive" data-bs-toggle="tooltip" title={navItem.text} target={navItem.isLinkNewTab ? '_blank' : '_self'}>
-          {<ItemIcon itemIcon={navItem.itemIcon} homePageUrl={homePageUrl} />}
-          {navItem.name && (<span className="mx-1 text-decoration-underline">{navItem.name}</span>)}
+      <ToLink to={link} className={`px-md-3 px-2 text-dark text-decoration-none text-center${isTextResponsive ? " text-responsive" : ""}`} data-bs-toggle="tooltip" title={navItem.text} target={navItem.isLinkNewTab ? '_blank' : '_self'}>
+        {<ItemIcon itemIcon={navItem.itemIcon} homePageUrl={homePageUrl} />}
+        {navItem.name && (<span className="mx-1 text-decoration-underline">{navItem.name}</span>)}
       </ToLink>
     )
 };
 
-export default function Nav() {
+export default function Nav(isTextResponsive = true) {
   const [loading, setLoading] = useState(true);
 
   const [homePageUrl, setHomePageUrl] = useState(null);
@@ -54,7 +54,7 @@ export default function Nav() {
       {navType === "Buttons" &&
         <div className="d-flex flex-wrap justify-content-center">
           {navItems.map((navItem, index) => (
-            <NavItem navType={navType} navItem={navItem} homePageUrl={homePageUrl} key={index} />
+            <NavItem navType={navType} navItem={navItem} homePageUrl={homePageUrl} isTextResponsive={isTextResponsive} key={index} />
           ))}
         </div>}
       {navType === "Line" &&
@@ -66,7 +66,7 @@ export default function Nav() {
           <div className={`collapse navbar-collapse ${isOpen ? 'show' : ''}`} onClick={toggle}>
             <ul className="list-group rounded-0 border-secondary navbar-nav">
               {navItems.map((navItem, index) => (
-                <NavItem navType={navType} navItem={navItem} homePageUrl={homePageUrl} key={index} />
+                <NavItem navType={navType} navItem={navItem} homePageUrl={homePageUrl} isTextResponsive={isTextResponsive} key={index} />
               ))}
             </ul>
           </div>

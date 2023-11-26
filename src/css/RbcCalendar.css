@@ -8,19 +8,42 @@
     text-align: right !important;
 }
 
-/* Hide the original text (day) inside the button  */
-.rbc-button-link {
+/* Hide the original text (day) inside the button, make the click on all rbc-header */
+.rbc-month-view .rbc-button-link {
     color: transparent;
+    width: 100%;
 }
+
 /*hide Saturday */
+/*try - week - ,
+.rbc-time-view .rbc-header:nth-child(7) ,
+.rbc-time-view .rbc-day-bg:nth-child(7) ,
+.rbc-time-view .rbc-row-content:nth-child(7) ,
+.rbc-time-view .rbc-time-column:nth-child(8) */
+
 .rbc-month-view .rbc-header:nth-child(7) {
     display: none;
 }
 
 .rbc-today {
-    background-color: #B0926A !important;
+    background-color: #E9B384 !important;
+}
+
+.bgBtn {
+    background-color: #577D86 !important;
+    color: white !important;
 }
 
 .bgDate {
-    background-color: #ECE3CE !important;
+    background-color: #BFCCB5 !important;
+}
+
+.rbc-month-view .rbc-event-allday,
+.rbc-month-view .event-container,
+.rbc-month-view .rbc-event,
+.rbc-time-view .rbc-event-allday,
+.rbc-time-view .event-container,
+.rbc-time-view .rbc-event {
+    background-color: #7C96AB !important;
+    border: 0;
 }
