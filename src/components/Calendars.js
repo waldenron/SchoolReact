@@ -267,7 +267,7 @@ export const CustomBigCalendar = ({ events }) => {
     );
 };
 
-export const MyCalendar = () => {
+export const Calendar = () => {
     const token = getWithExpiry("token");
 
     const [loading, setLoading] = useState(true);
@@ -321,7 +321,7 @@ export const MyCalendar = () => {
 };
 
 
-export default function Calendar() {
+export  function Calendar_Prev() {
     const token = getWithExpiry("token");
 
     const [loading, setLoading] = useState(true);

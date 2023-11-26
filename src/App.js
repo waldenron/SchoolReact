@@ -20,7 +20,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { toPageTitle } from './utils/utilityFunctions';
 import CoursePage from './components/Courses';
-import Calendar, { MyCalendar } from './components/Calendars';
+import  {Calendar, Calendar_Prev } from './components/Calendars';
 import Schedule from './components/Schedule';
 import PicGallery, { PicGalleryForDir } from './components/PicGallery';
 import Login from './components/Login';
@@ -182,9 +182,9 @@ export default function App() {
 
             <Route path="/Courses" element={<CoursePage />} />
             <Route path="/Courses/:id" element={<CoursePage />} />
-            <Route path="/MyCalendar" element={<MyCalendar />} />
+            <Route path="/CalendarPrev" element={<Calendar_Prev />} />
             <Route path="/Calendars" element={<Calendar />} />
-            <Route path="/Calendars/:id" element={<Calendar />} />
+            {/* <Route path="/Calendars/:id" element={<Calendar />} /> */}
             <Route path="/InfoItems" element={<InfoItems />} />
             <Route path="/InfoItems/:id" element={<InfoItems />} />
             <Route path="/Contacts" element={<ContactPage instDetails={instDetails} />} />
