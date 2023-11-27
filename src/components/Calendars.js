@@ -44,32 +44,7 @@ export function CalendarButtons({ calendarItems, onClick }) {
     );
 }
 
-const calculateCurrentDateRange = (toolbar, view) => {
-    const currentDate = toolbar.date; // This is the current date in focus
-    let startDate, endDate;
 
-    switch (view) {
-        case 'month':
-            startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-            endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-            break;
-        case 'week':
-            startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - currentDate.getDay());
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 6);
-            break;
-        case 'day':
-            startDate = endDate = new Date(currentDate);
-            break;
-        case 'agenda':
-            startDate = new Date(currentDate);
-            endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 30);
-            break;
-    }
-
-    return { startDate, endDate };
-};
 
 const getLabel = (startDate, endDate, view) => {
     const hebMonths = toHebrewDate(startDate, "MMMM", true);
@@ -92,6 +67,34 @@ const getLabel = (startDate, endDate, view) => {
 const CustomToolbar = (toolbar) => {
     const { label, onNavigate, onView, view } = toolbar;
     const isSmallScreen = false;// window.innerWidth < 900;
+
+    const calculateCurrentDateRange = (toolbar, view) => {
+        const currentDate = toolbar.date; // This is the current date in focus
+        let startDate, endDate;
+    
+        switch (view) {
+            case 'month':
+                startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                break;
+            case 'week':
+                startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - currentDate.getDay());
+                endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + 6);
+                break;
+            case 'day':
+                startDate = endDate = new Date(currentDate);
+                break;
+            case 'agenda':
+                startDate = new Date(currentDate);
+                endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + 30);
+                break;
+        }
+    
+        return { startDate, endDate };
+    };
+
     const { startDate, endDate } = calculateCurrentDateRange(toolbar, view);
 
     const combinedLabel = getLabel(startDate, endDate, view);
@@ -144,7 +147,7 @@ const CustomDateHeader = ({ date, label }) => {
 };
 
 const EventDetailsModal = ({ show, onHide, event }) => {
-    const dateText = `${toDate(event.start)}, ${toHebrewDate(event.start, "dd MM")}`;
+    const dateText = `יום ${toHebrewDate(event.start, "dddd")} - ${toDate(event.start, "dd/MM/yy")}, ${toHebrewDate(event.start, "dd MM")}`;
     let timeText = "";
     if (event.end.getHours() >= 6) timeText += toDate(event.end, "HH:mm") + " - ";
     if (event.start.getHours() >= 6) timeText += toDate(event.start, "HH:mm"); else timeText = null;

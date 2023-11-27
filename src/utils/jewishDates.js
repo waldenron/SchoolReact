@@ -100,7 +100,7 @@ const getHebrewDayOfWeek = (date) => {
         1: 'ראשון', 2: 'שני', 3: 'שלישי', 4: 'רביעי', 5: 'חמישי', 6: 'שישי', 7: 'שבת',
         Sunday: 'ראשון', Monday: 'שני', Tuesday: 'שלישי', Wednesday: 'רביעי', Thursday: 'חמישי', Friday: 'שישי', Saturday: 'שבת'
     };
-    return dayOfWeekMapping[date.getDay() - 1];
+    return dayOfWeekMapping[date.getDay() + 1];
 }
 
 const getHebrewGregorianMonth = (monthName) => {
