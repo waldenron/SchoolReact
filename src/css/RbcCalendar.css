@@ -41,12 +41,14 @@
     background-color: #BFCCB5 !important;
 }
 
-.rbc-month-view .rbc-event-allday,
-.rbc-month-view .event-container,
-.rbc-month-view .rbc-event,
+/* .rbc-month-view .rbc-event-allday, */
+/* .rbc-month-view .event-container, */
+/*,
 .rbc-time-view .rbc-event-allday,
-.rbc-time-view .event-container,
-.rbc-time-view .rbc-event {
-    background-color: #7C96AB !important;
+.rbc-time-view .event-container, 
+.rbc-time-view .rbc-event */
+.rbc-month-view .rbc-event
+    {
+    background-color: transparent !important;
     border: 0;
 }

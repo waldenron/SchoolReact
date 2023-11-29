@@ -25,8 +25,8 @@ const CalendarButton = ({ item, isActive, handleOnClick }) => {
     const text = isSmallScreen ? item.name.replace("יומן ", "") : item.name;
     const buttonStyle = item.color ? { backgroundColor: item.color.includes('#') ? item.color : `#${item.color}` } : {};
     return (
-        <div className={`d-flex justify-content-between btn btn-sm btn-${isActive ? 'primary active' : 'secondary'} m-1`} style={buttonStyle}>
-            <span onClick={() => handleOnClick(item.id)} className="flex-grow-1 text-end">{text}</span>
+        <div className={`d-flex justify-content-between btn btn-sm btn-${isActive ? 'primary active' : 'secondary'} m-1`}>
+            <span onClick={() => handleOnClick(item.id)} className="flex-grow-1 text-end"><span className="py-1" style={buttonStyle}>{text}</span> </span>
             {item.registerLink && <ToLink to={item.registerLink} ><FontAwesomeIcon icon="fa-solid fa-plus fa-xs" className="ms-1 text-white" title="רישום ליומן" /></ToLink>}
         </div>
     );
@@ -71,7 +71,7 @@ const CustomToolbar = (toolbar) => {
     const calculateCurrentDateRange = (toolbar, view) => {
         const currentDate = toolbar.date; // This is the current date in focus
         let startDate, endDate;
-    
+
         switch (view) {
             case 'month':
                 startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
@@ -91,7 +91,7 @@ const CustomToolbar = (toolbar) => {
                 endDate.setDate(endDate.getDate() + 30);
                 break;
         }
-    
+
         return { startDate, endDate };
     };
 
@@ -159,9 +159,11 @@ const EventDetailsModal = ({ show, onHide, event }) => {
             </Modal.Header>
             <Modal.Body className="bg-dark text-white">
                 <h3>{event.title}</h3>
+                {event.grade && <h4>שכבה {event.grade}</h4>}
                 <h5>{dateText}</h5>
                 {timeText && <h6>{timeText}</h6>}
-                {event.desc && <div>{event.desc}</div>}
+                {event.desc && <div dangerouslySetInnerHTML={{ __html: event.desc }} />}
+
                 {event.attachments && event.attachments.map((attachment, index) => (
                     <div className="mt-3" key={index}>
                         <FontAwesomeIcon icon="fa-paperclip" className="text-white ms-1" />
@@ -184,7 +186,7 @@ const CustomEvent = ({ event }) => {
     const handleEventClick = () => { setShowModal(true); };
     return (
         <>
-            <div onClick={handleEventClick} className="event-container">
+            <div style={event.style} onClick={handleEventClick} className="event-container">
                 <div className="d-flex justify-content-between">
                     <strong>{event.title}</strong>
                     {event.attachments && (
@@ -197,7 +199,8 @@ const CustomEvent = ({ event }) => {
                         </div>
                     )}
                 </div>
-                {event.desc && <div><small>{event.desc}</small></div>}
+                {event.grade && <div><small>שכבה {event.grade}</small></div>}
+                {event.desc && <div className="small" dangerouslySetInnerHTML={{ __html: event.desc }} />}
             </div>
 
             <EventDetailsModal show={showModal} onHide={() => setShowModal(false)} event={event} />
@@ -206,27 +209,45 @@ const CustomEvent = ({ event }) => {
 };
 
 
-const messages = {
-    allDay: 'כל היום', previous: 'הקודם', next: 'הבא', today: 'היום', month: 'חודש', week: 'שבוע', day: 'יום',
-    agenda: 'סדר יום', date: 'תאריך', time: 'זמן', event: 'אירוע',    // Any other translations...
-};
-function transformEventsToCalendarFormat(events) {
-    return events.map(event => {
-        const startDateTime = new Date(event.start);
-        const endDateTime = new Date(event.end);
 
-        return {
-            title: event.subject,
-            start: startDateTime,
-            end: endDateTime,
-            allDay: event.allDayEvent,
-            desc: event.description,
-            attachments: event.attachments,
-        };
-    });
-}
 
 export const CustomBigCalendar = ({ events }) => {
+    const messages = {
+        allDay: 'כל היום', previous: 'הקודם', next: 'הבא', today: 'היום', month: 'חודש', week: 'שבוע', day: 'יום',
+        agenda: 'סדר יום', date: 'תאריך', time: 'זמן', event: 'אירוע',    // Any other translations...
+    };
+
+    function transformEventsToCalendarFormat(events) {
+        //console.log(events.length);
+        return events.map(event => {
+            const startDateTime = new Date(event.start);
+            const endDateTime = new Date(event.end);
+
+            // return {
+            //     title: event.subject,
+            //     start: startDateTime,
+            //     end: endDateTime,
+            //     allDay: event.allDayEvent,
+            //     desc: event.description,
+            //     attachments: event.attachments,
+            //     style: { backgroundColor: eventsColor } // Different background color
+            // };
+
+            let eventObject = {
+                title: event.subject,
+                start: startDateTime,
+                end: endDateTime,
+                allDay: event.allDayEvent,
+                desc: event.description,
+                attachments: event.attachments,
+                style: { backgroundColor: event.color ? `#${event.color}` : "#7C96AB", boder: "0" },
+                grade: event.grade
+            };
+            //console.log(event);
+
+            return eventObject;
+        });
+    }
     const minTime = new Date();
     minTime.setHours(8, 0, 0, 0); // Set to 08:00 AM
     moment.locale('he'); // Set moment to use the Hebrew locale
@@ -261,7 +282,6 @@ export const CustomBigCalendar = ({ events }) => {
                         return <>{newChildren}</>
                     },
                     event: CustomEvent  // Use the custom event component
-
                 }
                 }
             />}
@@ -298,7 +318,10 @@ export const Calendar = () => {
         (async () => {
             setLoading(true);
             const calendarId = calendarItems.find(item => item.id === activeCalendar).link;
-            const additionalHeaders = [{ name: 'calendarId', value: calendarId }];
+            const additionalHeaders = [
+                { name: 'calendarId', value: calendarId },
+                ...(token ? [{ name: 'token', value: token }] : [])
+            ];
             const { data: fetchedData, error } = await fetchData('/api/Events', null, null, additionalHeaders);
             if (error && error.message === "Resource not found") setNotAlowed(true);
             else setEvents(fetchedData);
@@ -311,6 +334,9 @@ export const Calendar = () => {
     if (notAlowed) { return <NotAllowed />; }
     //delete calendarItems color if not token
     if (!token && calendarItems) { calendarItems.forEach(item => { item.color = null; }); }
+    const eventsColor = activeCalendar && calendarItems && token ? calendarItems.find(item => item.id === activeCalendar).color : null;
+    //console.log(calendarItems.find(item => item.id === activeCalendar).color);
+
     return (
         <div className="py-3 w-lg-90 mx-auto">
             <MobileRotateAdvice />
@@ -318,13 +344,12 @@ export const Calendar = () => {
             {calendarItems.length > 0 && <CalendarButtons calendarItems={calendarItems} onClick={setActiveCalendar} />}
             <br />
             {loading ? <LoadingSpinner /> : activeCalendar && <CustomBigCalendar events={events} />}
-            {/* {(loading ? <LoadingSpinner /> : activeCalendar && calendarItems && calendarItems.length > 0) && events && <CustomBigCalendar events={events} />} */}
         </div>
     );
 };
 
 
-export  function Calendar_Prev() {
+export function Calendar_Prev() {
     const token = getWithExpiry("token");
 
     const [loading, setLoading] = useState(true);
