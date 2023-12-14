@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const PicImage = ({ img, handleOnClickImg }) => {
     return (
-        <div className="col">
+        <div className="col" role="button">
             <div className="card" onClick={() => handleOnClickImg(img)}>
                 <img src={img.src} alt="" className="card-img-top" />
                 {img.name && (
@@ -24,8 +24,7 @@ const PicImage = ({ img, handleOnClickImg }) => {
 }
 
 const PicModal = ({ images, img, handleOnClickX }) => {
-    const [currentImgIndex, setCurImgIndex] = useState(images.findIndex(image => image.id === img.id));
-
+    const [currentImgIndex, setCurImgIndex] = useState(images.findIndex(image => image.src === img.src));
 
     const goToPrevImg = () => {
         setCurImgIndex(currentIndex => currentIndex > 0 ? currentIndex - 1 : images.length - 1);
@@ -150,7 +149,6 @@ export default function PicGallery() {
     if (loading || !folderImages || folderImages.length === 0) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }
 
-    //const header = `אלבום תמונות - ${selectedAlbum && selectedAlbum.name}`;
     const header = `${selectedAlbum && selectedAlbum.name}`;
     return (
         <div className="container-fluid w-lg-90 pb-5">

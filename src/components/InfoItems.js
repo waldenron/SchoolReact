@@ -62,6 +62,7 @@ function InfoItemToHtml(props) {
                                 </a>
                             </dd>
                         }
+                        {item.note && <dd className="ms-1 me-0"> {item.note} </dd>}
                     </dl>
                     {item.lastUpdateText &&
                         <span className="badge rounded-pill bg-secondary ml-auto align-self-end">
@@ -72,13 +73,16 @@ function InfoItemToHtml(props) {
             );
         case 'OnlyLink':
             return (
-                <div className="d-flex flex-wrap justify-content-between align-items-center w-100">
-                    <a href={link} target="_blank" rel="noopener noreferrer">{displayText}</a>
-                    {item.lastUpdateText &&
-                        <span className="badge rounded-pill bg-secondary ml-auto align-self-end">
-                            <small>{item.lastUpdateText}</small>
-                        </span>
-                    }
+                <div>
+                    <div className="d-flex flex-wrap justify-content-between align-items-center w-100">
+                        <a href={link} target="_blank" rel="noopener noreferrer">{displayText}</a>
+                        {item.lastUpdateText &&
+                            <span className="badge rounded-pill bg-secondary ml-auto align-self-end">
+                                <small>{item.lastUpdateText}</small>
+                            </span>
+                        }
+                    </div>
+                    {item.note && <div className="ms-0 me-2"> {item.note} </div>}
                 </div>
             );
         default:

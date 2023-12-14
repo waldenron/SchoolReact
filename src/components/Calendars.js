@@ -262,7 +262,7 @@ export const CustomBigCalendar = ({ events }) => {
                 startAccessor="start"
                 endAccessor="end"
                 min={minTime} // Set the minimum time
-                style={{ height: 680 }}
+                style={{ height: 900 }}
                 components={{
                     month: {
                         header: CustomDayLabel // Use your custom header component

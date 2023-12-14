@@ -91,12 +91,14 @@ export const ItemsList = ({ header, msg, items, toHtml, filterCategories, noItem
     const [activeFilter, setActiveFilter] = useState(null);
 
     const filteredItems = useMemo(() => {
+        const terms = cleanText(searchInput).split(/\s+/); // Split the search input by spaces or commas (replaced by space in cleanText) into terms
+
         const results = items.filter(item => {
-            if (!activeFilter) {
-                return cleanText(item.textSearch).includes(cleanText(searchInput));
-            }
-            return cleanText(item.textSearch).includes(cleanText(searchInput)) &&
-                item.category === activeFilter;
+            const itemText = cleanText(item.textSearch);
+       
+            if (!activeFilter) return terms.every(term => itemText.includes(term));
+
+            return item.category === activeFilter && terms.every(term => itemText.includes(term));
         });
         return toHtml(results);
     }, [searchInput, activeFilter, items, toHtml]);

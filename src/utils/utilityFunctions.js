@@ -1,11 +1,27 @@
 export const cleanText = (text) => {
     if (text != null) {
         text = text.toLowerCase();
-        text = text.replace(/ /g, "");
+        
+        //replace commas to spaces
+        text = text.replace(/,/g, " ");
+
+        // Replace specific Hebrew final letters with their non-final forms
+        text = text.replace(/ך/g, 'כ');
+        text = text.replace(/ם/g, 'מ');
+        text = text.replace(/ן/g, 'נ');
+        text = text.replace(/ף/g, 'פ');
+        text = text.replace(/ץ/g, 'צ');
+
+        // Replace ת as the last letter in text or in word to ה
+        text = text.replace(/ת( |$)/g, "ה$1");
+
+        //text = text.replace(/ /g, "");//need space for the split
+
         text = text.replace(/-/g, "");
         text = text.replace(/\"/g, "");
         text = text.replace(/\'/g, "");
-        return text;
+
+        return text.trim();
     }
     return "";
 }
@@ -105,7 +121,7 @@ export function toDate(date, format = "dd/MM/yyyy") {
 
     if (format.includes('mm')) formattedDate = formattedDate.replace('mm', twoDigit(minutes));
     else if (format.includes('m')) formattedDate = formattedDate.replace('m', minutes);
-    
+
     if (format.includes('HH')) formattedDate = formattedDate.replace('HH', twoDigit(hours));
     else if (format.includes('H')) formattedDate = formattedDate.replace('H', hours);
 
