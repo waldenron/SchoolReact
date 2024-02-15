@@ -25,9 +25,9 @@ const CalendarButton = ({ item, isActive, handleOnClick }) => {
     const text = isSmallScreen ? item.name.replace("יומן ", "") : item.name;
     const buttonStyle = item.color ? { backgroundColor: item.color.includes('#') ? item.color : `#${item.color}` } : {};
     return (
-        <div className={`d-flex justify-content-between btn btn-sm btn-${isActive ? 'primary active' : 'secondary'} m-1`}>
-            <span onClick={() => handleOnClick(item.id)} className="flex-grow-1 text-end"><span className="py-1" style={buttonStyle}>{text}</span> </span>
-            {item.registerLink && <ToLink to={item.registerLink} ><FontAwesomeIcon icon="fa-solid fa-plus fa-xs" className="ms-1 text-white" title="רישום ליומן" /></ToLink>}
+        <div className={`d-flex justify-content-between btn btn-sm btn-${isActive ? 'primary active' : 'secondary'} m-1`} style={buttonStyle}>
+            <span onClick={() => handleOnClick(item.id)} className="flex-grow-1 text-end"><span className="py-1">{text}</span> </span>
+            {/* {item.registerLink && <ToLink to={item.registerLink} ><FontAwesomeIcon icon="fa-solid fa-plus fa-xs" className="ms-1 text-white" title="רישום ליומן" /></ToLink>} */}
         </div>
     );
 };
@@ -334,9 +334,7 @@ export const Calendar = () => {
     if (notAlowed) { return <NotAllowed />; }
     //delete calendarItems color if not token
     if (!token && calendarItems) { calendarItems.forEach(item => { item.color = null; }); }
-    const eventsColor = activeCalendar && calendarItems && token ? calendarItems.find(item => item.id === activeCalendar).color : null;
-    //console.log(calendarItems.find(item => item.id === activeCalendar).color);
-
+    const registerLink = activeCalendar && calendarItems ? calendarItems.find(item => item.id === activeCalendar).registerLink : null;
     return (
         <div className="py-3 w-lg-90 mx-auto">
             <MobileRotateAdvice />
@@ -344,6 +342,14 @@ export const Calendar = () => {
             {calendarItems.length > 0 && <CalendarButtons calendarItems={calendarItems} onClick={setActiveCalendar} />}
             <br />
             {loading ? <LoadingSpinner /> : activeCalendar && <CustomBigCalendar events={events} />}
+
+            {registerLink &&
+                <div className="mt-1 text-start">
+                    <span className="btn btn-sm btn-secondary">
+                        <ToLink to={registerLink} className="text-decoration-none text-white" ><FontAwesomeIcon icon="fa-solid fa-plus fa-xs" className="ms-1" title="רישום ליומן" />רישום ליומן</ToLink>
+                    </span>
+                </div>
+            }
         </div>
     );
 };

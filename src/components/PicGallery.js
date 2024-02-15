@@ -148,7 +148,6 @@ export default function PicGallery() {
 
     if (loading || !folderImages || folderImages.length === 0) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }
-
     const header = `${selectedAlbum && selectedAlbum.name}`;
     return (
         <div className="container-fluid w-lg-90 pb-5">
