@@ -249,6 +249,13 @@ export default function Schedule() {
 
     const [scheduleItems, setScheduleItems] = useState([]);
 
+    function handlePrevClick(item, itemArray, curId) {
+        let prevIndex = itemArray.findIndex(item => item.id == curId) - 1;
+        if (prevIndex < 0) prevIndex = itemArray.length - 1;
+        let prevItem = itemArray[prevIndex];
+
+        handleSelect(item, prevItem.id);
+    }
     function handleNextClick(item, itemArray, curId) {
         let nextIndex = itemArray.findIndex(item => item.id == curId) + 1;
         if (nextIndex >= itemArray.length) nextIndex = 0;
@@ -256,12 +263,17 @@ export default function Schedule() {
 
         handleSelect(item, nextItem.id);
     }
-    function handlePrevClick(item, itemArray, curId) {
-        let prevIndex = itemArray.findIndex(item => item.id == curId) - 1;
-        if (prevIndex < 0) prevIndex = itemArray.length - 1;
-        let prevItem = itemArray[prevIndex];
 
-        handleSelect(item, prevItem.id);
+
+    function PrevButton({ item, itemArray, curId }) {
+        return (
+            <FontAwesomeIcon className="my-auto ms-2" icon={"fas fa-chevron-right"} role="button" onClick={() => handlePrevClick(item, itemArray, curId)} />
+        );
+    }
+    function NextButton({ item, itemArray, curId }) {
+        return (
+            <FontAwesomeIcon className="my-auto ms-2" icon={"fas fa-chevron-left"} role="button" onClick={() => handleNextClick(item, itemArray, curId)} />
+        );
     }
 
     function handleFilertMoreClick() {
@@ -488,23 +500,23 @@ export default function Schedule() {
                             <>
                                 {showSelects.class && classes &&
                                     <>
-                                        <FontAwesomeIcon className="my-auto ms-2" icon={"fas fa-chevron-right"} role="button" onClick={() => handlePrevClick("class", classes, selectedIds.class)} />
+                                        <PrevButton item="class" itemArray={classes} curId={selectedIds.class} />
                                         <SelectItems filterBy="class" preText="" items={classes} defaultText="בחירת כיתה" selectedValue={selectedIds.class} onSelect={handleSelect} />
-                                        <FontAwesomeIcon className="my-auto ms-2" icon={"fas fa-chevron-left"} role="button" onClick={() => handleNextClick("class", classes, selectedIds.class)} />
+                                        <NextButton item="class" itemArray={classes} curId={selectedIds.class} />
                                     </>
                                 }
                                 {showSelects.teacher && teachers &&
                                     <>
-                                        <FontAwesomeIcon className="my-auto ms-2" icon={"fas fa-chevron-right"} role="button" onClick={() => handlePrevClick("teacher", teachers, selectedIds.teacher)} />
+                                        <PrevButton item="teacher" itemArray={teachers} curId={selectedIds.teacher} />
                                         <SelectItems filterBy="teacher" preText="" items={teachers} defaultText="בחירת מורה" selectedValue={selectedIds.teacher} onSelect={handleSelect} />
-                                        <FontAwesomeIcon className="my-auto ms-2" icon={"fas fa-chevron-left"} role="button" onClick={() => handleNextClick("teacher", teachers, selectedIds.teacher)} />
+                                        <NextButton item="teacher" itemArray={teachers} curId={selectedIds.teacher} />
                                     </>
                                 }
                                 {showSelects.room && rooms &&
                                     <>
-                                        <FontAwesomeIcon className="my-auto ms-2" icon={"fas fa-chevron-right"} role="button" onClick={() => handlePrevClick("room", rooms, selectedIds.room)} />
+                                        <PrevButton item="room" itemArray={rooms} curId={selectedIds.room} />
                                         <SelectItems filterBy="room" preText="" items={rooms} defaultText="בחירת חדר" selectedValue={selectedIds.room} onSelect={handleSelect} />
-                                        <FontAwesomeIcon className="my-auto ms-2" icon={"fas fa-chevron-left"} role="button" onClick={() => handleNextClick("room", rooms, selectedIds.room)} />
+                                        <NextButton item="room" itemArray={rooms} curId={selectedIds.room} />
                                     </>
                                 }
                             </>}
@@ -512,9 +524,9 @@ export default function Schedule() {
                             <>
                                 {showSelects.grade && grades &&
                                     <>
-                                        <FontAwesomeIcon className="my-auto ms-2" icon={"fas fa-chevron-right"} role="button" onClick={() => handlePrevClick("grade", grades, selectedIds.grade)} />
+                                        <PrevButton item="grade" itemArray={grades} curId={selectedIds.grade} />
                                         <SelectItems filterBy="grade" preText="" items={grades} defaultText="בחירת שכבה" selectedValue={selectedIds.grade} onSelect={handleSelect} />
-                                        <FontAwesomeIcon className="my-auto ms-2" icon={"fas fa-chevron-left"} role="button" onClick={() => handleNextClick("grade", grades, selectedIds.grade)} />
+                                        <NextButton item="grade" itemArray={grades} curId={selectedIds.grade} />
                                     </>
                                 }
                                 {showSelects.section && sections &&
@@ -522,9 +534,9 @@ export default function Schedule() {
                                 }
                                 {(showSelects.grade || showSelects.section) && weekDays &&
                                     <>
-                                        <FontAwesomeIcon className="my-auto ms-2" icon={"fas fa-chevron-right"} role="button" onClick={() => handlePrevClick("weekDay", weekDays, selectedIds.weekDay)} />
+                                        <PrevButton item="weekDay" itemArray={weekDays} curId={selectedIds.weekDay} />
                                         <SelectItems filterBy="weekDay" preText="" items={weekDays} defaultText="בחירת יום בשבוע" selectedValue={selectedIds.weekDay} onSelect={handleSelect} moreCss="ms-2" isBbColorSelectedValue="true" />
-                                        <FontAwesomeIcon className="my-auto ms-2" icon={"fas fa-chevron-left"} role="button" onClick={() => handleNextClick("weekDay", weekDays, selectedIds.weekDay)} />
+                                        <NextButton item="weekDay" itemArray={weekDays} curId={selectedIds.weekDay} />
                                     </>
                                 }
                             </>}
