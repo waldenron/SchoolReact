@@ -327,6 +327,15 @@ export default function Schedule() {
                     showClass: false
                 }));
                 break;
+            case "minimum":// for all
+                setShowSelects(prevState => ({ ...prevState, section: true }));
+                setCheckboxShowValue(prevControls => ({
+                    ...prevControls,
+                    showTeacher: true,
+                    showClass: false,
+                    showRoom: false
+                }));
+                break;
         }
     }
     function handleSelect(dropdownItem, selectedId) {
@@ -390,7 +399,7 @@ export default function Schedule() {
             timeTableItem = `ל${days[weekDay - 1]} ${timeTableItem}`;
             const filterClasses = type === "grade" ?
                 classes.filter(c => c.gradeId == id) :
-                classes.filter(c => c.sectionId == id);
+                id != 99 ? classes.filter(c => c.sectionId == id) : classes;
             return <DailyTimetable checkboxShowValue={checkboxShowValue} lessons={lessons} scheduleItems={filteredItems} classes={filterClasses} timeTableItem={timeTableItem} showAddToCalendar={showAddToCalendar} weekDay={weekDay} />;
         }
         else {
@@ -439,6 +448,14 @@ export default function Schedule() {
             const fetchedPageHeader = await getPageHeader({ pageName: "Schedule" });
             setPageHeader(fetchedPageHeader);
 
+            const currentPath = window.location.pathname; 
+            if (currentPath.toLowerCase() === "/Schedule/all".toLowerCase()) {
+                setShowWeekly(false);
+                changeScheduleType("section");
+                handleShowClick("minimum");
+                handleSelect("section", 99);
+            }
+
         })();
 
         setLoading(false);
@@ -454,6 +471,7 @@ export default function Schedule() {
     if (loading) { return <LoadingSpinner />; }
     if (notAlowed) { return <NotAllowed />; }
     const header = pageHeader && `${pageHeader} - ${studyYear}${name ? ` - ${name}` : ''}`;
+
     return (
         <div className="py-3 w-lg-90 mx-auto">
             <div className={note ? "" : "d-flex align-items-center"}>

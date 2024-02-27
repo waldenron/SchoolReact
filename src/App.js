@@ -184,14 +184,16 @@ export default function App() {
             <Route path="/Courses/:id" element={<CoursePage />} />
             <Route path="/CalendarPrev" element={<Calendar_Prev />} />
             <Route path="/Calendars" element={<Calendar />} />
-            {/* <Route path="/Calendars/:id" element={<Calendar />} /> */}
             <Route path="/InfoItems" element={<InfoItems />} />
             <Route path="/InfoItems/:id" element={<InfoItems />} />
             <Route path="/Contacts" element={<ContactPage instDetails={instDetails} />} />
             <Route path="/Schedule" element={<Schedule />} />
+            <Route path="/Schedule/All" element={<Schedule />} />
+            
             <Route path="/PicGallery" element={<PicGallery />} />
             <Route path="/PicGallery/:name" element={<PicGalleryForDir />} />
             <Route path="/Login" element={<Login />} />
+
             <Route path="*" element={<NotFound homePageUrl={instDetails.homePageUrl} />} />
           </Routes>
 
