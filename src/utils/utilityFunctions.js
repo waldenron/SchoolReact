@@ -1,7 +1,7 @@
 export const cleanText = (text) => {
     if (text != null) {
         text = text.toLowerCase();
-        
+
         //replace commas to spaces
         text = text.replace(/,/g, " ");
 
@@ -126,6 +126,9 @@ export function toDate(date, format = "dd/MM/yyyy") {
     else if (format.includes('H')) formattedDate = formattedDate.replace('H', hours);
 
     return formattedDate;
+}
+export function addDays(date, addDays) {
+    return new Date(date.setDate(date.getDate() + addDays));
 }
 
 export const getNextDateForWeekDay = (dayIndex) => {
