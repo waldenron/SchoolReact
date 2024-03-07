@@ -24,6 +24,7 @@ import  {Calendar, Calendar_Prev } from './components/Calendars';
 import Schedule from './components/Schedule';
 import PicGallery, { PicGalleryForDir } from './components/PicGallery';
 import Login from './components/Login';
+import InfoItemsAdmin from './components/InfoItemsAdmin';
 library.add(fas)
 
 const useGoogleAnalytics = (trackingId) => {
@@ -194,6 +195,8 @@ export default function App() {
             <Route path="/PicGallery/:name" element={<PicGalleryForDir />} />
             <Route path="/Login" element={<Login />} />
 
+            <Route path="/InfoItemsAdmin" element={<InfoItemsAdmin />} />
+            
             <Route path="*" element={<NotFound homePageUrl={instDetails.homePageUrl} />} />
           </Routes>
 

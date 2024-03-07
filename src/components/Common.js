@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fetchData } from '../utils/apiServices';
 import { cssStringToObject, toDate, toPageTitle } from '../utils/utilityFunctions';
 import { Link } from 'react-router-dom';
+import { faL } from '@fortawesome/free-solid-svg-icons';
 
 export const getCssClass = (type) => {
     switch (type) {
@@ -190,7 +191,14 @@ export function NotFound({ homePageUrl }) {
 export function NotAllowed() {
     return (
         <div className="container mx-auto bg-warning">
-            <h2 className="display-4 text-center">עמוד זה אינו פתוח לבית הספר</h2>
+            <h2 className="display-4 text-center">עמוד זה אינו פתוח לבית הספר.</h2>
+        </div>
+    );
+}
+export function NotAllowedUser() {
+    return (
+        <div className="container mx-auto bg-warning">
+            <h2 className="display-4 text-center">אין לך הרשאה לעמוד זה.</h2>
         </div>
     );
 }
@@ -203,7 +211,7 @@ export const AddToCalendarLink = ({ title, startTime, endTime, isAllday = false,
 
     // Construct the Google Calendar link
     let eventLink = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title.trim())}`;
-    if (isAllday) eventLink += `&dates=${toDate(startTime, "yyyyMMdd")}/${toDate(endTime,"yyyyMMdd")}`
+    if (isAllday) eventLink += `&dates=${toDate(startTime, "yyyyMMdd")}/${toDate(endTime, "yyyyMMdd")}`
     else eventLink += `&dates=${toDate(fixGoogleTimeProblem(startTime), "yyyyMMddTHHmmz")}/${toDate(fixGoogleTimeProblem(endTime), "yyyyMMddTHHmmz")}&ctz=Asia/Jerusalem`;
 
     // Append description and location if they are provided
@@ -212,4 +220,174 @@ export const AddToCalendarLink = ({ title, startTime, endTime, isAllday = false,
 
     return <a href={eventLink} className="text-decoration-none" target="_blank" rel="noopener noreferrer" ><AddToCalendarIcon />{text && <span className="ms-1">{text}</span>
     }</a>;
+};
+
+
+
+export const ClassesCheckboxComponent = ({ sections, grades, classes, chooseAll = true, onSelectedClassesChange }) => {
+    const [selectedSections, setSelectedSections] = useState(new Set());
+    const [selectedGrades, setSelectedGrades] = useState(new Set());
+    const [selectedClasses, setSelectedClasses] = useState(new Set());
+    const [isEditing, setIsEditing] = useState(!chooseAll);
+    const [isAllSelected, setIsAllSelected] = useState(chooseAll);
+
+    useEffect(() => {
+        if (isAllSelected) {
+            const allClassIds = classes.map(c => c.id);
+            setSelectedClasses(new Set(allClassIds));
+        } else {
+            setSelectedClasses(new Set());
+        }
+    }, [classes, isAllSelected]);
+
+
+    useEffect(() => {
+        onSelectedClassesChange(Array.from(selectedClasses));
+    }, [selectedClasses]);
+
+    const toggleSection = (sectionId) => {
+        const tempSelectedSections = new Set(selectedSections);
+        const tempSelectedGrades = new Set(selectedGrades);
+        const tempSelectedClasses = new Set(selectedClasses);
+
+        if (tempSelectedSections.has(sectionId)) {
+            tempSelectedSections.delete(sectionId);
+            grades.forEach(grade => {
+                if (grade.sectionId === sectionId) {
+                    tempSelectedGrades.delete(grade.id);
+                    classes.forEach(c => {
+                        if (c.gradeId === grade.id) {
+                            tempSelectedClasses.delete(c.id);
+                        }
+                    });
+                }
+            });
+        }
+        else {
+            tempSelectedSections.add(sectionId);
+            grades.forEach(grade => {
+                if (grade.sectionId === sectionId) {
+                    tempSelectedGrades.add(grade.id);
+                    classes.forEach(c => {
+                        if (c.gradeId === grade.id) {
+                            tempSelectedClasses.add(c.id);
+                        }
+                    });
+                }
+            });
+        }
+
+        setSelectedSections(tempSelectedSections);
+        setSelectedGrades(tempSelectedGrades);
+        setSelectedClasses(tempSelectedClasses);
+    };
+
+    const toggleGrade = (gradeId) => {
+        const tempSelectedGrades = new Set(selectedGrades);
+        const tempSelectedClasses = new Set(selectedClasses);
+
+        if (tempSelectedGrades.has(gradeId)) {
+            tempSelectedGrades.delete(gradeId);
+            classes.forEach(c => {
+                if (c.gradeId === gradeId) {
+                    tempSelectedClasses.delete(c.id);
+                }
+            });
+        } else {
+            tempSelectedGrades.add(gradeId);
+            classes.forEach(c => {
+                if (c.gradeId === gradeId) {
+                    tempSelectedClasses.add(c.id);
+                }
+            });
+        }
+
+        setSelectedGrades(tempSelectedGrades);
+        setSelectedClasses(tempSelectedClasses);
+    };
+
+    const toggleClass = (classId) => {
+        const tempSelectedClasses = new Set(selectedClasses);
+
+        if (tempSelectedClasses.has(classId)) { tempSelectedClasses.delete(classId); }
+        else { tempSelectedClasses.add(classId); }
+
+        setSelectedClasses(tempSelectedClasses);
+    };
+    const changeModeClick = (isEdit) => {
+        if (isEdit) {
+            setIsEditing(true);
+            setSelectedSections(new Set());
+            setSelectedGrades(new Set());
+            setSelectedClasses(new Set());
+        }
+        else {
+            setIsAllSelected(true);
+            setSelectedSections(new Set(sections.map(s => s.id)));
+            setSelectedGrades(new Set(grades.map(g => g.id)));
+            setSelectedClasses(new Set(classes.map(c => c.id)));
+
+            setIsEditing(false);
+        }
+    };
+    return (
+        <div>
+            {!isEditing ? (
+                <div className="d-flex align-items-center">
+                    <h3>כל הכיתות</h3>
+                    <button className="btn btn-link" onClick={() => changeModeClick(true)}>שנה</button>
+                </div>
+            ) : (
+                <div>
+                    <div className="d-flex align-items-center">
+                        <h3>בחירת כיתות</h3>
+                        <button className="btn btn-link" onClick={() => changeModeClick(false)}>בחר הכל</button>
+                    </div>
+                    <div className="d-flex flex-column flex-sm-row align-items-start mb-2">
+                        <h4 className="mb-2 mb-sm-0">חטיבות</h4>
+                        <div className="d-flex flex-wrap">
+                            {sections.map(section => (
+                                <label key={section.id} className="form-check-label me-2" htmlFor={`section-${section.id}`}>
+                                    {section.name}
+                                    <input
+                                        className="form-check-input ms-1"
+                                        type="checkbox"
+                                        id={`section-${section.id}`}
+                                        checked={selectedSections.has(section.id)}
+                                        onChange={() => toggleSection(section.id)}
+                                    />
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="d-flex flex-column flex-sm-row align-items-start mb-2">
+                        <h4 className="mb-2 mb-sm-0">שכבות</h4>
+                        <div className="d-flex flex-wrap">
+                            {grades.map(grade => (
+                                <label key={grade.id} className="form-check-label me-2" htmlFor={`grade-${grade.id}`}>
+                                    {grade.name}
+                                    <input className="form-check-input ms-1" type="checkbox" id={`grade-${grade.id}`}
+                                        checked={selectedGrades.has(grade.id)} onChange={() => toggleGrade(grade.id)} />
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="d-flex flex-column flex-sm-row align-items-start mb-2">
+                        <h4 className="">כיתות</h4>
+                        <div className="d-flex flex-wrap">
+                            {classes.map(c => (
+                                <label key={c.id} className={`form-check-label me-2 ${c.id.toString().endsWith("01") ? "fw-bold" : ""}`} htmlFor={`class-${c.id}`}>
+                                    {c.name}
+                                    <input className="form-check-input ms-1" type="checkbox" id={`class-${c.id}`}
+                                        checked={selectedClasses.has(c.id)} onChange={() => toggleClass(c.id)} />
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 };
