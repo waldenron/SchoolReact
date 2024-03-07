@@ -152,14 +152,12 @@ export default function InfoItems() {
         </>
     const infoItemCategoryName = infoItemCategories && infoItemCategories.length > 0 ? infoItemCategories.find(item => item.id == id)?.name : "";
     const header = token ? "אזור מורים" : pageHeader && (pageHeader + (id && infoItemCategoryName ? " - <span class='fw-bolder'>" + infoItemCategoryName + "</span>" : ""));
-    const filterCategories = infoItemCategories.filter(item => item.isShowOnInfoItemsPage === true);
-    let infoItemsToShow = !id ?
-        infoItems.filter(item => item.isShowOnInfoItemsPage == true)
-        : infoItems.filter(item => item.category == id);
-    if (selectedGrade != -1) infoItemsToShow = infoItemsToShow.filter(item => item.grades === "" || item.grades.includes(selectedGrade));
+    //const filterCategories = infoItemCategories.filter(item => item.isShowOnInfoItemsPage === true);
+    if (id) infoItems = infoItems.filter(item => item.category == id);
+    if (selectedGrade != -1) infoItems = infoItems.filter(item => item.grades === "" || item.grades.includes(selectedGrade));
     return (
-        <ItemsList header={header} msg={msg} items={infoItemsToShow} toHtml={(data) => toHtmlElements(data, homePageUrl)}
-            filterCategories={!id ? filterCategories : null}
+        <ItemsList header={header} msg={msg} items={infoItems} toHtml={(data) => toHtmlElements(data, homePageUrl)}
+            filterCategories={!id ? infoItemCategories : null}
             noItemShow={id ? "true" : null}
         />
     )

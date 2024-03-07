@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { ClassesCheckboxComponent, LoadingSpinner, NotAllowed, NotAllowedUser, SelectItems } from "./Common"
-import { ItemsList } from './ItemsList';
+import { FilterCategories, ItemsList } from './ItemsList';
 import { NavItem } from './Nav';
 
 import { getWithExpiry, toArchiveText, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
@@ -97,6 +97,31 @@ const toHtmlElements = (data, homePageUrl) => {
     ));
 };
 
+const InfoItemCategoriesComponent = ({ infoItemCategories, onSelectCategory }) => {
+    const [isRestricted, setIsRestricted] = useState(false); // Default to לתלמידים
+
+    // Filter categories based on isRestricted state
+    const filteredCategories = infoItemCategories.filter(category => category.isRestricted === isRestricted);
+
+    const handleOnIsRestrictedClick = (isRestricted) => {
+        setIsRestricted(isRestricted);
+        onSelectCategory(null);
+    }
+
+    return (
+        <div className="w-md-50">
+            <div className="d-flex align-items-center">
+                <b className="ms-3 me-0">מיועד ל- </b>
+                <button className={`btn btn-sm btn-link${!isRestricted ? " bgLightGray" : ""}`} onClick={() => handleOnIsRestrictedClick(false)}>לתלמידים</button>
+                <button className={`btn btn-sm btn-link${isRestricted ? " bgLightGray" : ""}`} onClick={() => handleOnIsRestrictedClick(true)}>למורים</button>
+            </div>
+            <div className="d-flex align-items-center">
+                <b className="align-self-baseline mt-1 ms-3 me-0">קטגוריה</b>
+                <FilterCategories filterCategories={filteredCategories} onFilterChange={onSelectCategory} />
+            </div>
+        </div>
+    );
+};
 export default function InfoItemsAdmin() {
     const { id } = useParams();
     const token = getWithExpiry("token");
@@ -114,16 +139,24 @@ export default function InfoItemsAdmin() {
     const [infoItemCategories, setInfoItemCategories] = useState([]);
     const [infoItems, setInfoItems] = useState([]);
 
+
+    const [curCategory, setCurCategory] = useState(null);
+
+
     useEffect(() => {
         if (token) {
             (async () => {
                 const additionalHeaders = [{ name: 'token', value: token }];
+                const { data: fetchedDataIsAdmin, error } = await fetchData('/api/IsAdminUser', null, null, additionalHeaders);
+                if (error && error.message === "Resource not found") setNotAlowed(fetchedDataIsAdmin);
 
-                const { data: fetchedData, error } = await fetchData('/api/InfoItems', infoItemsTransformFunction, null, additionalHeaders);
-                if (error && error.message === "Resource not found") setNotAlowed(true);
+                const { data: fetchedData, errorData } = await fetchData('/api/InfoItems', infoItemsTransformFunction, null, additionalHeaders);
+                if (errorData && errorData.message === "Resource not found") setNotAlowed(true);
                 else setInfoItems(fetchedData);
+
                 if (!notAlowed) {
-                    const { data: fetchedDataCategories } = await fetchData('/api/InfoItemCategories', null, null, additionalHeaders);
+                    const isOnlyShowOnInfoItemsPage = false;
+                    const { data: fetchedDataCategories } = await fetchData('/api/InfoItemCategories/' + isOnlyShowOnInfoItemsPage, null, null, additionalHeaders);
                     setInfoItemCategories(fetchedDataCategories);
 
                     const { data: fetchedDataClasses } = await fetchData('/api/Classes');
@@ -135,7 +168,7 @@ export default function InfoItemsAdmin() {
                     const { data: fetchedDataSections } = await fetchData('/api/Sections');
                     //setSections(fetchedDataSections);
                     setSections(fetchedDataSections.filter(section => section.id < 99));
-                    
+
                     const fetchedUrl = await getHomePageUrl();
                     setHomePageUrl(fetchedUrl);
 
@@ -150,8 +183,13 @@ export default function InfoItemsAdmin() {
 
     if (!token || notAlowed) { return <NotAllowedUser />; }
     if (loading) { return <LoadingSpinner />; }
-    console.log(selectedClasses);
+
+    //console.log(infoItemCategories);
     return (
-        <ClassesCheckboxComponent sections={sections} grades={grades} classes={classes} onSelectedClassesChange={setSelectedClasses}/>
+        <div>
+            <ClassesCheckboxComponent sections={sections} grades={grades} classes={classes} onSelectedClassesChange={setSelectedClasses} />
+            <InfoItemCategoriesComponent infoItemCategories={infoItemCategories} onSelectCategory={setCurCategory} />
+        </div>
+
     )
 };

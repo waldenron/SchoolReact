@@ -343,7 +343,7 @@ export const ClassesCheckboxComponent = ({ sections, grades, classes, chooseAll 
                         <h3>בחירת כיתות</h3>
                         <button className="btn btn-link" onClick={() => changeModeClick(false)}>בחר הכל</button>
                     </div>
-                    <div className="d-flex flex-column flex-sm-row align-items-start mb-2">
+                    <div className="d-flex flex-column flex-sm-row align-items-start align-items-center mb-2">
                         <h4 className="mb-2 mb-sm-0">חטיבות</h4>
                         <div className="d-flex flex-wrap">
                             {sections.map(section => (
@@ -361,7 +361,7 @@ export const ClassesCheckboxComponent = ({ sections, grades, classes, chooseAll 
                         </div>
                     </div>
 
-                    <div className="d-flex flex-column flex-sm-row align-items-start mb-2">
+                    <div className="d-flex flex-column flex-sm-row align-items-start align-items-center mb-2">
                         <h4 className="mb-2 mb-sm-0">שכבות</h4>
                         <div className="d-flex flex-wrap">
                             {grades.map(grade => (
@@ -374,7 +374,7 @@ export const ClassesCheckboxComponent = ({ sections, grades, classes, chooseAll 
                         </div>
                     </div>
 
-                    <div className="d-flex flex-column flex-sm-row align-items-start mb-2">
+                    <div className="d-flex flex-column flex-sm-row align-items-start align-items-center mb-2">
                         <h4 className="">כיתות</h4>
                         <div className="d-flex flex-wrap">
                             {classes.map(c => (
