@@ -99,14 +99,39 @@ const toHtmlElements = (data, homePageUrl) => {
 };
 
 
+export const DescriptionInput = ({ id, label, value, onChange, inputType = "text", isRequiredField = false, inputMoreCss = "", placeholder = "", moreProps = {} }) => {
+    return (
+        <div className="d-flex flex-column align-items-start align-items-sm-center flex-sm-row text-sm-center mb-3">
+            <div className="pe-sm-2 mb-2 mb-sm-0">
+                <label htmlFor={id} className={`fw-bold${isRequiredField ? " requiredField" : ""}`}>{label}</label>
+            </div>
+            <div className="w-sm-90 flex-grow-1">
+                <input
+                    id={id}
+                    name={id}
+                    type={inputType}
+                    className={`form-control${inputMoreCss ? ' ' + inputMoreCss : ""}`}
+                    onChange={onChange}
+                    value={value}
+                    placeholder={placeholder}
+                    {...moreProps}
+                />
+            </div>
+        </div>
+    );
+};
 
-export function LinkComponent() {
-    const [linkType, setLinkType] = useState('none');
-    const [linkText, setLinkText] = useState('');
+export function LinkComponent({ defaultlinkType, hasLinkText = true }) {
+    const [linkType, setLinkType] = useState(defaultlinkType);
+    const [linkText, setLinkText] = useState('לחצו כאן');
+    const [link, setLink] = useState('');
     const [fileLabel, setFileLabel] = useState('עיון');
 
+    const [linkTypes, setLinkTypes] = useState([]);
+
     const handleChangeLinkType = (e) => {
-        setLinkType(e.target.dataset.value);
+        const selectedLinkType = linkTypes.find(item => item.id === parseInt(e.target.dataset.value));
+        setLinkType(selectedLinkType);
     };
 
     const handleFileChange = (e) => {
@@ -114,42 +139,61 @@ export function LinkComponent() {
         setFileLabel(fileName);
     };
 
-    return (
-        <div id="DivLink" className="bg-white my-3">
-            <div id="DivLinkType" className="input-group d-flex flex-column flex-sm-row justify-content-start">
-                <span id="spanLinkFile" className="input-group-text before border-0">
-                    <a id="FullLink" target="_blank" href="#"><i className="fas fa-paperclip ps-1"></i>קובץ/<i className="fas fa-link ps-1"></i>קישור</a>
-                </span>
-                {['none', 'link', 'file'].map((value) => (
-                    <div key={value} className="form-check form-check-inline mx-1 my-auto">
-                        <label className="form-check-label" htmlFor={`Radio${value.charAt(0).toUpperCase() + value.slice(1)}`}>
-                            {value === 'none' ? 'ללא' : value === 'link' ? 'קישור' : 'קובץ'}
-                        </label>
-                        <input type="radio" className="form-check-input" name="linkType"
-                            value={`Radio${value.charAt(0).toUpperCase() + value.slice(1)}`}
-                            id={`Radio${value.charAt(0).toUpperCase() + value.slice(1)}`}
-                            data-value={value}
-                            checked={linkType === value}
-                            onChange={handleChangeLinkType}
-                        />
-                    </div>
-                ))}
+    useEffect(() => {
+        (async () => {
+
+            const { data: fetchedDataLinkTypes } = await fetchData('/api/LinkTypes');
+            setLinkTypes(fetchedDataLinkTypes);
+
+            //setLinkType to 1 (none)
+            const selectedLinkType = defaultlinkType || fetchedDataLinkTypes.find(item => item.id === 1);
+            setLinkType(selectedLinkType);
+
+            //setLoading(false);
+        }
+        )();
+    }, []);
+
+    const LinkFileHeader = () => {
+        return (
+            <div className="fw-bold">
+                <FontAwesomeIcon icon="fas fa-paperclip" className="ps-1" />
+                <span className={`d-inline${link ? " btn btn-link" : ""}`}>קובץ</span>
+                <span className=""> / </span>
+                <FontAwesomeIcon icon="fas fa-link" className="ps-1" />
+                <span className={`d-inline${link ? " btn btn-link" : ""}`}>קישור</span>
             </div>
-            {linkType === 'link' && (
-                <div id="DivLinkText" className="input-group">
-                    <span className="input-group-text before">תיאור הקישור</span>
-                    <input type="text" id="TextLinkText" className="form-control" defaultValue="לחצו כאן" onChange={(e) => setLinkText(e.target.value)} value={linkText} />
+        );
+    };
+    return (
+        <div className="my-3">
+            <div className="d-flex flex-column align-items-start flex-sm-row mb-3">
+                <div className="pe-sm-2 mb-2 mb-sm-0">
+                    {link ? (<span><a target="_blank" href="#"><LinkFileHeader /></a></span>) : (<LinkFileHeader />)}
                 </div>
-            )}
-            {linkType === 'link' && (
-                <div id="DivLinkOther" className="input-group">
-                    {/* Other link-related inputs */}
+                <div className="flex-grow-1">
+                    {linkTypes.map((item) => (
+                        <div key={item.id} className="form-check form-check-inline ms-1 me-0">
+                            <label className="form-check-label" htmlFor={`Radio${item.id}`}>
+                                {item.itemIcon && item.itemIcon.type === 'fa' && <FontAwesomeIcon icon={item.itemIcon.cssClass} className="mx-1" />}
+                                {item.description}
+                            </label>
+                            <input type="radio" className="form-check-input" id={`Radio${item.id}`} name="linkType"
+                                data-value={item.id} checked={linkType && linkType.id === item.id} onChange={handleChangeLinkType} />
+                        </div>
+                    ))}
                 </div>
+            </div>
+            {linkType && linkType.isLink && hasLinkText && (
+                <DescriptionInput id="linkText" label="תיאור הקישור" value={linkText} onChange={(e) => setLinkText(e.target.value)} />
             )}
-            {linkType === 'file' && (
-                <div id="DivFile" className="input-group d-flex justify-content-between">
+            {linkType && linkType.isLink && (
+                <DescriptionInput id="link" label="הקישור" value={link} onChange={(e) => setLink(e.target.value)} inputType="url" className="form-control" placeholder="Enter URL" />
+            )}
+            {linkType && linkType.isFile && (
+                <div className="input-group d-flex justify-content-between">
                     <input type="file" id="File1" className="form-control d-none" onChange={handleFileChange} />
-                    <label className="form-label-lg flex-fill bg-dark text-white ps-1 py-1 mx-0" htmlFor="File1">{fileLabel}</label>
+                    <label htmlFor="File1" className="form-label-lg flex-fill bg-dark text-white py-1 mx-0">{fileLabel}</label>
                 </div>
             )}
         </div>
@@ -204,7 +248,7 @@ export default function InfoItemsAdmin() {
 
     const today = new Date();
 
-    const [item, setItem] = useState({
+    const initialItemState = {
         infoItemCategory: '',
         name: '',
         text: '',
@@ -215,9 +259,9 @@ export default function InfoItemsAdmin() {
         end: toDate(addDays(today, 7), "yyyy-MM-dd"),
         priority: '3',
         note: '',
-
         classes: ''
-    });
+    };
+    const [item, setItem] = useState(initialItemState);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -235,7 +279,7 @@ export default function InfoItemsAdmin() {
 
         //find the infoItemCategory obj from infoItemCategories by id from categoryId
         setSelectedCategory(infoItemCategories.find(category => category.id === categoryId));
-        console.log(infoItemCategories.find(category => category.id === categoryId));
+        //console.log(infoItemCategories.find(category => category.id === categoryId));
     };
 
     const onSelectedClassesChange = (curClasses) => {
@@ -344,7 +388,7 @@ export default function InfoItemsAdmin() {
     if (!token || notAlowed) { return <NotAllowedUser />; }
     if (loading) { return <LoadingSpinner />; }
 
-    //console.log(infoItemCategories);
+    //console.log(selectedCategory);
     return (
         <div>
             <form onSubmit={handleSubmit} className="container-fluid">
@@ -352,8 +396,7 @@ export default function InfoItemsAdmin() {
                 {selectedCategory && (<div className="mt-3 w-md-75">
                     {selectedCategory.hasClasses && (<ClassesCheckboxComponent sections={sections} grades={grades} classes={classes} onSelectedClassesChange={onSelectedClassesChange} />)}
                     {selectedCategory.hasName && (<div className="mb-3">
-                        <label htmlFor="name" className="form-label my-auto requiredField">כותרת/טקסט</label>
-                        <input type="text" className="form-control" id="name" name="name" value={item.name} onChange={handleChange} />
+                        <DescriptionInput id="name" label="כותרת/טקסט" isRequiredField={true} value={item.name} onChange={handleChange} />
                     </div>)}
                     {selectedCategory.hasText && (<div className="mb-3">
                         <label htmlFor="text" className="form-label my-auto requiredField">תוכן ההודעה</label>
@@ -380,26 +423,32 @@ export default function InfoItemsAdmin() {
                         <input type="date" id="DateEnd" className="form-control-inline border-0 border-bottom text-center"
                             value={item.end} onChange={handleChange} />
                     </div>
-                    <LinkComponent />
+                    <LinkComponent hasLinkText={selectedCategory.hasLinkText} />
                     <div className="my-3">
-                        <span>אפשרויות נוספות</span>
+                        <b>אפשרויות נוספות</b>
                         <FontAwesomeIcon className="my-auto ms-2" icon={showMoreOptions ? "fas fa-circle-chevron-up" : "fas fa-circle-chevron-down"} role="button" onClick={() => handleShowMoreOptions()} />
                     </div>
                     {showMoreOptions && (
                         <div className="">
-                            <div className="mb-3">
-                                <label htmlFor="priority" className="form-label">קדימות</label>
-                                <input type="number" className="form-control" id="priority" name="priority" value={item.priority}
-                                    onChange={handleChange} min="1" max="10" />
-                            </div>
+                            <DescriptionInput id="priority" label="קדימות" value={item.priority} onChange={handleChange} inputType="number" inputMoreCss="w-md-10" moreProps={{
+                                min: 1, max: 10
+                            }} />
 
+                            {/* <div className="mb-3">
+                                <label htmlFor="priority" className="form-label fw-bold">קדימות</label>
+                                <input type="number" className="form-control w-md-10" id="priority" name="priority" value={item.priority}
+                                    onChange={handleChange} min="1" max="10" />
+                            </div> */}
+                            <DescriptionInput id="note" label="הערה" value={item.note} onChange={handleChange} />
+                            {/* 
                             <div className="mb-3">
-                                <label htmlFor="note" className="form-label">הערה</label>
-                                <input type="text" className="form-control" id="note" name="note" value={item.note} onChange={handleChange} />
-                            </div>
+                                <label htmlFor="note" className="form-label fw-bold">הערה</label>
+                                <input type="text" className="form-control w-md-50" id="note" name="note" value={item.note} onChange={handleChange} />
+                            </div> */}
                         </div>
                     )}
                     <button type="submit" className="btn btn-primary">הוספה</button>
+                    <button type="button" className="btn btn-link" onClick={() => setItem(initialItemState)}>איפוס</button>
                 </div>)}
             </form>
         </div>
