@@ -10,112 +10,27 @@ import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
-//InfoNav
-const infoNavSortFunction = (a, b) => a.priority - b.priority;
-
-function InfoNav({ homePageUrl }) {
-    const token = getWithExpiry("token");
-
-    const [navItems, setNavItems] = useState([]);
-
-    useEffect(() => {
-        (async () => {
-            const additionalHeaders = token ? [{ name: 'token', value: token }] : [];
-
-            const { data: fetchedData, error } = await fetchData('/api/InfoLinksItems', null, infoNavSortFunction, additionalHeaders);
-            setNavItems(fetchedData);
-        })();
-    }, []);
-
-    return (
-        <div className="d-flex flex-wrap btn-group justify-content-center">
-            {navItems.map((navItem, index) => (
-                <NavItem navItem={navItem} homePageUrl={homePageUrl} isTextResponsive={false} key={index} />
-            ))}
-        </div>
-    );
-}
-
-
-//infoItems
-const infoItemsTransformFunction = (infoItem) => ({
-    ...infoItem,
-    textSearch: `${infoItem.text}`
-});
-
-function InfoItemToHtml(props) {
-    const { homePageUrl, ...item } = props;
-
-    const displayText = item.isArchive ? toArchiveText(whatsappStrToHtmlTags(item.text)) : whatsappStrToHtmlTags(item.text);
-    const displayMoreText = whatsappStrToHtmlTags(item.moreText).replace(/\r\n/g, '<br>');
-    const link = item.link ? item.link.replace("../../", homePageUrl) : "";
-    switch (item.type) {
-        case 'WithText':
-            return (
-                <div className="d-flex flex-wrap justify-content-between align-items-center w-100">
-                    <dl className="mb-0">
-                        <dt className="mb-1"> {displayText}</dt>
-                        <dd className="ms-1 me-0" dangerouslySetInnerHTML={{ __html: displayMoreText }}></dd>
-                        {item.link &&
-                            <dd className="ms-1 me-0">
-                                <a href={link} target="_blank" rel="noopener noreferrer">
-                                    {item.linkText}
-                                </a>
-                            </dd>
-                        }
-                        {item.note && <dd className="ms-1 me-0"> {item.note} </dd>}
-                    </dl>
-                    {item.lastUpdateText &&
-                        <span className="badge rounded-pill bg-secondary ml-auto align-self-end">
-                            <small>{item.lastUpdateText}</small>
-                        </span>
-                    }
-                </div>
-            );
-        case 'OnlyLink':
-            return (
-                <div>
-                    <div className="d-flex flex-wrap justify-content-between align-items-center w-100">
-                        <a href={link} target="_blank" rel="noopener noreferrer">{displayText}</a>
-                        {item.lastUpdateText &&
-                            <span className="badge rounded-pill bg-secondary ml-auto align-self-end">
-                                <small>{item.lastUpdateText}</small>
-                            </span>
-                        }
-                    </div>
-                    {item.note && <div className="ms-0 me-2"> {item.note} </div>}
-                </div>
-            );
-        default:
-            return null;
-    }
-}
-
-
-const toHtmlElements = (data, homePageUrl) => {
-    return data.map((item, index) => (
-        <InfoItemToHtml key={index} {...item} homePageUrl={homePageUrl} />
-    ));
-};
-
-
 export const DescriptionInput = ({ id, label, value, onChange, inputType = "text", isRequiredField = false, inputMoreCss = "", placeholder = "", moreProps = {} }) => {
+    const allProps = {
+        id,
+        name: id,
+        className: `form-control${inputMoreCss ? ' ' + inputMoreCss : ""}`,
+        onChange,
+        value,
+        placeholder,
+        ...moreProps
+    };
     return (
         <div className="d-flex flex-column align-items-start align-items-sm-center flex-sm-row text-sm-center mb-3">
-            <div className="pe-sm-2 mb-2 mb-sm-0">
+            <div className="width-fifteen-percent pe-sm-2 mb-2 mb-sm-0">
                 <label htmlFor={id} className={`fw-bold${isRequiredField ? " requiredField" : ""}`}>{label}</label>
             </div>
-            <div className="w-sm-90 flex-grow-1">
-                <input
-                    id={id}
-                    name={id}
-                    type={inputType}
-                    className={`form-control${inputMoreCss ? ' ' + inputMoreCss : ""}`}
-                    onChange={onChange}
-                    value={value}
-                    placeholder={placeholder}
-                    {...moreProps}
-                />
+            <div className="w-75 flex-grow-1">
+                {inputType !== "textarea" ? (
+                    <input {...allProps} type={inputType} />
+                ) : (
+                    <textarea {...allProps} />
+                )}
             </div>
         </div>
     );
@@ -158,7 +73,7 @@ export const DateSelector = ({ label, buttons, startValue, endValue, onChange, i
     const btnsEnd = buttons.filter(button => button === "dayAfter" || button === "weekAfter" || button === "monthAfter");
     return (
         <div className="d-flex flex-column align-items-start align-items-sm-center flex-sm-row text-sm-end mb-3">
-            {(label && <div className="pe-sm-2 mb-2 mb-sm-0">
+            {(label && <div className="width-fifteen-percent pe-sm-2 mb-2 mb-sm-0">
                 <label className={`fw-bold${isRequiredField ? " requiredField" : ""}`}>{label}</label>
             </div>)}
             {isShowStart && (<div className="w-sm-90">
@@ -190,7 +105,9 @@ export const DateSelector = ({ label, buttons, startValue, endValue, onChange, i
     );
 };
 
-export function LinkComponent({ defaultlinkType, hasLinkText = true }) {
+export function LinkComponent({ defaultlinkType, isMustLink = false, hasLinkText = true }) {
+    console.log("defaultlinkType", defaultlinkType);
+
     const [linkType, setLinkType] = useState(defaultlinkType);
     const [linkText, setLinkText] = useState('לחצו כאן');
     const [link, setLink] = useState('');
@@ -217,6 +134,12 @@ export function LinkComponent({ defaultlinkType, hasLinkText = true }) {
             //setLinkType to 1 (none)
             const selectedLinkType = defaultlinkType || fetchedDataLinkTypes.find(item => item.id === 1);
             setLinkType(selectedLinkType);
+
+
+            console.log("isMustLink " + defaultlinkType || linkTypes.find(item => item.isMustLink === isMustLink));
+            // const defaultlinkType = ;
+            // console.log("defaultlinkType", defaultlinkType);
+            // setLinkType(defaultlinkType);
 
             //setLoading(false);
         }
@@ -284,12 +207,12 @@ const InfoItemCategoriesComponent = ({ infoItemCategories, onSelectCategory }) =
     return (
         <div className="w-md-50">
             <div className="d-flex align-items-center">
-                <b className="ms-3 me-0">מיועד ל- </b>
+                <b className="ms-3 me-0">מיועד ל - </b>
                 <button className={`btn btn-sm btn-link${!isRestricted ? " bgLightGray" : ""}`} onClick={() => handleOnIsRestrictedClick(false)}>לתלמידים</button>
                 <button className={`btn btn-sm btn-link${isRestricted ? " bgLightGray" : ""}`} onClick={() => handleOnIsRestrictedClick(true)}>למורים</button>
             </div>
-            <div className="d-flex align-items-center">
-                <b className="align-self-baseline mt-1 ms-3 me-0">קטגוריה</b>
+            <div className="d-flex">
+                <b className="mt-1 ms-3 me-0">מסוג - </b>
                 <FilterCategories filterCategories={filteredCategories} onFilterChange={onSelectCategory} />
             </div>
         </div>
@@ -332,35 +255,15 @@ export default function InfoItemsAdmin() {
     };
     const [item, setItem] = useState(initialItemState);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setItem(prevState => ({
-            ...prevState,
-            [name]: value
-        }));
-    };
-    const handleChangeByName = (name, value) => {
-        setItem(prevState => ({
-            ...prevState,
-            [name]: value
-        }));
-    };
+    const handleChangeByName = (name, value) => { setItem(prevState => ({ ...prevState, [name]: value })); };
+    const handleChange = (e) => { const { name, value } = e.target; handleChangeByName(name, value); };
 
     const onSelectCategory = (categoryId) => {
-        setItem(prevState => ({
-            ...prevState,
-            infoItemCategory: categoryId
-        }));
-
+        handleChangeByName("infoItemCategory", categoryId);
         setSelectedCategory(infoItemCategories.find(category => category.id === categoryId));
     };
 
-    const onSelectedClassesChange = (curClasses) => {
-        setItem(prevState => ({
-            ...prevState,
-            classes: curClasses
-        }));
-    };
+    const onSelectedClassesChange = (curClasses) => { handleChangeByName("classes", curClasses); };
 
 
     const handleSubmit = (e) => {
@@ -376,7 +279,7 @@ export default function InfoItemsAdmin() {
                 const { data: fetchedDataIsAdmin, error } = await fetchData('/api/IsAdminUser', null, null, additionalHeaders);
                 if (error && error.message === "Resource not found") setNotAlowed(fetchedDataIsAdmin);
 
-                const { data: fetchedData, errorData } = await fetchData('/api/InfoItems', infoItemsTransformFunction, null, additionalHeaders);
+                const { data: fetchedData, errorData } = await fetchData('/api/InfoItems', null, null, additionalHeaders);
                 if (errorData && errorData.message === "Resource not found") setNotAlowed(true);
                 else setInfoItems(fetchedData);
 
@@ -410,9 +313,7 @@ export default function InfoItemsAdmin() {
 
     if (!token || notAlowed) { return <NotAllowedUser />; }
     if (loading) { return <LoadingSpinner />; }
-    //rows - if small screen 5 else 10
     const rows = window.innerWidth < 768 ? 5 : 10;
-    //console.log(selectedCategory);
     return (
         <div>
             <form onSubmit={handleSubmit} className="container-fluid">
@@ -423,13 +324,15 @@ export default function InfoItemsAdmin() {
                         <DescriptionInput id="name" label="כותרת/טקסט" isRequiredField={true} value={item.name} onChange={handleChange} />
                     </div>)}
                     {selectedCategory.hasText && (<div className="mb-3">
-                        <label htmlFor="text" className="form-label my-auto requiredField">תוכן ההודעה</label>
-                        <textarea className="form-control" id="text" name="text" value={item.text} onChange={handleChange} rows={rows} />
+                        <DescriptionInput id="text" label="תוכן ההודעה" isRequiredField={true} value={item.text} onChange={handleChange} inputType="textarea" moreProps={{ rows }} />
+
+                        {/* <label htmlFor="text" className="form-label my-auto requiredField">תוכן ההודעה</label>
+                        <textarea className="form-control" id="text" name="text" value={item.text} onChange={handleChange} rows={rows} /> */}
                     </div>)}
                     <div>
                         <DateSelector label={"פרסום"} buttons={["today", "tomorrow", "dayAfter", "weekAfter", "monthAfter", "lastDayOfStudyYear"]} startValue={item.start} endValue={item.end} onChange={handleChangeByName} isRequiredField={true} />
                     </div>
-                    <LinkComponent hasLinkText={selectedCategory.hasLinkText} />
+                    <LinkComponent defaultlinkType={item.linkType} isMustLink={selectedCategory.isMustLink} hasLinkText={selectedCategory.hasLinkText} />
 
                     <div className="my-3">
                         <b>אפשרויות נוספות</b>
@@ -441,8 +344,8 @@ export default function InfoItemsAdmin() {
                             <DescriptionInput id="note" label="הערה" value={item.note} onChange={handleChange} />
                         </div>
                     )}
-                    <button type="submit" className="btn btn-primary">הוספה</button>
                     <button type="button" className="btn btn-link" onClick={() => setItem(initialItemState)}>איפוס</button>
+                    <button type="submit" className="btn btn-primary">הוספה</button>
                 </div>)}
             </form>
         </div>

@@ -181,6 +181,10 @@ ul.list-group li:hover {
     .width-fifth {
         flex: 0 0 calc(20.0% - 1rem);
     }
+    
+    .width-fifteen-percent {
+        flex: 0 0 calc(15.0% - 1rem);
+    }
 }
 
 @media screen and (max-width: 576px) {
@@ -200,7 +204,5 @@ ul.list-group li:hover {
         margin-top: 5% !important;
     }
 
-    .w-sm-90 {
-        width: 85% !important;
-    }
+    
 }
