@@ -145,3 +145,10 @@ export const addTimeToDate = (date, time) => {
     date.setHours(parseInt(timeParts[0], 10), parseInt(timeParts[1], 10), 0, 0);
     return date;
 };
+
+export function lastDayOfStudyYear() {
+    //sep-dec last day of aug next year, Otherwise, current year
+    const date = new Date();
+    if (date.getMonth() >= 8) return new Date(date.getFullYear() + 1, 7, 31);
+    else return new Date(date.getFullYear(), 7, 31);
+}

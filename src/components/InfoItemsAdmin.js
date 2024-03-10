@@ -4,7 +4,7 @@ import { ClassesCheckboxComponent, LoadingSpinner, NotAllowed, NotAllowedUser, S
 import { FilterCategories, ItemsList } from './ItemsList';
 import { NavItem } from './Nav';
 
-import { addDays, getWithExpiry, toArchiveText, toDate, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
+import { addDays, getWithExpiry, lastDayOfStudyYear, toArchiveText, toDate, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
 import { fetchData, getHomePageUrl, getPageHeader } from '../utils/apiServices';
 import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -121,6 +121,75 @@ export const DescriptionInput = ({ id, label, value, onChange, inputType = "text
     );
 };
 
+export const DateSelector = ({ label, buttons, startValue, endValue, onChange, isRequiredField = false, isShowStart = true, isShowEnd = true, inputMoreCss = "", moreProps = {} }) => {
+    const handleSetDate = (preset, name, event) => {
+        let newStartDate = new Date(startValue) || new Date();
+        let newEndDate = new Date(startValue) || new Date();
+
+        switch (preset) {
+            case 'today': newStartDate = new Date(); break;
+            case 'tomorrow': newStartDate.setDate(newStartDate.getDate() + 1); break;
+
+            case 'dayAfter': newEndDate.setDate(newEndDate.getDate() + 1); break;
+            case 'weekAfter': newEndDate.setDate(newEndDate.getDate() + 7); break;
+            case 'monthAfter': newEndDate.setMonth(newEndDate.getMonth() + 1); break;
+            case 'lastDayOfStudyYear': newEndDate = lastDayOfStudyYear(); break;
+
+            default: break;
+        }
+        onChange(name, toDate(name == "start" ? newStartDate : newEndDate, "yyyy-MM-dd"));
+
+        // Remove focus from the button
+        event.target.blur();
+    };
+    function btnText(btn) {
+        switch (btn) {
+            case 'today': return "היום";
+            case 'tomorrow': return "מחר";
+            case 'dayAfter': return "יום";
+            case 'weekAfter': return "שבוע";
+            case 'monthAfter': return "חודש";
+            case 'lastDayOfStudyYear': return "סוף שנה";
+            default: return "";
+        }
+    }
+    const btnCss = "btn btn-link btn-sm mb-1";
+    const btnsStart = buttons.filter(button => button === "today" || button === "tomorrow");
+    const btnsEnd = buttons.filter(button => button === "dayAfter" || button === "weekAfter" || button === "monthAfter");
+    return (
+        <div className="d-flex flex-column align-items-start align-items-sm-center flex-sm-row text-sm-end mb-3">
+            {(label && <div className="pe-sm-2 mb-2 mb-sm-0">
+                <label className={`fw-bold${isRequiredField ? " requiredField" : ""}`}>{label}</label>
+            </div>)}
+            {isShowStart && (<div className="w-sm-90">
+                <b className="me-1 ms-1 my-auto">התחלה</b>
+                {btnsStart.reduce((acc, button, index, array) => {
+                    acc.push(<button key={button} className={btnCss} onClick={(e) => handleSetDate(button, "start", e)}>{btnText(button)}</button>);
+                    // Add separator if not the last item
+                    if (index < btnsStart.length - 1) acc.push(<span key={`sep-${button}`} className="my-auto">|</span>);
+
+                    return acc;
+                }, [])}
+                <input type="date" name="start" className="form-control-inline border-0 border-bottom text-center"
+                    value={startValue} onChange={onChange} />
+            </div>)}
+            {isShowEnd && (<div className="w-sm-90">
+                <b className="me-1 ms-1 me-sm-5 my-auto">סיום</b>
+                <span className="me-4 ms-1">אחרי:</span>
+                {btnsEnd.reduce((acc, button, index, array) => {
+                    acc.push(<button key={button} className={btnCss} onClick={(e) => handleSetDate(button, "start", e)}>{btnText(button)}</button>);
+                    // Add separator if not the last item
+                    if (index < btnsEnd.length - 1) acc.push(<span key={`sep-${button}`} className="my-auto">|</span>);
+
+                    return acc;
+                }, [])}
+                <input type="date" name="end" className="form-control-inline border-0 border-bottom text-center" value={endValue} onChange={onChange} />
+                {buttons && buttons.includes("lastDayOfStudyYear") && (<button className={btnCss} onClick={(e) => handleSetDate("lastDayOfStudyYear", "end", e)}>סוף שנה</button>)}
+            </div>)}
+        </div>
+    );
+};
+
 export function LinkComponent({ defaultlinkType, hasLinkText = true }) {
     const [linkType, setLinkType] = useState(defaultlinkType);
     const [linkText, setLinkText] = useState('לחצו כאן');
@@ -130,7 +199,7 @@ export function LinkComponent({ defaultlinkType, hasLinkText = true }) {
     const [linkTypes, setLinkTypes] = useState([]);
 
     const handleChangeLinkType = (e) => {
-        const selectedLinkType = linkTypes.find(item => item.id === parseInt(e.target.dataset.value));
+        const selectedLinkType = linkTypes?.find(item => item.id === parseInt(e.target.dataset.value));
         setLinkType(selectedLinkType);
     };
 
@@ -172,7 +241,7 @@ export function LinkComponent({ defaultlinkType, hasLinkText = true }) {
                     {link ? (<span><a target="_blank" href="#"><LinkFileHeader /></a></span>) : (<LinkFileHeader />)}
                 </div>
                 <div className="flex-grow-1">
-                    {linkTypes.map((item) => (
+                    {linkTypes?.map((item) => (
                         <div key={item.id} className="form-check form-check-inline ms-1 me-0">
                             <label className="form-check-label" htmlFor={`Radio${item.id}`}>
                                 {item.itemIcon && item.itemIcon.type === 'fa' && <FontAwesomeIcon icon={item.itemIcon.cssClass} className="mx-1" />}
@@ -270,6 +339,12 @@ export default function InfoItemsAdmin() {
             [name]: value
         }));
     };
+    const handleChangeByName = (name, value) => {
+        setItem(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
 
     const onSelectCategory = (categoryId) => {
         setItem(prevState => ({
@@ -277,70 +352,17 @@ export default function InfoItemsAdmin() {
             infoItemCategory: categoryId
         }));
 
-        //find the infoItemCategory obj from infoItemCategories by id from categoryId
         setSelectedCategory(infoItemCategories.find(category => category.id === categoryId));
-        //console.log(infoItemCategories.find(category => category.id === categoryId));
     };
 
     const onSelectedClassesChange = (curClasses) => {
         setItem(prevState => ({
             ...prevState,
-            classes: curClasses // Assuming infoItemCategory is the state property to update
+            classes: curClasses
         }));
     };
 
-    const handleSetStartDate = (preset, event) => {
-        let newDate = new Date();
-        switch (preset) {
-            case 'today':
 
-                break;
-            case 'tomorrow':
-                newDate.setDate(newDate.getDate() + 1);
-                break;
-            // Add more cases as needed
-            default:
-                break;
-        }
-
-        setItem(prevState => ({
-            ...prevState, ['start']: toDate(newDate, "yyyy-MM-dd")
-        }));
-
-        // Remove focus from the button
-        event.target.blur();
-    };
-
-    const handleSetEndDate = (preset, event) => {
-        let newDate = new Date(item.start);
-        switch (preset) {
-            case 'dayAfter':
-                newDate.setDate(newDate.getDate() + 1);
-                break;
-            case 'weekAfter':
-                newDate.setDate(newDate.getDate() + 7);
-                break;
-            case 'monthAfter':
-                newDate.setMonth(newDate.getMonth() + 1);
-                break;
-            case 'lastDayOfStudyYear':
-                //sep-dec last day of aug next year, Otherwise, current year
-                if (newDate.getMonth() >= 8) {
-                    newDate = new Date(newDate.getFullYear() + 1, 7, 31);
-                } else {
-                    newDate = new Date(newDate.getFullYear(), 7, 31);
-                }
-                break;
-            default:
-                break;
-        }
-        setItem(prevState => ({
-            ...prevState, ['end']: toDate(newDate, "yyyy-MM-dd")
-        }));
-
-        // Remove focus from the button
-        event.target.blur();
-    };
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log(item);
@@ -385,9 +407,11 @@ export default function InfoItemsAdmin() {
         }
     }, []);
 
+
     if (!token || notAlowed) { return <NotAllowedUser />; }
     if (loading) { return <LoadingSpinner />; }
-
+    //rows - if small screen 5 else 10
+    const rows = window.innerWidth < 768 ? 5 : 10;
     //console.log(selectedCategory);
     return (
         <div>
@@ -400,51 +424,21 @@ export default function InfoItemsAdmin() {
                     </div>)}
                     {selectedCategory.hasText && (<div className="mb-3">
                         <label htmlFor="text" className="form-label my-auto requiredField">תוכן ההודעה</label>
-                        <textarea className="form-control" id="text" name="text" value={item.text} onChange={handleChange} />
+                        <textarea className="form-control" id="text" name="text" value={item.text} onChange={handleChange} rows={rows} />
                     </div>)}
-                    <div className="d-flex align-items-center my-1 ms-md-2">
-                        <label className="form-label my-auto requiredField">פרסום</label>
-                        <b className="me-3 ms-1 my-auto">התחלה</b>
-                        <button className="btn btn-link btn-sm" onClick={(e) => handleSetStartDate('today', e)}>היום</button>
-                        <span className="my-auto">|</span>
-                        <button className="btn btn-link btn-sm" onClick={(e) => handleSetStartDate('tomorrow', e)}>מחר</button>
-                        <input type="date" className="form-control-inline border-0 border-bottom text-center"
-                            value={item.start} onChange={handleChange} />
-
-                        <b className="d-flex align-items-center me-3 ms-1">סיום</b>
-                        <span className="me-4 ms-1">אחרי:</span>
-                        <button type="button" className="btn btn-link btn-sm" onClick={(e) => handleSetEndDate('dayAfter', e)}>יום</button>
-                        <span className="my-auto">|</span>
-                        <button type="button" className="btn btn-link btn-sm" onClick={(e) => handleSetEndDate('weekAfter', e)}>שבוע</button>
-                        <span className="my-auto">|</span>
-                        <button type="button" className="btn btn-link btn-sm" onClick={(e) => handleSetEndDate('monthAfter', e)}>חודש</button>
-                        <span className="my-auto">|</span>
-                        <button type="button" className="btn btn-link btn-sm" onClick={(e) => handleSetEndDate('lastDayOfStudyYear', e)}>סוף שנה</button>
-                        <input type="date" id="DateEnd" className="form-control-inline border-0 border-bottom text-center"
-                            value={item.end} onChange={handleChange} />
+                    <div>
+                        <DateSelector label={"פרסום"} buttons={["today", "tomorrow", "dayAfter", "weekAfter", "monthAfter", "lastDayOfStudyYear"]} startValue={item.start} endValue={item.end} onChange={handleChangeByName} isRequiredField={true} />
                     </div>
                     <LinkComponent hasLinkText={selectedCategory.hasLinkText} />
+
                     <div className="my-3">
                         <b>אפשרויות נוספות</b>
                         <FontAwesomeIcon className="my-auto ms-2" icon={showMoreOptions ? "fas fa-circle-chevron-up" : "fas fa-circle-chevron-down"} role="button" onClick={() => handleShowMoreOptions()} />
                     </div>
                     {showMoreOptions && (
                         <div className="">
-                            <DescriptionInput id="priority" label="קדימות" value={item.priority} onChange={handleChange} inputType="number" inputMoreCss="w-md-10" moreProps={{
-                                min: 1, max: 10
-                            }} />
-
-                            {/* <div className="mb-3">
-                                <label htmlFor="priority" className="form-label fw-bold">קדימות</label>
-                                <input type="number" className="form-control w-md-10" id="priority" name="priority" value={item.priority}
-                                    onChange={handleChange} min="1" max="10" />
-                            </div> */}
+                            <DescriptionInput id="priority" label="קדימות" value={item.priority} onChange={handleChange} inputType="number" inputMoreCss="w-md-10" moreProps={{ min: 1, max: 10 }} />
                             <DescriptionInput id="note" label="הערה" value={item.note} onChange={handleChange} />
-                            {/* 
-                            <div className="mb-3">
-                                <label htmlFor="note" className="form-label fw-bold">הערה</label>
-                                <input type="text" className="form-control w-md-50" id="note" name="note" value={item.note} onChange={handleChange} />
-                            </div> */}
                         </div>
                     )}
                     <button type="submit" className="btn btn-primary">הוספה</button>
