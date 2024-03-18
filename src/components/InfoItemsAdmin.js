@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 
 import { ClassesCheckboxComponent, LoadingSpinner, NotAllowed, NotAllowedUser, SelectItems } from "./Common"
 import { FilterCategories, ItemsList } from './ItemsList';
-import { NavItem } from './Nav';
 
 import { addDays, getWithExpiry, lastDayOfStudyYear, toArchiveText, toDate, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
 import { fetchData, getHomePageUrl, getPageHeader } from '../utils/apiServices';
@@ -22,10 +21,10 @@ export const DescriptionInput = ({ id, label, value, onChange, inputType = "text
     };
     return (
         <div className="d-flex flex-column align-items-start align-items-sm-center flex-sm-row text-sm-center mb-3">
-            <div className="width-fifteen-percent pe-sm-2 mb-2 mb-sm-0">
+            <div className="width-twelve-percent text-end pe-sm-2 mb-2 mb-sm-0">
                 <label htmlFor={id} className={`fw-bold${isRequiredField ? " requiredField" : ""}`}>{label}</label>
             </div>
-            <div className="w-75 flex-grow-1">
+            <div className="w-100 w-md-50 flex-grow-1">
                 {inputType !== "textarea" ? (
                     <input {...allProps} type={inputType} />
                 ) : (
@@ -73,7 +72,7 @@ export const DateSelector = ({ label, buttons, startValue, endValue, onChange, i
     const btnsEnd = buttons.filter(button => button === "dayAfter" || button === "weekAfter" || button === "monthAfter");
     return (
         <div className="d-flex flex-column align-items-start align-items-sm-center flex-sm-row text-sm-end mb-3">
-            {(label && <div className="width-fifteen-percent pe-sm-2 mb-2 mb-sm-0">
+            {(label && <div className="width-twelve-percent pe-sm-2 mb-2 mb-sm-0">
                 <label className={`fw-bold${isRequiredField ? " requiredField" : ""}`}>{label}</label>
             </div>)}
             {isShowStart && (<div className="w-sm-90">
@@ -105,10 +104,10 @@ export const DateSelector = ({ label, buttons, startValue, endValue, onChange, i
     );
 };
 
-export function LinkComponent({ defaultlinkType, isMustLink = false, hasLinkText = true }) {
-    console.log("defaultlinkType", defaultlinkType);
+export function LinkComponent({ defaultLinkType, isMustLink = false, hasLinkText = true }) {
+    console.log("defaultLinkType", defaultLinkType);
 
-    const [linkType, setLinkType] = useState(defaultlinkType);
+    const [linkType, setLinkType] = useState(defaultLinkType);
     const [linkText, setLinkText] = useState('לחצו כאן');
     const [link, setLink] = useState('');
     const [fileLabel, setFileLabel] = useState('עיון');
@@ -132,11 +131,11 @@ export function LinkComponent({ defaultlinkType, isMustLink = false, hasLinkText
             setLinkTypes(fetchedDataLinkTypes);
 
             //setLinkType to 1 (none)
-            const selectedLinkType = defaultlinkType || fetchedDataLinkTypes.find(item => item.id === 1);
+            const selectedLinkType = defaultLinkType || fetchedDataLinkTypes.find(item => item.id === 1);
             setLinkType(selectedLinkType);
 
 
-            console.log("isMustLink " + defaultlinkType || linkTypes.find(item => item.isMustLink === isMustLink));
+            console.log("isMustLink " + defaultLinkType || linkTypes.find(item => item.isMustLink === isMustLink));
             // const defaultlinkType = ;
             // console.log("defaultlinkType", defaultlinkType);
             // setLinkType(defaultlinkType);
@@ -161,7 +160,7 @@ export function LinkComponent({ defaultlinkType, isMustLink = false, hasLinkText
         <div className="my-3">
             <div className="d-flex flex-column align-items-start flex-sm-row mb-3">
                 <div className="pe-sm-2 mb-2 mb-sm-0">
-                    {link ? (<span><a target="_blank" href="#"><LinkFileHeader /></a></span>) : (<LinkFileHeader />)}
+                    {link ? (<span><a target="_blank" href={link}><LinkFileHeader /></a></span>) : (<LinkFileHeader />)}
                 </div>
                 <div className="flex-grow-1">
                     {linkTypes?.map((item) => (
@@ -184,8 +183,8 @@ export function LinkComponent({ defaultlinkType, isMustLink = false, hasLinkText
             )}
             {linkType && linkType.isFile && (
                 <div className="input-group d-flex justify-content-between">
-                    <input type="file" id="File1" className="form-control d-none" onChange={handleFileChange} />
                     <label htmlFor="File1" className="form-label-lg flex-fill bg-dark text-white py-1 mx-0">{fileLabel}</label>
+                    <input type="file" id="File1" className="form-control d-none" onChange={handleFileChange} />
                 </div>
             )}
         </div>
@@ -279,8 +278,9 @@ export default function InfoItemsAdmin() {
                 const { data: fetchedDataIsAdmin, error } = await fetchData('/api/IsAdminUser', null, null, additionalHeaders);
                 if (error && error.message === "Resource not found") setNotAlowed(fetchedDataIsAdmin);
 
-                const { data: fetchedData, errorData } = await fetchData('/api/InfoItems', null, null, additionalHeaders);
-                if (errorData && errorData.message === "Resource not found") setNotAlowed(true);
+                const { data: fetchedData, errorData = null } = await fetchData('/api/InfoItemsAdmin', null, null, additionalHeaders);
+                console.log("errorData: " + errorData && true);
+                if (errorData && (errorData.message === "Resource not found" || errorData.message === "User Not Allowed")) setNotAlowed(true);
                 else setInfoItems(fetchedData);
 
                 if (!notAlowed) {
@@ -314,6 +314,8 @@ export default function InfoItemsAdmin() {
     if (!token || notAlowed) { return <NotAllowedUser />; }
     if (loading) { return <LoadingSpinner />; }
     const rows = window.innerWidth < 768 ? 5 : 10;
+
+    if (infoItems) console.log(infoItems);
     return (
         <div>
             <form onSubmit={handleSubmit} className="container-fluid">
@@ -332,7 +334,7 @@ export default function InfoItemsAdmin() {
                     <div>
                         <DateSelector label={"פרסום"} buttons={["today", "tomorrow", "dayAfter", "weekAfter", "monthAfter", "lastDayOfStudyYear"]} startValue={item.start} endValue={item.end} onChange={handleChangeByName} isRequiredField={true} />
                     </div>
-                    <LinkComponent defaultlinkType={item.linkType} isMustLink={selectedCategory.isMustLink} hasLinkText={selectedCategory.hasLinkText} />
+                    <LinkComponent defaultLinkType={item.linkType} isMustLink={selectedCategory.isMustLink} hasLinkText={selectedCategory.hasLinkText} />
 
                     <div className="my-3">
                         <b>אפשרויות נוספות</b>
