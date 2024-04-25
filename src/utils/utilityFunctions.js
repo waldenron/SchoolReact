@@ -127,8 +127,11 @@ export function toDate(date, format = "dd/MM/yyyy") {
 
     return formattedDate;
 }
-export function addDays(date, addDays) {
-    return new Date(date.setDate(date.getDate() + addDays));
+
+export function addDays(date, days) {
+    var result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
 }
 
 export const getNextDateForWeekDay = (dayIndex) => {

@@ -7,6 +7,7 @@ import { addDays, getWithExpiry, lastDayOfStudyYear, toArchiveText, toDate, what
 import { fetchData, getHomePageUrl, getPageHeader } from '../utils/apiServices';
 import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { toHebrewDate } from '../utils/jewishDates';
 
 
 export const DescriptionInput = ({ id, label, value, onChange, inputType = "text", isRequiredField = false, inputMoreCss = "", placeholder = "", moreProps = {} }) => {
@@ -21,7 +22,7 @@ export const DescriptionInput = ({ id, label, value, onChange, inputType = "text
     };
     return (
         <div className="d-flex flex-column align-items-start align-items-sm-center flex-sm-row text-sm-center mb-3">
-            <div className="width-twelve-percent text-end pe-sm-2 mb-2 mb-sm-0">
+            <div className="width-fifteen-percent text-end pe-sm-2 mb-2 mb-sm-0">
                 <label htmlFor={id} className={`fw-bold${isRequiredField ? " requiredField" : ""}`}>{label}</label>
             </div>
             <div className="w-100 w-md-50 flex-grow-1">
@@ -39,7 +40,6 @@ export const DateSelector = ({ label, buttons, startValue, endValue, onChange, i
     const handleSetDate = (preset, name, event) => {
         let newStartDate = new Date(startValue) || new Date();
         let newEndDate = new Date(startValue) || new Date();
-
         switch (preset) {
             case 'today': newStartDate = new Date(); break;
             case 'tomorrow': newStartDate.setDate(newStartDate.getDate() + 1); break;
@@ -103,16 +103,33 @@ export const DateSelector = ({ label, buttons, startValue, endValue, onChange, i
         </div>
     );
 };
+function datesString(start, end) {
+    let text = "";
+    let i = new Date(start.getTime());
 
-export function LinkComponent({ defaultLinkType, isMustLink = false, hasLinkText = true }) {
-    console.log("defaultLinkType", defaultLinkType);
+    while (i <= end) {
+        text += `*יום ${toHebrewDate(i, "dddd")}*`;  // Day of the week in Hebrew
+        text += ` - ${toHebrewDate(i, "dd MM")}`;   // Day and month in Hebrew
+        text += `, ${toDate(i, "dd/MM")}`;          // Day and month in Gregorian
 
-    const [linkType, setLinkType] = useState(defaultLinkType);
-    const [linkText, setLinkText] = useState('לחצו כאן');
-    const [link, setLink] = useState('');
-    const [fileLabel, setFileLabel] = useState('עיון');
+        //if (i < end) { text += "<br><br>"; }
+        if (i < end) { text += "\n\n"; }
+
+        i.setDate(i.getDate() + 1); // Increment day by 1
+    }
+    return text;
+}
+
+export function LinkComponent_Prev({ defaultLinkType = 1, defaultLinkText = 'לחצו כאן', defaultLink = '', defaultFile = 'עיון', isMustLink = false, hasLinkText = true }) {
+    //console.log("defaultLinkType", defaultLinkType);
 
     const [linkTypes, setLinkTypes] = useState([]);
+    const [linkType, setLinkType] = useState(null);
+
+    const [linkText, setLinkText] = useState(defaultLinkText);
+    const [link, setLink] = useState(defaultLink);
+    const [fileLabel, setFileLabel] = useState(defaultFile);
+
 
     const handleChangeLinkType = (e) => {
         const selectedLinkType = linkTypes?.find(item => item.id === parseInt(e.target.dataset.value));
@@ -131,23 +148,17 @@ export function LinkComponent({ defaultLinkType, isMustLink = false, hasLinkText
             setLinkTypes(fetchedDataLinkTypes);
 
             //setLinkType to 1 (none)
-            const selectedLinkType = defaultLinkType || fetchedDataLinkTypes.find(item => item.id === 1);
+            const selectedLinkType = fetchedDataLinkTypes && fetchedDataLinkTypes.find(item => item.id === defaultLinkType);
             setLinkType(selectedLinkType);
-
-
-            console.log("isMustLink " + defaultLinkType || linkTypes.find(item => item.isMustLink === isMustLink));
-            // const defaultlinkType = ;
-            // console.log("defaultlinkType", defaultlinkType);
-            // setLinkType(defaultlinkType);
 
             //setLoading(false);
         }
         )();
-    }, []);
+    }, [defaultLinkType]);
 
     const LinkFileHeader = () => {
         return (
-            <div className="fw-bold">
+            <div className={`fw-bold ${isMustLink ? "requiredField" : ""}`}>
                 <FontAwesomeIcon icon="fas fa-paperclip" className="ps-1" />
                 <span className={`d-inline${link ? " btn btn-link" : ""}`}>קובץ</span>
                 <span className=""> / </span>
@@ -156,6 +167,8 @@ export function LinkComponent({ defaultLinkType, isMustLink = false, hasLinkText
             </div>
         );
     };
+
+    //console.log("linkType", linkType);
     return (
         <div className="my-3">
             <div className="d-flex flex-column align-items-start flex-sm-row mb-3">
@@ -183,7 +196,7 @@ export function LinkComponent({ defaultLinkType, isMustLink = false, hasLinkText
             )}
             {linkType && linkType.isFile && (
                 <div className="input-group d-flex justify-content-between">
-                    <label htmlFor="File1" className="form-label-lg flex-fill bg-dark text-white py-1 mx-0">{fileLabel}</label>
+                    <label htmlFor="File1" className="form-label-lg flex-fill bg-dark text-white py-1 mx-0 pe-2">{fileLabel}</label>
                     <input type="file" id="File1" className="form-control d-none" onChange={handleFileChange} />
                 </div>
             )}
@@ -217,11 +230,102 @@ const InfoItemCategoriesComponent = ({ infoItemCategories, onSelectCategory }) =
         </div>
     );
 };
+
+export function LinkComponent({ linkObj, onLinkObjChange }) {
+    //console.log("defaultLinkType", defaultLinkType);
+
+    const [linkTypes, setLinkTypes] = useState([]);
+    const [linkType, setLinkType] = useState(null);
+
+    const [linkText, setLinkText] = useState(linkObj.linkText || 'לחצו כאן');
+    const [link, setLink] = useState(linkObj.link);
+    const [fileLabel, setFileLabel] = useState(linkObj.file || 'עיון');
+
+
+    const handleChangeLinkType = (e) => {
+        const selectedLinkType = linkTypes?.find(item => item.id === parseInt(e.target.dataset.value));
+        setLinkType(selectedLinkType);
+        onLinkObjChange({ linkType: selectedLinkType });
+    };
+
+    const handleTextChange = (e) => { onLinkObjChange({ linkText: e.target.value }); };
+    const handleLinkChange = (e) => { onLinkObjChange({ link: e.target.value }); };
+    const handleFileChange = (e) => {
+        const fileName = e.target.files[0]?.name || 'עיון';
+        setFileLabel(fileName);
+        onLinkObjChange({ file: fileName });
+    };
+
+    useEffect(() => {
+        (async () => {
+
+            const { data: fetchedDataLinkTypes } = await fetchData('/api/LinkTypes');
+            setLinkTypes(fetchedDataLinkTypes);
+
+            //setLinkType to 1 (none)
+            const selectedLinkType = fetchedDataLinkTypes && fetchedDataLinkTypes.find(item => item.id === linkObj.linkType);
+            setLinkType(selectedLinkType);
+
+            //setLoading(false);
+        }
+        )();
+    }, [linkObj.linkType]);
+
+    const LinkFileHeader = () => {
+        return (
+            <div className={`fw-bold ${linkObj.isMustLink ? "requiredField" : ""}`}>
+                <FontAwesomeIcon icon="fas fa-paperclip" className="ps-1" />
+                <span className={`d-inline${link ? " btn btn-link" : ""}`}>קובץ</span>
+                <span className=""> / </span>
+                <FontAwesomeIcon icon="fas fa-link" className="ps-1" />
+                <span className={`d-inline${link ? " btn btn-link" : ""}`}>קישור</span>
+            </div>
+        );
+    };
+
+    //console.log("linkType", linkType);
+    return (
+        <div className="my-3">
+            <div className="d-flex flex-column align-items-start flex-sm-row mb-3">
+                <div className="pe-sm-2 mb-2 mb-sm-0">
+                    {link ? (<span><a target="_blank" href={link}><LinkFileHeader /></a></span>) : (<LinkFileHeader />)}
+                </div>
+                <div className="flex-grow-1">
+                    {linkTypes?.map((item) => (
+                        <div key={item.id} className="form-check form-check-inline ms-1 me-0">
+                            <label className="form-check-label" htmlFor={`Radio${item.id}`}>
+                                {item.itemIcon && item.itemIcon.type === 'fa' && <FontAwesomeIcon icon={item.itemIcon.cssClass} className="mx-1" />}
+                                {item.description}
+                            </label>
+                            <input type="radio" className="form-check-input" id={`Radio${item.id}`} name="linkType"
+                                data-value={item.id} checked={linkType && linkType.id === item.id} onChange={handleChangeLinkType} />
+                        </div>
+                    ))}
+                </div>
+            </div>
+            {linkType && linkType.isLink && linkObj.hasLinkText && (
+                //<DescriptionInput id="linkText" label="תיאור הקישור" value={linkText} onChange={(e) => setLinkText(e.target.value)} />
+                <DescriptionInput id="linkText" label="תיאור הקישור" value={linkText} onChange={handleTextChange} />
+            )}
+            {linkType && linkType.isLink && (
+                //<DescriptionInput id="link" label="הקישור" value={link} onChange={(e) => setLink(e.target.value)} inputType="url" className="form-control" placeholder="Enter URL" />
+                <DescriptionInput id="link" label="הקישור" value={link} onChange={handleLinkChange} inputType="url" className="form-control" placeholder="Enter URL" />
+            )}
+            {linkType && linkType.isFile && (
+                <div className="input-group d-flex justify-content-between">
+                    <label htmlFor="File1" className="form-label-lg flex-fill bg-dark text-white py-1 mx-0 pe-2">{fileLabel}</label>
+                    <input type="file" id="File1" className="form-control d-none" onChange={handleFileChange} />
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function InfoItemsAdmin() {
     const { id } = useParams();
     const token = getWithExpiry("token");
     const [loading, setLoading] = useState(true);
-    const [notAlowed, setNotAlowed] = useState(false);
+    const [hasPermission, setHasPermission] = useState(true);
 
     const [showMoreOptions, setShowMoreOptions] = useState(false);
     const handleShowMoreOptions = () => { setShowMoreOptions(!showMoreOptions); };
@@ -238,12 +342,18 @@ export default function InfoItemsAdmin() {
     const [infoItems, setInfoItems] = useState([]);
 
     const today = new Date();
+    const endDate = addDays(today, 7);
+
+    // const check = datesString(today, endDate);
+    // console.log("check");
+    // console.log(check);
 
     const initialItemState = {
         infoItemCategory: '',
         name: '',
         text: '',
-        linkType: '',
+        //text: datesString(today, endDate),
+        linkType: 1,
         linkText: '',
         link: '',
         start: toDate(today, "yyyy-MM-dd"),
@@ -257,9 +367,25 @@ export default function InfoItemsAdmin() {
     const handleChangeByName = (name, value) => { setItem(prevState => ({ ...prevState, [name]: value })); };
     const handleChange = (e) => { const { name, value } = e.target; handleChangeByName(name, value); };
 
+    const toLinkObj = (item) => { return { linkType: item.linkType, link: item.link, linkText: item.linkText, file: item.link, isMustLink: selectedCategory?.isMustLink, hasLinkText: selectedCategory?.hasLinkText } };
+    const [linkObj, setLinkObj] = useState(item);
+
+    const handleLinkObjChange = (newLinkObj) => {
+        setLinkObj(prev => ({ ...prev, ...newLinkObj }));
+
+    };
+
     const onSelectCategory = (categoryId) => {
-        handleChangeByName("infoItemCategory", categoryId);
-        setSelectedCategory(infoItemCategories.find(category => category.id === categoryId));
+
+        if (infoItemCategories && categoryId) {
+            const curSelectedCategory = infoItemCategories.find(category => category.id === categoryId);
+
+            handleChangeByName("infoItemCategory", categoryId);
+            setSelectedCategory(curSelectedCategory);
+
+            handleChangeByName("linkType", curSelectedCategory.defaultLinkType);
+            handleLinkObjChange(toLinkObj(item));
+        }
     };
 
     const onSelectedClassesChange = (curClasses) => { handleChangeByName("classes", curClasses); };
@@ -267,7 +393,8 @@ export default function InfoItemsAdmin() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log(item);
+        //console.log("item");
+        //console.log(item);
         // Here, you would typically send the item to your server or handle it as needed
     };
 
@@ -276,14 +403,14 @@ export default function InfoItemsAdmin() {
             (async () => {
                 const additionalHeaders = [{ name: 'token', value: token }];
                 const { data: fetchedDataIsAdmin, error } = await fetchData('/api/IsAdminUser', null, null, additionalHeaders);
-                if (error && error.message === "Resource not found") setNotAlowed(fetchedDataIsAdmin);
+                if (error && error.message === "Resource not found") setHasPermission(fetchedDataIsAdmin);
 
                 const { data: fetchedData, errorData = null } = await fetchData('/api/InfoItemsAdmin', null, null, additionalHeaders);
-                console.log("errorData: " + errorData && true);
-                if (errorData && (errorData.message === "Resource not found" || errorData.message === "User Not Allowed")) setNotAlowed(true);
-                else setInfoItems(fetchedData);
+                //console.log("errorData: " + errorData && true);
+                if (errorData && (errorData.message === "Resource not found" || errorData.message === "User Not Allowed")) setHasPermission(false);
+                else { setHasPermission(true); setInfoItems(fetchedData); }
 
-                if (!notAlowed) {
+                if (hasPermission) {
                     const isOnlyShowOnInfoItemsPage = false;
                     const { data: fetchedDataCategories } = await fetchData('/api/InfoItemCategories/' + isOnlyShowOnInfoItemsPage, null, null, additionalHeaders);
                     setInfoItemCategories(fetchedDataCategories);
@@ -295,7 +422,6 @@ export default function InfoItemsAdmin() {
                     setGrades(fetchedDataGrades);
 
                     const { data: fetchedDataSections } = await fetchData('/api/Sections');
-                    //setSections(fetchedDataSections);
                     setSections(fetchedDataSections.filter(section => section.id < 99));
 
                     const fetchedUrl = await getHomePageUrl();
@@ -310,15 +436,17 @@ export default function InfoItemsAdmin() {
         }
     }, []);
 
-
-    if (!token || notAlowed) { return <NotAllowedUser />; }
     if (loading) { return <LoadingSpinner />; }
+    if (!token || !hasPermission) { return <NotAllowedUser />; }
     const rows = window.innerWidth < 768 ? 5 : 10;
 
-    if (infoItems) console.log(infoItems);
+    //if (infoItems) console.log(infoItems);
+    //console.log("item.linkType", item.linkType);
+    //console.log(toLinkObj(item));
+
     return (
-        <div>
-            <form onSubmit={handleSubmit} className="container-fluid">
+        <div className="container-fluid">
+            <form onSubmit={handleSubmit} >
                 <InfoItemCategoriesComponent infoItemCategories={infoItemCategories} onSelectCategory={onSelectCategory} />
                 {selectedCategory && (<div className="mt-3 w-md-75">
                     {selectedCategory.hasClasses && (<ClassesCheckboxComponent sections={sections} grades={grades} classes={classes} onSelectedClassesChange={onSelectedClassesChange} />)}
@@ -334,7 +462,9 @@ export default function InfoItemsAdmin() {
                     <div>
                         <DateSelector label={"פרסום"} buttons={["today", "tomorrow", "dayAfter", "weekAfter", "monthAfter", "lastDayOfStudyYear"]} startValue={item.start} endValue={item.end} onChange={handleChangeByName} isRequiredField={true} />
                     </div>
-                    <LinkComponent defaultLinkType={item.linkType} isMustLink={selectedCategory.isMustLink} hasLinkText={selectedCategory.hasLinkText} />
+                    {/* <LinkComponent defaultLinkType={item.linkType} defaultLinkText={item.linkText} defaultLink={item.link} defaultFile={item.link}
+                    isMustLink={selectedCategory.isMustLink} hasLinkText={selectedCategory.hasLinkText} /> */}
+                    <LinkComponent linkObj={linkObj} onLinkObjChange ={handleLinkObjChange} />
 
                     <div className="my-3">
                         <b>אפשרויות נוספות</b>

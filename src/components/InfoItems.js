@@ -103,6 +103,7 @@ export default function InfoItems() {
 
     const [loading, setLoading] = useState(true);
     const [notAlowed, setNotAlowed] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const [homePageUrl, setHomePageUrl] = useState(null);
     const [pageHeader, setPageHeader] = useState(null);
@@ -118,6 +119,10 @@ export default function InfoItems() {
             const { data: fetchedData, error } = await fetchData('/api/InfoItems', infoItemsTransformFunction, null, additionalHeaders);
             if (error && error.message === "Resource not found") setNotAlowed(true);
             else setInfoItems(fetchedData);
+
+            const { data: fetchedDataIsAdmin, errorAdmin } = await fetchData('/api/IsAdminUser', null, null, additionalHeaders);
+            if (!errorAdmin) setIsAdmin(fetchedDataIsAdmin);
+            //InfoItemsAdmin
 
             const { data: fetchedDataCategories } = await fetchData('/api/InfoItemCategories', null, null, additionalHeaders);
             setInfoItemCategories(fetchedDataCategories);
@@ -151,14 +156,18 @@ export default function InfoItems() {
             }
         </>
     const infoItemCategoryName = infoItemCategories && infoItemCategories.length > 0 ? infoItemCategories.find(item => item.id == id)?.name : "";
+    const adminLink = isAdmin ? <span className="ms-0 me-3"><a className="ms-0 me-5 btn btn-dark" href="/InfoItemsAdmin">עריכת פריטי מידע</a></span> : null;
     const header = token ? "אזור מורים" : pageHeader && (pageHeader + (id && infoItemCategoryName ? " - <span class='fw-bolder'>" + infoItemCategoryName + "</span>" : ""));
     //const filterCategories = infoItemCategories.filter(item => item.isShowOnInfoItemsPage === true);
     if (id) infoItems = infoItems.filter(item => item.category == id);
     if (selectedGrade != -1) infoItems = infoItems.filter(item => item.grades === "" || item.grades.includes(selectedGrade));
     return (
-        <ItemsList header={header} msg={msg} items={infoItems} toHtml={(data) => toHtmlElements(data, homePageUrl)}
-            filterCategories={!id ? infoItemCategories : null}
-            noItemShow={id ? "true" : null}
-        />
+        <>
+        {adminLink}
+            <ItemsList header={header} msg={msg} items={infoItems} toHtml={(data) => toHtmlElements(data, homePageUrl)}
+                filterCategories={!id ? infoItemCategories : null}
+                noItemShow={id ? "true" : null}
+            />
+        </>
     )
 };

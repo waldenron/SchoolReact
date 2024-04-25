@@ -53,7 +53,6 @@ export default function Nav(isTextResponsive = true) {
   }, []);
 
   //if (loading) { return <LoadingSpinner />; }
-  console.log(navItemsMore);
   return (
     <>
       {navType === "Buttons" &&
