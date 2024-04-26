@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { ClassesCheckboxComponent, LoadingSpinner, NotAllowed, NotAllowedUser, SelectItems } from "./Common"
 import { FilterCategories, ItemsList } from './ItemsList';
 
-import { addDays, getWithExpiry, lastDayOfStudyYear, toArchiveText, toDate, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
+import { addDays, getNextDateForWeekDay, getWithExpiry, lastDayOfStudyYear, toArchiveText, toDate, whatsappStrToHtmlTags } from '../utils/utilityFunctions';
 import { fetchData, getHomePageUrl, getPageHeader } from '../utils/apiServices';
 import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -91,7 +91,7 @@ export const DateSelector = ({ label, buttons, startValue, endValue, onChange, i
                 <b className="me-1 ms-1 me-sm-5 my-auto">סיום</b>
                 <span className="me-4 ms-1">אחרי:</span>
                 {btnsEnd.reduce((acc, button, index, array) => {
-                    acc.push(<button key={button} className={btnCss} onClick={(e) => handleSetDate(button, "start", e)}>{btnText(button)}</button>);
+                    acc.push(<button key={button} className={btnCss} onClick={(e) => handleSetDate(button, "end", e)}>{btnText(button)}</button>);
                     // Add separator if not the last item
                     if (index < btnsEnd.length - 1) acc.push(<span key={`sep-${button}`} className="my-auto">|</span>);
 
@@ -112,98 +112,12 @@ function datesString(start, end) {
         text += ` - ${toHebrewDate(i, "dd MM")}`;   // Day and month in Hebrew
         text += `, ${toDate(i, "dd/MM")}`;          // Day and month in Gregorian
 
-        //if (i < end) { text += "<br><br>"; }
         if (i < end) { text += "\n\n"; }
 
-        i.setDate(i.getDate() + 1); // Increment day by 1
+        i.setDate(i.getDate() + 1);
     }
     return text;
 }
-
-export function LinkComponent_Prev({ defaultLinkType = 1, defaultLinkText = 'לחצו כאן', defaultLink = '', defaultFile = 'עיון', isMustLink = false, hasLinkText = true }) {
-    //console.log("defaultLinkType", defaultLinkType);
-
-    const [linkTypes, setLinkTypes] = useState([]);
-    const [linkType, setLinkType] = useState(null);
-
-    const [linkText, setLinkText] = useState(defaultLinkText);
-    const [link, setLink] = useState(defaultLink);
-    const [fileLabel, setFileLabel] = useState(defaultFile);
-
-
-    const handleChangeLinkType = (e) => {
-        const selectedLinkType = linkTypes?.find(item => item.id === parseInt(e.target.dataset.value));
-        setLinkType(selectedLinkType);
-    };
-
-    const handleFileChange = (e) => {
-        const fileName = e.target.files[0]?.name || 'עיון';
-        setFileLabel(fileName);
-    };
-
-    useEffect(() => {
-        (async () => {
-
-            const { data: fetchedDataLinkTypes } = await fetchData('/api/LinkTypes');
-            setLinkTypes(fetchedDataLinkTypes);
-
-            //setLinkType to 1 (none)
-            const selectedLinkType = fetchedDataLinkTypes && fetchedDataLinkTypes.find(item => item.id === defaultLinkType);
-            setLinkType(selectedLinkType);
-
-            //setLoading(false);
-        }
-        )();
-    }, [defaultLinkType]);
-
-    const LinkFileHeader = () => {
-        return (
-            <div className={`fw-bold ${isMustLink ? "requiredField" : ""}`}>
-                <FontAwesomeIcon icon="fas fa-paperclip" className="ps-1" />
-                <span className={`d-inline${link ? " btn btn-link" : ""}`}>קובץ</span>
-                <span className=""> / </span>
-                <FontAwesomeIcon icon="fas fa-link" className="ps-1" />
-                <span className={`d-inline${link ? " btn btn-link" : ""}`}>קישור</span>
-            </div>
-        );
-    };
-
-    //console.log("linkType", linkType);
-    return (
-        <div className="my-3">
-            <div className="d-flex flex-column align-items-start flex-sm-row mb-3">
-                <div className="pe-sm-2 mb-2 mb-sm-0">
-                    {link ? (<span><a target="_blank" href={link}><LinkFileHeader /></a></span>) : (<LinkFileHeader />)}
-                </div>
-                <div className="flex-grow-1">
-                    {linkTypes?.map((item) => (
-                        <div key={item.id} className="form-check form-check-inline ms-1 me-0">
-                            <label className="form-check-label" htmlFor={`Radio${item.id}`}>
-                                {item.itemIcon && item.itemIcon.type === 'fa' && <FontAwesomeIcon icon={item.itemIcon.cssClass} className="mx-1" />}
-                                {item.description}
-                            </label>
-                            <input type="radio" className="form-check-input" id={`Radio${item.id}`} name="linkType"
-                                data-value={item.id} checked={linkType && linkType.id === item.id} onChange={handleChangeLinkType} />
-                        </div>
-                    ))}
-                </div>
-            </div>
-            {linkType && linkType.isLink && hasLinkText && (
-                <DescriptionInput id="linkText" label="תיאור הקישור" value={linkText} onChange={(e) => setLinkText(e.target.value)} />
-            )}
-            {linkType && linkType.isLink && (
-                <DescriptionInput id="link" label="הקישור" value={link} onChange={(e) => setLink(e.target.value)} inputType="url" className="form-control" placeholder="Enter URL" />
-            )}
-            {linkType && linkType.isFile && (
-                <div className="input-group d-flex justify-content-between">
-                    <label htmlFor="File1" className="form-label-lg flex-fill bg-dark text-white py-1 mx-0 pe-2">{fileLabel}</label>
-                    <input type="file" id="File1" className="form-control d-none" onChange={handleFileChange} />
-                </div>
-            )}
-        </div>
-    );
-}
-
 
 const InfoItemCategoriesComponent = ({ infoItemCategories, onSelectCategory }) => {
     const [isRestricted, setIsRestricted] = useState(false); // Default to לתלמידים
@@ -243,16 +157,17 @@ export function LinkComponent({ linkObj, onLinkObjChange }) {
     const handleChangeLinkType = (e) => {
         const selectedLinkType = linkTypes?.find(item => item.id === parseInt(e.target.dataset.value));
         setLinkType(selectedLinkType);
-        onLinkObjChange({ linkType: selectedLinkType });
+        onLinkObjChange({ linkType: selectedLinkType.id });
     };
 
     const handleTextChange = (e) => { onLinkObjChange({ linkText: e.target.value }); };
     const handleLinkChange = (e) => { onLinkObjChange({ link: e.target.value }); };
     const handleFileChange = (e) => {
-        const fileName = e.target.files[0]?.name || 'עיון';
+        const fileName = e.target.files[0] ? e.target.files[0].name : 'עיון';
         setFileLabel(fileName);
         onLinkObjChange({ file: fileName });
     };
+
 
     useEffect(() => {
         (async () => {
@@ -269,12 +184,28 @@ export function LinkComponent({ linkObj, onLinkObjChange }) {
         )();
     }, [linkObj.linkType]);
 
+    useEffect(() => {
+        //const defaultLinkText = 'לחצו כאן';
+        //if (!linkObj.linkText) setLinkText(defaultLinkText);
+        //setLinkText(linkObj.linkText || defaultLinkText);
+        if (linkObj.linkText !== undefined && linkObj.linkText !== null) {
+            setLinkText(linkObj.linkText);
+        } else if (linkObj.linkText === '') {
+            setLinkText(''); // Handle empty string as a valid case
+        }
+
+        //setLinkText(linkObj.linkText || 'לחצו כאן');
+        setLink(linkObj.link || '');
+        setFileLabel(linkObj.file || 'עיון');
+    }, [linkObj]);
+
+
     const LinkFileHeader = () => {
         return (
             <div className={`fw-bold ${linkObj.isMustLink ? "requiredField" : ""}`}>
                 <FontAwesomeIcon icon="fas fa-paperclip" className="ps-1" />
                 <span className={`d-inline${link ? " btn btn-link" : ""}`}>קובץ</span>
-                <span className=""> / </span>
+                <span className="fs-4">/</span>
                 <FontAwesomeIcon icon="fas fa-link" className="ps-1" />
                 <span className={`d-inline${link ? " btn btn-link" : ""}`}>קישור</span>
             </div>
@@ -286,7 +217,7 @@ export function LinkComponent({ linkObj, onLinkObjChange }) {
         <div className="my-3">
             <div className="d-flex flex-column align-items-start flex-sm-row mb-3">
                 <div className="pe-sm-2 mb-2 mb-sm-0">
-                    {link ? (<span><a target="_blank" href={link}><LinkFileHeader /></a></span>) : (<LinkFileHeader />)}
+                    {link ? (<span className="text-decoration-none"><a className="text-decoration-none" target="_blank" href={link}><LinkFileHeader /></a></span>) : (<LinkFileHeader />)}
                 </div>
                 <div className="flex-grow-1">
                     {linkTypes?.map((item) => (
@@ -296,17 +227,15 @@ export function LinkComponent({ linkObj, onLinkObjChange }) {
                                 {item.description}
                             </label>
                             <input type="radio" className="form-check-input" id={`Radio${item.id}`} name="linkType"
-                                data-value={item.id} checked={linkType && linkType.id === item.id} onChange={handleChangeLinkType} />
+                                data-value={item.id} checked={linkType ? linkType.id === item.id : false} onChange={handleChangeLinkType} />
                         </div>
                     ))}
                 </div>
             </div>
             {linkType && linkType.isLink && linkObj.hasLinkText && (
-                //<DescriptionInput id="linkText" label="תיאור הקישור" value={linkText} onChange={(e) => setLinkText(e.target.value)} />
                 <DescriptionInput id="linkText" label="תיאור הקישור" value={linkText} onChange={handleTextChange} />
             )}
             {linkType && linkType.isLink && (
-                //<DescriptionInput id="link" label="הקישור" value={link} onChange={(e) => setLink(e.target.value)} inputType="url" className="form-control" placeholder="Enter URL" />
                 <DescriptionInput id="link" label="הקישור" value={link} onChange={handleLinkChange} inputType="url" className="form-control" placeholder="Enter URL" />
             )}
             {linkType && linkType.isFile && (
@@ -322,8 +251,9 @@ export function LinkComponent({ linkObj, onLinkObjChange }) {
 export default function InfoItemsAdmin() {
     const { id } = useParams();
     const token = getWithExpiry("token");
+    const [loadingAdmin, setLoadingAdmin] = useState(true);
     const [loading, setLoading] = useState(true);
-    const [hasPermission, setHasPermission] = useState(true);
+    const [hasPermission, setHasPermission] = useState(null);
 
     const [showMoreOptions, setShowMoreOptions] = useState(false);
     const handleShowMoreOptions = () => { setShowMoreOptions(!showMoreOptions); };
@@ -341,7 +271,6 @@ export default function InfoItemsAdmin() {
 
     const today = new Date();
     const endDate = addDays(today, 7);
-
     // const check = datesString(today, endDate);
     // console.log("check");
     // console.log(check);
@@ -352,7 +281,7 @@ export default function InfoItemsAdmin() {
         text: '',
         //text: datesString(today, endDate),
         linkType: 1,
-        linkText: '',
+        linkText: 'לחצו כאן',
         link: '',
         start: toDate(today, "yyyy-MM-dd"),
         end: toDate(addDays(today, 7), "yyyy-MM-dd"),
@@ -362,43 +291,22 @@ export default function InfoItemsAdmin() {
     };
     const [item, setItem] = useState(initialItemState);
 
-    const handleChangeByName = (name, value) => { setItem(prevState => ({ ...prevState, [name]: value })); };
-    const handleChange = (e) => { const { name, value } = e.target; handleChangeByName(name, value); };
-
-    const toLinkObj = (item) => { return { linkType: item.linkType, link: item.link, linkText: item.linkText, file: item.link, isMustLink: selectedCategory?.isMustLink, hasLinkText: selectedCategory?.hasLinkText } };
     const [linkObj, setLinkObj] = useState(item);
+    const toLinkObj = (item) => { return { linkType: item.linkType, link: item.link, linkText: item.linkText, file: item.link, isMustLink: selectedCategory?.isMustLink, hasLinkText: selectedCategory?.hasLinkText } };
 
-    const handleLinkObjChange = (newLinkObj) => {
-        setLinkObj(prev => ({ ...prev, ...newLinkObj }));
-
-    };
 
     useEffect(() => {
         handleLinkObjChange(toLinkObj(item));
-    }, [item.linkType]); 
-    
-    const onSelectCategory = (categoryId) => {
+    }, [item.linkType]);
 
-        if (infoItemCategories && categoryId) {
-            const curSelectedCategory = infoItemCategories.find(category => category.id === categoryId);
+    useEffect(() => {
+        handleChangeByName("linkType", linkObj.linkType);
+        handleChangeByName("link", linkObj.link);
+        handleChangeByName("linkText", linkObj.linkText);
+        handleChangeByName("file", linkObj.file);
+    }, [linkObj]);
 
-            handleChangeByName("infoItemCategory", categoryId);
-            setSelectedCategory(curSelectedCategory);
-
-            handleChangeByName("linkType", curSelectedCategory.defaultLinkType);
-        }
-    };
-
-    const onSelectedClassesChange = (curClasses) => { handleChangeByName("classes", curClasses); };
-
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        //console.log("item");
-        console.log(item);
-        // Here, you would typically send the item to your server or handle it as needed
-    };
-
+    //Api read
     useEffect(() => {
         if (token) {
             (async () => {
@@ -406,12 +314,12 @@ export default function InfoItemsAdmin() {
                 const { data: fetchedDataIsAdmin, error } = await fetchData('/api/IsAdminUser', null, null, additionalHeaders);
                 if (error && error.message === "Resource not found") setHasPermission(fetchedDataIsAdmin);
 
-                const { data: fetchedData, errorData = null } = await fetchData('/api/InfoItemsAdmin', null, null, additionalHeaders);
+                const { data: fetchedDataPermission, errorData = null } = await fetchData('/api/InfoItemsAdmin', null, null, additionalHeaders);
                 //console.log("errorData: " + errorData && true);
                 if (errorData && (errorData.message === "Resource not found" || errorData.message === "User Not Allowed")) setHasPermission(false);
-                else { setHasPermission(true); setInfoItems(fetchedData); }
+                else { setHasPermission(true); setInfoItems(fetchedDataPermission); }
 
-                if (hasPermission) {
+                if (fetchedDataPermission) {//hasPermission
                     const isOnlyShowOnInfoItemsPage = false;
                     const { data: fetchedDataCategories } = await fetchData('/api/InfoItemCategories/' + isOnlyShowOnInfoItemsPage, null, null, additionalHeaders);
                     setInfoItemCategories(fetchedDataCategories);
@@ -423,7 +331,7 @@ export default function InfoItemsAdmin() {
                     setGrades(fetchedDataGrades);
 
                     const { data: fetchedDataSections } = await fetchData('/api/Sections');
-                    setSections(fetchedDataSections.filter(section => section.id < 99));
+                    // setSections(fetchedDataSections.filter(section => section.id < 99));
 
                     const fetchedUrl = await getHomePageUrl();
                     setHomePageUrl(fetchedUrl);
@@ -437,14 +345,67 @@ export default function InfoItemsAdmin() {
         }
     }, []);
 
+
+    const onSelectCategory = (categoryId) => {
+
+        if (infoItemCategories && categoryId) {
+            const curSelectedCategory = infoItemCategories.find(category => category.id === categoryId);
+
+            handleChangeByName("infoItemCategory", categoryId);
+            setSelectedCategory(curSelectedCategory);
+
+            handleChangeByName("linkType", curSelectedCategory.defaultLinkType);
+        }
+    };
+    const onSelectedClassesChange = (curClasses) => { handleChangeByName("classes", curClasses); };
+
+    const handleChangeByName = (name, value) => { setItem(prevState => ({ ...prevState, [name]: value })); };
+    const handleChange = (e) => { const { name, value } = e.target; handleChangeByName(name, value); };
+
+    const handleClickNextWeekDates = () => {
+        const nextSunday = getNextDateForWeekDay(1); // Assuming 1 represents Sunday
+        const nextWeekDates = datesString(nextSunday, addDays(nextSunday, 5));
+
+        setItem(prevState => ({
+            ...prevState,
+            text: nextWeekDates
+        }));
+    };
+
+
+    const handleLinkObjChange = (newLinkObj) => { setLinkObj(prev => ({ ...prev, ...newLinkObj })); };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log("handleSubmit");
+        console.log(item); // Logging the item to be sent, ensure it's correct.
+        if (token) {
+            const API_URL = '/api/InfoItemsAdmin'; // URL of the API
+            const additionalHeaders = [{ name: 'token', value: token }];
+            const method = 'POST'; 
+
+            try {
+                const { data, error } = await fetchData(API_URL, null, null, additionalHeaders, item, method);
+                if (error) {
+                    console.error('Error submitting item:', error);
+                    // Handle errors appropriately in the UI
+                } else {
+                    console.log('Item submitted successfully:', data);
+                    // Handle success, such as notifying the user or redirecting
+                }
+            } catch (err) {
+                console.error('Submission failed:', err);
+                // Further error handling, potentially updating the UI to show a failed state
+            }
+        }
+    };
+
+
+
+    if (!token || hasPermission === false) { return <NotAllowedUser />; }
     if (loading) { return <LoadingSpinner />; }
-    if (!token || !hasPermission) { return <NotAllowedUser />; }
     const rows = window.innerWidth < 768 ? 5 : 10;
-
     //if (infoItems) console.log(infoItems);
-    //console.log("item.linkType", item.linkType);
-    //console.log(toLinkObj(item));
-
     return (
         <div className="container-fluid">
             <form onSubmit={handleSubmit} >
@@ -456,17 +417,17 @@ export default function InfoItemsAdmin() {
                     </div>)}
                     {selectedCategory.hasText && (<div className="mb-3">
                         <DescriptionInput id="text" label="תוכן ההודעה" isRequiredField={true} value={item.text} onChange={handleChange} inputType="textarea" moreProps={{ rows }} />
-
-                        {/* <label htmlFor="text" className="form-label my-auto requiredField">תוכן ההודעה</label>
-                        <textarea className="form-control" id="text" name="text" value={item.text} onChange={handleChange} rows={rows} /> */}
+                        <div className="text-start">
+                            <button className={`btn btn-link pt-0 mt-0 ${item.text.trim().length > 0 ? ' disabled' : ''}`} onClick={handleClickNextWeekDates}>הוסף תאריכים לשבוע הבא</button>
+                            <button className="btn btn-link pt-0 mt-0" onClick={() => setItem(prevState => ({ ...prevState, text: "" }))}>נקה תוכן</button>
+                        </div>
                     </div>)}
                     <div>
                         <DateSelector label={"פרסום"} buttons={["today", "tomorrow", "dayAfter", "weekAfter", "monthAfter", "lastDayOfStudyYear"]} startValue={item.start} endValue={item.end} onChange={handleChangeByName} isRequiredField={true} />
                     </div>
-                    {/* <LinkComponent defaultLinkType={item.linkType} defaultLinkText={item.linkText} defaultLink={item.link} defaultFile={item.link}
-                    isMustLink={selectedCategory.isMustLink} hasLinkText={selectedCategory.hasLinkText} /> */}
-                    <LinkComponent linkObj={linkObj} onLinkObjChange ={handleLinkObjChange} />
-
+                    <div>
+                        <LinkComponent linkObj={linkObj} onLinkObjChange={handleLinkObjChange} />
+                    </div>
                     <div className="my-3">
                         <b>אפשרויות נוספות</b>
                         <FontAwesomeIcon className="my-auto ms-2" icon={showMoreOptions ? "fas fa-circle-chevron-up" : "fas fa-circle-chevron-down"} role="button" onClick={() => handleShowMoreOptions()} />
@@ -482,6 +443,5 @@ export default function InfoItemsAdmin() {
                 </div>)}
             </form>
         </div>
-
     )
 };

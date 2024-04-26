@@ -16,13 +16,12 @@ export const fetchData = async (API_URL, transformFunction, sortFunction, header
         });
 
         const isBodyEmpty = bodyItems && Object.keys(bodyItems).length === 0;
-
         const response = await fetch(`${apiUrl}${API_URL}`, {
             method: curMethod,
             headers: fetchHeaders,
             ...(isBodyEmpty ? {} : { body: JSON.stringify(bodyItems) }) // Spread the body property if not empty
         });
-
+        
         if (response.status === 404) {
             return { data: null, error: 'Resource not found' };
         } else if (response.status === 204) {

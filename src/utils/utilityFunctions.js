@@ -134,11 +134,17 @@ export function addDays(date, days) {
     return result;
 }
 
-export const getNextDateForWeekDay = (dayIndex) => {
+export const getNextDateForWeekDay = (dayNumber) => {
     // returns the next occurrence of a specific day of the week
     const now = new Date();
     const resultDate = new Date(now.getTime());
-    resultDate.setDate(now.getDate() + ((dayIndex + 7 - now.getDay()) % 7 || 7));
+    // Adjust dayNumber to match JavaScript's day index (where Sunday is 0)
+    const adjustedDayNumber = (dayNumber - 1) % 7;
+
+    // Calculate days to add
+    const daysToAdd = (adjustedDayNumber + 7 - now.getDay()) % 7;
+    resultDate.setDate(now.getDate() + (daysToAdd === 0 ? 7 : daysToAdd));
+
     return resultDate;
 };
 
