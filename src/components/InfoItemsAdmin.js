@@ -232,8 +232,6 @@ const InfoItemCategoriesComponent = ({ infoItemCategories, onSelectCategory }) =
 };
 
 export function LinkComponent({ linkObj, onLinkObjChange }) {
-    //console.log("defaultLinkType", defaultLinkType);
-
     const [linkTypes, setLinkTypes] = useState([]);
     const [linkType, setLinkType] = useState(null);
 
@@ -375,6 +373,10 @@ export default function InfoItemsAdmin() {
 
     };
 
+    useEffect(() => {
+        handleLinkObjChange(toLinkObj(item));
+    }, [item.linkType]); 
+    
     const onSelectCategory = (categoryId) => {
 
         if (infoItemCategories && categoryId) {
@@ -384,7 +386,6 @@ export default function InfoItemsAdmin() {
             setSelectedCategory(curSelectedCategory);
 
             handleChangeByName("linkType", curSelectedCategory.defaultLinkType);
-            handleLinkObjChange(toLinkObj(item));
         }
     };
 
@@ -394,7 +395,7 @@ export default function InfoItemsAdmin() {
     const handleSubmit = (e) => {
         e.preventDefault();
         //console.log("item");
-        //console.log(item);
+        console.log(item);
         // Here, you would typically send the item to your server or handle it as needed
     };
 
