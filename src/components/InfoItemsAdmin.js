@@ -362,13 +362,54 @@ export default function InfoItemsAdmin() {
     const handleChangeByName = (name, value) => { setItem(prevState => ({ ...prevState, [name]: value })); };
     const handleChange = (e) => { const { name, value } = e.target; handleChangeByName(name, value); };
 
-    const handleClickNextWeekDates = () => {
-        const nextSunday = getNextDateForWeekDay(1); // Assuming 1 represents Sunday
-        const nextWeekDates = datesString(nextSunday, addDays(nextSunday, 5));
+    const handleClickForDates = (toDates) => {
+        let startPubish = new Date();
+        let dateStart;
+        let endEnd;
+        let datesStr;
+        let newName;
+        switch (toDates) {
+            case 'this week': {
+                dateStart = addDays(new Date(), 1);//Tommorow
+                endEnd = getNextDateForWeekDay(6);//Next Friday
+
+                datesStr = datesString(dateStart, endEnd);
+                break;
+            }
+            case 'next week': {
+                dateStart = getNextDateForWeekDay(1);//Next Sunday
+                endEnd = addDays(dateStart, 5);//Next Friday
+
+                datesStr = datesString(dateStart, endEnd);
+                break;
+            }
+
+            case 'Tommorow': {
+                dateStart = addDays(new Date(), 1); //Tommorow
+                endEnd = addDays(dateStart, 1);
+
+                datesStr = `מחר ${datesString(dateStart, dateStart)}`;
+                if (!item.name) newName = `הודעה ל${datesStr}`;
+                break;
+            }
+
+            case 'Day after tommorow': {
+                dateStart = addDays(new Date(), 2); //Day after tommorow
+                endEnd = addDays(dateStart, 2);
+
+                datesStr = `מחרתיים ${datesString(dateStart, dateStart)}`;
+
+                if (!item.name) newName = `הודעה ל${datesStr}`;
+                break;
+            }
+        }
 
         setItem(prevState => ({
             ...prevState,
-            text: nextWeekDates
+            ...(newName ? { name: newName } : {}),
+            text: datesStr,
+            start: toDate(startPubish, "yyyy-MM-dd"),//
+            end: toDate(endEnd, "yyyy-MM-dd")
         }));
     };
 
@@ -382,7 +423,7 @@ export default function InfoItemsAdmin() {
         if (token) {
             const API_URL = '/api/InfoItemsAdmin'; // URL of the API
             const additionalHeaders = [{ name: 'token', value: token }];
-            const method = 'POST'; 
+            const method = 'POST';
 
             try {
                 const { data, error } = await fetchData(API_URL, null, null, additionalHeaders, item, method);
@@ -405,43 +446,48 @@ export default function InfoItemsAdmin() {
     if (!token || hasPermission === false) { return <NotAllowedUser />; }
     if (loading) { return <LoadingSpinner />; }
     const rows = window.innerWidth < 768 ? 5 : 10;
+    const datesBtnClass = `btn btn-link pt-0 mt-0 ${item.text.trim().length > 0 ? ' disabled' : ''}`;
     //if (infoItems) console.log(infoItems);
     return (
         <div className="container-fluid">
-            <form onSubmit={handleSubmit} >
-                <InfoItemCategoriesComponent infoItemCategories={infoItemCategories} onSelectCategory={onSelectCategory} />
-                {selectedCategory && (<div className="mt-3 w-md-75">
-                    {selectedCategory.hasClasses && (<ClassesCheckboxComponent sections={sections} grades={grades} classes={classes} onSelectedClassesChange={onSelectedClassesChange} />)}
-                    {selectedCategory.hasName && (<div className="mb-3">
-                        <DescriptionInput id="name" label="כותרת/טקסט" isRequiredField={true} value={item.name} onChange={handleChange} />
-                    </div>)}
-                    {selectedCategory.hasText && (<div className="mb-3">
-                        <DescriptionInput id="text" label="תוכן ההודעה" isRequiredField={true} value={item.text} onChange={handleChange} inputType="textarea" moreProps={{ rows }} />
-                        <div className="text-start">
-                            <button className={`btn btn-link pt-0 mt-0 ${item.text.trim().length > 0 ? ' disabled' : ''}`} onClick={handleClickNextWeekDates}>הוסף תאריכים לשבוע הבא</button>
-                            <button className="btn btn-link pt-0 mt-0" onClick={() => setItem(prevState => ({ ...prevState, text: "" }))}>נקה תוכן</button>
-                        </div>
-                    </div>)}
-                    <div>
-                        <DateSelector label={"פרסום"} buttons={["today", "tomorrow", "dayAfter", "weekAfter", "monthAfter", "lastDayOfStudyYear"]} startValue={item.start} endValue={item.end} onChange={handleChangeByName} isRequiredField={true} />
-                    </div>
-                    <div>
-                        <LinkComponent linkObj={linkObj} onLinkObjChange={handleLinkObjChange} />
-                    </div>
-                    <div className="my-3">
-                        <b>אפשרויות נוספות</b>
-                        <FontAwesomeIcon className="my-auto ms-2" icon={showMoreOptions ? "fas fa-circle-chevron-up" : "fas fa-circle-chevron-down"} role="button" onClick={() => handleShowMoreOptions()} />
-                    </div>
-                    {showMoreOptions && (
-                        <div className="">
-                            <DescriptionInput id="priority" label="קדימות" value={item.priority} onChange={handleChange} inputType="number" inputMoreCss="w-md-10" moreProps={{ min: 1, max: 10 }} />
-                            <DescriptionInput id="note" label="הערה" value={item.note} onChange={handleChange} />
-                        </div>
-                    )}
-                    <button type="button" className="btn btn-link" onClick={() => setItem(initialItemState)}>איפוס</button>
-                    <button type="submit" className="btn btn-primary">הוספה</button>
+            <InfoItemCategoriesComponent infoItemCategories={infoItemCategories} onSelectCategory={onSelectCategory} />
+            {selectedCategory && (<div className="mt-3 w-md-75">
+                {selectedCategory.hasClasses && (<ClassesCheckboxComponent sections={sections} grades={grades} classes={classes} onSelectedClassesChange={onSelectedClassesChange} />)}
+                {selectedCategory.hasName && (<div className="mb-3">
+                    <DescriptionInput id="name" label="כותרת/טקסט" isRequiredField={true} value={item.name} onChange={handleChange} />
                 </div>)}
-            </form>
+                {selectedCategory.hasText && (<div className="mb-3">
+                    <div className="text-start">
+                        <b>הוסף תאריכים</b>
+                        <button className={datesBtnClass} onClick={() => handleClickForDates('Tommorow')}>מחר</button>
+                        <button className={datesBtnClass} onClick={() => handleClickForDates('Day after tommorow')}>מחרתיים</button>
+                        <button className={datesBtnClass} onClick={() => handleClickForDates('this week')}>לשבוע זה</button>
+                        <button className={datesBtnClass} onClick={() => handleClickForDates('next week')}>לשבוע הבא</button>
+                    </div>
+                    <DescriptionInput id="text" label="תוכן ההודעה" isRequiredField={true} value={item.text} onChange={handleChange} inputType="textarea" moreProps={{ rows }} />
+                    <div className="text-start">
+                        <button className="btn btn-link pt-0 mt-0" onClick={() => setItem(prevState => ({ ...prevState, text: "" }))}>נקה תוכן</button>
+                    </div>
+                </div>)}
+                <div>
+                    <DateSelector label={"פרסום"} buttons={["today", "tomorrow", "dayAfter", "weekAfter", "monthAfter", "lastDayOfStudyYear"]} startValue={item.start} endValue={item.end} onChange={handleChangeByName} isRequiredField={true} />
+                </div>
+                <div>
+                    <LinkComponent linkObj={linkObj} onLinkObjChange={handleLinkObjChange} />
+                </div>
+                <div className="my-3">
+                    <b>אפשרויות נוספות</b>
+                    <FontAwesomeIcon className="my-auto ms-2" icon={showMoreOptions ? "fas fa-circle-chevron-up" : "fas fa-circle-chevron-down"} role="button" onClick={() => handleShowMoreOptions()} />
+                </div>
+                {showMoreOptions && (
+                    <div className="">
+                        <DescriptionInput id="priority" label="קדימות" value={item.priority} onChange={handleChange} inputType="number" inputMoreCss="w-md-10" moreProps={{ min: 1, max: 10 }} />
+                        <DescriptionInput id="note" label="הערה" value={item.note} onChange={handleChange} />
+                    </div>
+                )}
+                <button type="button" className="btn btn-link" onClick={() => setItem(initialItemState)}>איפוס</button>
+                <button type="button" onClick={() => handleSubmit()} className="btn btn-primary">הוספה</button>
+            </div>)}
         </div>
     )
 };
