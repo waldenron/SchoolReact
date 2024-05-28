@@ -7,10 +7,10 @@ import { addDays, getNextDateForWeekDay, getWithExpiry, lastDayOfStudyYear, toAr
 import { fetchData, getHomePageUrl, getPageHeader } from '../utils/apiServices';
 import { useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { toHebrewDate } from '../utils/jewishDates';
+import { datesString, toHebrewDate } from '../utils/jewishDates';
 
 
-export const DescriptionInput = ({ id, label, value, onChange, inputType = "text", isRequiredField = false, inputMoreCss = "", placeholder = "", moreProps = {} }) => {
+export const DescriptionInput = ({ id, label, value, onChange, inputType = "text", isRequiredField = false, inputMoreCss = "", placeholder = "", moreProps = {}, addClearBtn = false, onClear = null }) => {
     const allProps = {
         id,
         name: id,
@@ -25,12 +25,17 @@ export const DescriptionInput = ({ id, label, value, onChange, inputType = "text
             <div className="width-fifteen-percent text-end pe-sm-2 mb-2 mb-sm-0">
                 <label htmlFor={id} className={`fw-bold${isRequiredField ? " requiredField" : ""}`}>{label}</label>
             </div>
-            <div className="w-100 w-md-50 flex-grow-1">
-                {inputType !== "textarea" ? (
-                    <input {...allProps} type={inputType} />
-                ) : (
-                    <textarea {...allProps} />
-                )}
+            <div className="w-100 w-md-50 flex-grow-1 d-flex align-items-center">
+                <div className="input-group">
+                    {inputType !== "textarea" ? (
+                        <input {...allProps} type={inputType} className="form-control rounded-0 " />
+                    ) : (
+                        <textarea {...allProps} />
+                    )}
+                    {addClearBtn &&
+                        <button className="btn btn-link pt-0 mt-0 bg-white border border-end-0 d-flex align-items-end" onClick={onClear} tabIndex="-1"><span className="w-100 text-end">נקה</span></button>
+                    }
+                </div>
             </div>
         </div>
     );
@@ -72,13 +77,13 @@ export const DateSelector = ({ label, buttons, startValue, endValue, onChange, i
     const btnsEnd = buttons.filter(button => button === "dayAfter" || button === "weekAfter" || button === "monthAfter");
     return (
         <div className="d-flex flex-column align-items-start align-items-sm-center flex-sm-row text-sm-end mb-3">
-            {(label && <div className="width-twelve-percent pe-sm-2 mb-2 mb-sm-0">
+            {(label && <div className="width-fifteen-percent pe-sm-2 mb-2 mb-sm-0">
                 <label className={`fw-bold${isRequiredField ? " requiredField" : ""}`}>{label}</label>
             </div>)}
             {isShowStart && (<div className="w-sm-90">
                 <b className="me-1 ms-1 my-auto">התחלה</b>
                 {btnsStart.reduce((acc, button, index, array) => {
-                    acc.push(<button key={button} className={btnCss} onClick={(e) => handleSetDate(button, "start", e)}>{btnText(button)}</button>);
+                    acc.push(<button key={button} className={btnCss} onClick={(e) => handleSetDate(button, "start", e)} tabIndex="-1">{btnText(button)}</button>);
                     // Add separator if not the last item
                     if (index < btnsStart.length - 1) acc.push(<span key={`sep-${button}`} className="my-auto">|</span>);
 
@@ -91,33 +96,19 @@ export const DateSelector = ({ label, buttons, startValue, endValue, onChange, i
                 <b className="me-1 ms-1 me-sm-5 my-auto">סיום</b>
                 <span className="me-4 ms-1">אחרי:</span>
                 {btnsEnd.reduce((acc, button, index, array) => {
-                    acc.push(<button key={button} className={btnCss} onClick={(e) => handleSetDate(button, "end", e)}>{btnText(button)}</button>);
+                    acc.push(<button key={button} className={btnCss} onClick={(e) => handleSetDate(button, "end", e)} tabIndex="-1">{btnText(button)}</button>);
                     // Add separator if not the last item
                     if (index < btnsEnd.length - 1) acc.push(<span key={`sep-${button}`} className="my-auto">|</span>);
 
                     return acc;
                 }, [])}
                 <input type="date" name="end" className="form-control-inline border-0 border-bottom text-center" value={endValue} onChange={onChange} />
-                {buttons && buttons.includes("lastDayOfStudyYear") && (<button className={btnCss} onClick={(e) => handleSetDate("lastDayOfStudyYear", "end", e)}>סוף שנה</button>)}
+                {buttons && buttons.includes("lastDayOfStudyYear") && (<button className={btnCss} onClick={(e) => handleSetDate("lastDayOfStudyYear", "end", e)} tabIndex="-1">סוף שנה</button>)}
             </div>)}
         </div>
     );
 };
-function datesString(start, end) {
-    let text = "";
-    let i = new Date(start.getTime());
 
-    while (i <= end) {
-        text += `*יום ${toHebrewDate(i, "dddd")}*`;  // Day of the week in Hebrew
-        text += ` - ${toHebrewDate(i, "dd MM")}`;   // Day and month in Hebrew
-        text += `, ${toDate(i, "dd/MM")}`;          // Day and month in Gregorian
-
-        if (i < end) { text += "\n\n"; }
-
-        i.setDate(i.getDate() + 1);
-    }
-    return text;
-}
 
 const InfoItemCategoriesComponent = ({ infoItemCategories, onSelectCategory }) => {
     const [isRestricted, setIsRestricted] = useState(false); // Default to לתלמידים
@@ -219,7 +210,7 @@ export function LinkComponent({ linkObj, onLinkObjChange }) {
                 <div className="pe-sm-2 mb-2 mb-sm-0">
                     {link ? (<span className="text-decoration-none"><a className="text-decoration-none" target="_blank" href={link}><LinkFileHeader /></a></span>) : (<LinkFileHeader />)}
                 </div>
-                <div className="flex-grow-1">
+                <div className="flex-grow-1 mt-2">
                     {linkTypes?.map((item) => (
                         <div key={item.id} className="form-check form-check-inline ms-1 me-0">
                             <label className="form-check-label" htmlFor={`Radio${item.id}`}>
@@ -383,7 +374,6 @@ export default function InfoItemsAdmin() {
                 datesStr = datesString(dateStart, endEnd);
                 break;
             }
-
             case 'Tommorow': {
                 dateStart = addDays(new Date(), 1); //Tommorow
                 endEnd = addDays(dateStart, 1);
@@ -417,7 +407,7 @@ export default function InfoItemsAdmin() {
     const handleLinkObjChange = (newLinkObj) => { setLinkObj(prev => ({ ...prev, ...newLinkObj })); };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        //e.preventDefault();
         console.log("handleSubmit");
         console.log(item); // Logging the item to be sent, ensure it's correct.
         if (token) {
@@ -441,8 +431,44 @@ export default function InfoItemsAdmin() {
         }
     };
 
+    const handleSelectItem = (selectedItem) => {
+        console.log(selectedItem);
+        setItem({
+            infoItemCategory: selectedItem.infoItemCategory,
+            name: selectedItem.name,
+            text: selectedItem.text,
+            linkType: selectedItem.linkType,
+            linkText: selectedItem.linkText,
+            link: selectedItem.link,
+            start: selectedItem.start,
+            end: selectedItem.end,
+            priority: selectedItem.priority,
+            note: selectedItem.note,
+            classes: selectedItem.classes
+        });
+    };
 
-
+    const InfoItemsList = ({ items, onSelectItem }) => (
+        <div className="info-items-list">
+            <ul className="list-group">
+                {items.map(item => (
+                    <li key={item.id} onClick={() => onSelectItem(item)} className="list-group-item list-group-item-action" style={{ cursor: "pointer" }}>
+                        {item.text}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+    const AddDatesButtons = () => {
+        return (
+            <>
+                <button className={datesBtnClass} onClick={() => handleClickForDates('Tommorow')}>מחר</button>
+                <button className={datesBtnClass} onClick={() => handleClickForDates('Day after tommorow')}>מחרתיים</button>
+                <button className={datesBtnClass} onClick={() => handleClickForDates('this week')}>לשבוע זה</button>
+                <button className={datesBtnClass} onClick={() => handleClickForDates('next week')}>לשבוע הבא</button>
+            </>
+        )
+    }
     if (!token || hasPermission === false) { return <NotAllowedUser />; }
     if (loading) { return <LoadingSpinner />; }
     const rows = window.innerWidth < 768 ? 5 : 10;
@@ -451,23 +477,18 @@ export default function InfoItemsAdmin() {
     return (
         <div className="container-fluid">
             <InfoItemCategoriesComponent infoItemCategories={infoItemCategories} onSelectCategory={onSelectCategory} />
+            {/* {infoItems && <InfoItemsList items={infoItems} onSelectItem={handleSelectItem} />} */}
             {selectedCategory && (<div className="mt-3 w-md-75">
                 {selectedCategory.hasClasses && (<ClassesCheckboxComponent sections={sections} grades={grades} classes={classes} onSelectedClassesChange={onSelectedClassesChange} />)}
                 {selectedCategory.hasName && (<div className="mb-3">
-                    <DescriptionInput id="name" label="כותרת/טקסט" isRequiredField={true} value={item.name} onChange={handleChange} />
+                    <DescriptionInput id="name" label="כותרת/טקסט" isRequiredField={true} value={item.name} onChange={handleChange} addClearBtn={true} onClear={() => setItem(prevState => ({ ...prevState, name: "" }))} />
                 </div>)}
                 {selectedCategory.hasText && (<div className="mb-3">
                     <div className="text-start">
                         <b>הוסף תאריכים</b>
-                        <button className={datesBtnClass} onClick={() => handleClickForDates('Tommorow')}>מחר</button>
-                        <button className={datesBtnClass} onClick={() => handleClickForDates('Day after tommorow')}>מחרתיים</button>
-                        <button className={datesBtnClass} onClick={() => handleClickForDates('this week')}>לשבוע זה</button>
-                        <button className={datesBtnClass} onClick={() => handleClickForDates('next week')}>לשבוע הבא</button>
+                        {AddDatesButtons()}
                     </div>
-                    <DescriptionInput id="text" label="תוכן ההודעה" isRequiredField={true} value={item.text} onChange={handleChange} inputType="textarea" moreProps={{ rows }} />
-                    <div className="text-start">
-                        <button className="btn btn-link pt-0 mt-0" onClick={() => setItem(prevState => ({ ...prevState, text: "" }))}>נקה תוכן</button>
-                    </div>
+                    <DescriptionInput id="text" label="תוכן ההודעה" isRequiredField={true} value={item.text} onChange={handleChange} inputType="textarea" moreProps={{ rows }} addClearBtn={true} onClear={() => setItem(prevState => ({ ...prevState, text: "" }))} />
                 </div>)}
                 <div>
                     <DateSelector label={"פרסום"} buttons={["today", "tomorrow", "dayAfter", "weekAfter", "monthAfter", "lastDayOfStudyYear"]} startValue={item.start} endValue={item.end} onChange={handleChangeByName} isRequiredField={true} />

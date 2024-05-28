@@ -156,15 +156,16 @@ export default function InfoItems() {
             }
         </>
     const infoItemCategoryName = infoItemCategories && infoItemCategories.length > 0 ? infoItemCategories.find(item => item.id == id)?.name : "";
-    const adminLink = isAdmin ? <span className="ms-0 me-3"><a className="ms-0 me-5 btn btn-dark" href="/InfoItemsAdmin">עריכת פריטי מידע</a></span> : null;
+    const adminLink = isAdmin ? <span className="ms-0 me-3"><a className="ms-0 me-5 btn btn-dark" href="/InfoItemsAdmin">ניהול פריטי מידע</a></span> : null;
     const header = token ? "אזור מורים" : pageHeader && (pageHeader + (id && infoItemCategoryName ? " - <span class='fw-bolder'>" + infoItemCategoryName + "</span>" : ""));
     //const filterCategories = infoItemCategories.filter(item => item.isShowOnInfoItemsPage === true);
-    if (id) infoItems = infoItems.filter(item => item.category == id);
-    if (selectedGrade != -1) infoItems = infoItems.filter(item => item.grades === "" || item.grades.includes(selectedGrade));
+    let curInfoItems = [...infoItems];
+    if (id) curInfoItems = curInfoItems.filter(item => item.category == id);
+    if (selectedGrade != -1) curInfoItems = curInfoItems.filter(item => item.grades === "" || item.grades.includes(selectedGrade));
     return (
         <>
         {adminLink}
-            <ItemsList header={header} msg={msg} items={infoItems} toHtml={(data) => toHtmlElements(data, homePageUrl)}
+            <ItemsList header={header} msg={msg} items={curInfoItems} toHtml={(data) => toHtmlElements(data, homePageUrl)}
                 filterCategories={!id ? infoItemCategories : null}
                 noItemShow={id ? "true" : null}
             />

@@ -1,4 +1,5 @@
 import { HDate } from 'hebcal';
+import { toDate } from './utilityFunctions';
 
 const getGregorianMonthRange = (month, year) => {
     const startDate = new Date(year, month - 1, 1);
@@ -145,4 +146,20 @@ export function toHebrewDate(date, format = "dd MM yyyy", isHeb = true) {
     else if (format.includes('yy')) formattedDate = formattedDate.replace('yy', getHebrewJewishYear(date).slice(-2)); // last two digits of the year
 
     return formattedDate;
+}
+
+export function datesString(start, end) {
+    let text = "";
+    let i = new Date(start.getTime());
+
+    while (i <= end) {
+        text += `*יום ${toHebrewDate(i, "dddd")}*`;  // Day of the week in Hebrew
+        text += ` - ${toHebrewDate(i, "dd MM")}`;   // Day and month in Hebrew
+        text += `, ${toDate(i, "dd/MM")}`;          // Day and month in Gregorian
+
+        if (i < end) { text += "\n\n"; }
+
+        i.setDate(i.getDate() + 1);
+    }
+    return text;
 }
